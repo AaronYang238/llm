@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 580" font-family="Inter, system-ui, sans-serif" font-size="13">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#455a64"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="26" text-anchor="middle" font-size="16" font-weight="600">H100 SXM 节点：内存层级与互联拓扑</text>
+
+  <!-- Left panel: single-GPU memory pyramid -->
+  <g transform="translate(40, 60)">
+    <text x="200" y="0" text-anchor="middle" font-weight="600">单卡内部（H100 80GB）</text>
+
+    <rect x="130" y="20" width="140" height="44" rx="4" fill="#1e88e5" stroke="#0d47a1"/>
+    <text x="200" y="38" text-anchor="middle" fill="white" font-weight="600">Register</text>
+    <text x="200" y="56" text-anchor="middle" fill="white" font-size="11">256 KB/SM · ~80 TB/s · 1 cyc</text>
+
+    <rect x="100" y="80" width="200" height="44" rx="4" fill="#42a5f5" stroke="#1976d2"/>
+    <text x="200" y="98" text-anchor="middle" fill="white" font-weight="600">SMEM / L1</text>
+    <text x="200" y="116" text-anchor="middle" fill="white" font-size="11">228 KB/SM · ~33 TB/s · ~30 cyc</text>
+
+    <rect x="70" y="140" width="260" height="44" rx="4" fill="#64b5f6" stroke="#1976d2"/>
+    <text x="200" y="158" text-anchor="middle" fill="white" font-weight="600">L2 Cache</text>
+    <text x="200" y="176" text-anchor="middle" fill="white" font-size="11">50 MB · ~12 TB/s · ~200 cyc</text>
+
+    <rect x="30" y="200" width="340" height="44" rx="4" fill="#90caf9" stroke="#1976d2"/>
+    <text x="200" y="218" text-anchor="middle" font-weight="600">HBM3</text>
+    <text x="200" y="236" text-anchor="middle" font-size="11">80 GB · 3.35 TB/s · ~500 cyc</text>
+
+    <text x="200" y="280" text-anchor="middle" fill="#546e7a" font-size="12">越往下：容量 +，带宽 −，延迟 +</text>
+  </g>
+
+  <!-- Right panel: multi-GPU topology -->
+  <g transform="translate(520, 60)">
+    <text x="200" y="0" text-anchor="middle" font-weight="600">跨卡 / 跨节点</text>
+
+    <rect x="0" y="20" width="60" height="36" rx="4" fill="#43a047" stroke="#1b5e20"/>
+    <text x="30" y="42" text-anchor="middle" fill="white">GPU0</text>
+    <rect x="80" y="20" width="60" height="36" rx="4" fill="#43a047" stroke="#1b5e20"/>
+    <text x="110" y="42" text-anchor="middle" fill="white">GPU1</text>
+    <text x="180" y="42" text-anchor="middle" font-size="14">...</text>
+    <rect x="220" y="20" width="60" height="36" rx="4" fill="#43a047" stroke="#1b5e20"/>
+    <text x="250" y="42" text-anchor="middle" fill="white">GPU7</text>
+
+    <rect x="0" y="110" width="280" height="40" rx="4" fill="#fbc02d" stroke="#f57f17"/>
+    <text x="140" y="135" text-anchor="middle" font-weight="600">NVSwitch（节点内全互联）</text>
+    <line x1="30" y1="56" x2="30" y2="110" stroke="#455a64" marker-end="url(#arr)"/>
+    <line x1="110" y1="56" x2="110" y2="110" stroke="#455a64" marker-end="url(#arr)"/>
+    <line x1="250" y1="56" x2="250" y2="110" stroke="#455a64" marker-end="url(#arr)"/>
+    <text x="310" y="135" font-size="12" fill="#f57f17">900 GB/s 双向 per GPU</text>
+
+    <rect x="0" y="200" width="280" height="40" rx="4" fill="#e53935" stroke="#b71c1c"/>
+    <text x="140" y="225" text-anchor="middle" fill="white" font-weight="600">IB NDR HCA × 8（出节点）</text>
+    <line x1="140" y1="150" x2="140" y2="200" stroke="#455a64" marker-end="url(#arr)"/>
+    <text x="310" y="225" font-size="12" fill="#b71c1c">50 GB/s 单向 per HCA</text>
+
+    <rect x="60" y="290" width="160" height="36" rx="4" fill="#cfd8dc" stroke="#546e7a" stroke-dasharray="4 2"/>
+    <text x="140" y="312" text-anchor="middle">其他节点 (×N)</text>
+    <line x1="140" y1="240" x2="140" y2="290" stroke="#455a64" stroke-dasharray="4 2" marker-end="url(#arr)"/>
+  </g>
+
+  <!-- Bandwidth scale ladder -->
+  <g transform="translate(40, 410)">
+    <text x="0" y="0" font-weight="600" fill="#37474f">带宽量级阶梯（粗略，每跨一层 5–60×）</text>
+    <line x1="0" y1="20" x2="880" y2="20" stroke="#90a4ae" stroke-width="2"/>
+    <g font-size="11" fill="#37474f">
+      <text x="10" y="44">Register</text><text x="10" y="58">~80 TB/s</text>
+      <text x="140" y="44">SMEM</text><text x="140" y="58">~33 TB/s</text>
+      <text x="260" y="44">L2</text><text x="260" y="58">~12 TB/s</text>
+      <text x="370" y="44">HBM3</text><text x="370" y="58">3.35 TB/s</text>
+      <text x="490" y="44">NVLink4</text><text x="490" y="58">900 GB/s</text>
+      <text x="620" y="44">PCIe Gen5</text><text x="620" y="58">128 GB/s</text>
+      <text x="760" y="44">IB NDR</text><text x="760" y="58">50 GB/s</text>
+    </g>
+    <g>
+      <circle cx="35"  cy="20" r="5" fill="#1e88e5"/>
+      <circle cx="160" cy="20" r="5" fill="#42a5f5"/>
+      <circle cx="270" cy="20" r="5" fill="#64b5f6"/>
+      <circle cx="395" cy="20" r="5" fill="#90caf9"/>
+      <circle cx="520" cy="20" r="5" fill="#fbc02d"/>
+      <circle cx="660" cy="20" r="5" fill="#fb8c00"/>
+      <circle cx="785" cy="20" r="5" fill="#e53935"/>
+    </g>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(40, 540)" font-size="12">
+    <rect x="0" y="0" width="14" height="14" fill="#1e88e5"/><text x="20" y="11">片上存储</text>
+    <rect x="120" y="0" width="14" height="14" fill="#43a047"/><text x="140" y="11">GPU</text>
+    <rect x="200" y="0" width="14" height="14" fill="#fbc02d"/><text x="220" y="11">节点内 fabric</text>
+    <rect x="360" y="0" width="14" height="14" fill="#e53935"/><text x="380" y="11">出节点（网络）</text>
+    <text x="540" y="11" fill="#546e7a">数字为 H100 SXM 80GB / NVLink Gen4 / IB NDR</text>
+  </g>
+</svg>

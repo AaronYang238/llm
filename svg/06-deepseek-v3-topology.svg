@@ -1,0 +1,212 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 720" font-family="system-ui, sans-serif">
+  <defs>
+    <marker id="ardsv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9a3412"/>
+    </marker>
+    <linearGradient id="a2aBar" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#fed7aa"/>
+      <stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+    <style>
+      .nvbox{fill:#fafafa;stroke:#374151;stroke-width:1.5}
+      .gpubox{fill:#fefce8;stroke:#a16207;stroke-width:1.5}
+      .attn{fill:#dbeafe;stroke:#1d4ed8;stroke-width:1.2}
+      .kv{fill:#e0e7ff;stroke:#4338ca;stroke-width:1.2}
+      .shared{fill:#fce7f3;stroke:#be185d;stroke-width:1.2}
+      .expert{fill:#dcfce7;stroke:#15803d;stroke-width:1.2}
+      .a2a{fill:url(#a2aBar);stroke:#9a3412;stroke-width:1.5}
+      .gpuhdr{font-size:11px;font-weight:700;fill:#451a03}
+      .role{font-size:9px;fill:#6b7280}
+      .lbl{font-size:9px;fill:#0f172a}
+      .title{font-size:15px;font-weight:700;fill:#0f172a}
+      .sub{font-size:12px;font-weight:600;fill:#0f172a}
+      .a2aTxt{font-size:12px;font-weight:700;fill:#7c2d12}
+    </style>
+  </defs>
+  <text x="440" y="22" text-anchor="middle" class="title">DeepSeek-V3 推理部署: DP=8 (Attention) + EP=8 (MoE), 单机 8 卡 H100/H200</text>
+  <text x="440" y="40" text-anchor="middle" font-size="11" fill="#475569">每卡持有完整 attention 权重 + 自己 batch + 自己的 KV cache + 32/256 个 routed experts + 共享专家</text>
+  <!-- NVLink fabric -->
+  <rect class="nvbox" x="30" y="60" width="820" height="500" rx="8"/>
+  <text x="50" y="80" font-size="12" font-weight="700" fill="#374151">NVSwitch / NVLink Fabric (900 GB/s 双向, 节点内 all-to-all 走这里)</text>
+  <!-- 8 GPU columns -->
+  <g>
+    <!-- Helper: each GPU at x = 50 + i*100, width=90 -->
+    <!-- GPU 0..7 -->
+    <g transform="translate(50,95)">
+      <rect class="gpubox" x="0" y="0" width="90" height="200" rx="4"/>
+      <text class="gpuhdr" x="45" y="14" text-anchor="middle">GPU 0</text>
+      <text class="role" x="45" y="26" text-anchor="middle">DP=0 / EP=0</text>
+      <rect class="attn" x="6" y="34" width="78" height="34" rx="3"/>
+      <text class="lbl" x="45" y="48" text-anchor="middle">MLA Attn</text>
+      <text class="lbl" x="45" y="60" text-anchor="middle">(本地)</text>
+      <rect class="kv" x="6" y="72" width="78" height="22" rx="3"/>
+      <text class="lbl" x="45" y="86" text-anchor="middle">KV cache (1/8 并发)</text>
+      <rect class="shared" x="6" y="98" width="78" height="20" rx="3"/>
+      <text class="lbl" x="45" y="111" text-anchor="middle">Shared Expert</text>
+      <rect class="expert" x="6" y="122" width="78" height="74" rx="3"/>
+      <text class="lbl" x="45" y="138" text-anchor="middle">Routed</text>
+      <text class="lbl" x="45" y="150" text-anchor="middle">Experts</text>
+      <text class="lbl" x="45" y="164" text-anchor="middle">E0..E31</text>
+      <text class="lbl" x="45" y="178" text-anchor="middle">(32 / 256)</text>
+    </g>
+    <g transform="translate(150,95)">
+      <rect class="gpubox" x="0" y="0" width="90" height="200" rx="4"/>
+      <text class="gpuhdr" x="45" y="14" text-anchor="middle">GPU 1</text>
+      <text class="role" x="45" y="26" text-anchor="middle">DP=1 / EP=1</text>
+      <rect class="attn" x="6" y="34" width="78" height="34" rx="3"/>
+      <text class="lbl" x="45" y="48" text-anchor="middle">MLA Attn</text>
+      <text class="lbl" x="45" y="60" text-anchor="middle">(本地)</text>
+      <rect class="kv" x="6" y="72" width="78" height="22" rx="3"/>
+      <text class="lbl" x="45" y="86" text-anchor="middle">KV cache</text>
+      <rect class="shared" x="6" y="98" width="78" height="20" rx="3"/>
+      <text class="lbl" x="45" y="111" text-anchor="middle">Shared Expert</text>
+      <rect class="expert" x="6" y="122" width="78" height="74" rx="3"/>
+      <text class="lbl" x="45" y="138" text-anchor="middle">Routed</text>
+      <text class="lbl" x="45" y="150" text-anchor="middle">Experts</text>
+      <text class="lbl" x="45" y="164" text-anchor="middle">E32..E63</text>
+    </g>
+    <g transform="translate(250,95)">
+      <rect class="gpubox" x="0" y="0" width="90" height="200" rx="4"/>
+      <text class="gpuhdr" x="45" y="14" text-anchor="middle">GPU 2</text>
+      <text class="role" x="45" y="26" text-anchor="middle">DP=2 / EP=2</text>
+      <rect class="attn" x="6" y="34" width="78" height="34" rx="3"/>
+      <text class="lbl" x="45" y="48" text-anchor="middle">MLA Attn</text>
+      <text class="lbl" x="45" y="60" text-anchor="middle">(本地)</text>
+      <rect class="kv" x="6" y="72" width="78" height="22" rx="3"/>
+      <text class="lbl" x="45" y="86" text-anchor="middle">KV cache</text>
+      <rect class="shared" x="6" y="98" width="78" height="20" rx="3"/>
+      <text class="lbl" x="45" y="111" text-anchor="middle">Shared Expert</text>
+      <rect class="expert" x="6" y="122" width="78" height="74" rx="3"/>
+      <text class="lbl" x="45" y="138" text-anchor="middle">Routed</text>
+      <text class="lbl" x="45" y="150" text-anchor="middle">Experts</text>
+      <text class="lbl" x="45" y="164" text-anchor="middle">E64..E95</text>
+    </g>
+    <g transform="translate(350,95)">
+      <rect class="gpubox" x="0" y="0" width="90" height="200" rx="4"/>
+      <text class="gpuhdr" x="45" y="14" text-anchor="middle">GPU 3</text>
+      <text class="role" x="45" y="26" text-anchor="middle">DP=3 / EP=3</text>
+      <rect class="attn" x="6" y="34" width="78" height="34" rx="3"/>
+      <text class="lbl" x="45" y="48" text-anchor="middle">MLA Attn</text>
+      <text class="lbl" x="45" y="60" text-anchor="middle">(本地)</text>
+      <rect class="kv" x="6" y="72" width="78" height="22" rx="3"/>
+      <text class="lbl" x="45" y="86" text-anchor="middle">KV cache</text>
+      <rect class="shared" x="6" y="98" width="78" height="20" rx="3"/>
+      <text class="lbl" x="45" y="111" text-anchor="middle">Shared Expert</text>
+      <rect class="expert" x="6" y="122" width="78" height="74" rx="3"/>
+      <text class="lbl" x="45" y="138" text-anchor="middle">Routed</text>
+      <text class="lbl" x="45" y="150" text-anchor="middle">Experts</text>
+      <text class="lbl" x="45" y="164" text-anchor="middle">E96..E127</text>
+    </g>
+    <g transform="translate(450,95)">
+      <rect class="gpubox" x="0" y="0" width="90" height="200" rx="4"/>
+      <text class="gpuhdr" x="45" y="14" text-anchor="middle">GPU 4</text>
+      <text class="role" x="45" y="26" text-anchor="middle">DP=4 / EP=4</text>
+      <rect class="attn" x="6" y="34" width="78" height="34" rx="3"/>
+      <text class="lbl" x="45" y="48" text-anchor="middle">MLA Attn</text>
+      <text class="lbl" x="45" y="60" text-anchor="middle">(本地)</text>
+      <rect class="kv" x="6" y="72" width="78" height="22" rx="3"/>
+      <text class="lbl" x="45" y="86" text-anchor="middle">KV cache</text>
+      <rect class="shared" x="6" y="98" width="78" height="20" rx="3"/>
+      <text class="lbl" x="45" y="111" text-anchor="middle">Shared Expert</text>
+      <rect class="expert" x="6" y="122" width="78" height="74" rx="3"/>
+      <text class="lbl" x="45" y="138" text-anchor="middle">Routed</text>
+      <text class="lbl" x="45" y="150" text-anchor="middle">Experts</text>
+      <text class="lbl" x="45" y="164" text-anchor="middle">E128..E159</text>
+    </g>
+    <g transform="translate(550,95)">
+      <rect class="gpubox" x="0" y="0" width="90" height="200" rx="4"/>
+      <text class="gpuhdr" x="45" y="14" text-anchor="middle">GPU 5</text>
+      <text class="role" x="45" y="26" text-anchor="middle">DP=5 / EP=5</text>
+      <rect class="attn" x="6" y="34" width="78" height="34" rx="3"/>
+      <text class="lbl" x="45" y="48" text-anchor="middle">MLA Attn</text>
+      <text class="lbl" x="45" y="60" text-anchor="middle">(本地)</text>
+      <rect class="kv" x="6" y="72" width="78" height="22" rx="3"/>
+      <text class="lbl" x="45" y="86" text-anchor="middle">KV cache</text>
+      <rect class="shared" x="6" y="98" width="78" height="20" rx="3"/>
+      <text class="lbl" x="45" y="111" text-anchor="middle">Shared Expert</text>
+      <rect class="expert" x="6" y="122" width="78" height="74" rx="3"/>
+      <text class="lbl" x="45" y="138" text-anchor="middle">Routed</text>
+      <text class="lbl" x="45" y="150" text-anchor="middle">Experts</text>
+      <text class="lbl" x="45" y="164" text-anchor="middle">E160..E191</text>
+    </g>
+    <g transform="translate(650,95)">
+      <rect class="gpubox" x="0" y="0" width="90" height="200" rx="4"/>
+      <text class="gpuhdr" x="45" y="14" text-anchor="middle">GPU 6</text>
+      <text class="role" x="45" y="26" text-anchor="middle">DP=6 / EP=6</text>
+      <rect class="attn" x="6" y="34" width="78" height="34" rx="3"/>
+      <text class="lbl" x="45" y="48" text-anchor="middle">MLA Attn</text>
+      <text class="lbl" x="45" y="60" text-anchor="middle">(本地)</text>
+      <rect class="kv" x="6" y="72" width="78" height="22" rx="3"/>
+      <text class="lbl" x="45" y="86" text-anchor="middle">KV cache</text>
+      <rect class="shared" x="6" y="98" width="78" height="20" rx="3"/>
+      <text class="lbl" x="45" y="111" text-anchor="middle">Shared Expert</text>
+      <rect class="expert" x="6" y="122" width="78" height="74" rx="3"/>
+      <text class="lbl" x="45" y="138" text-anchor="middle">Routed</text>
+      <text class="lbl" x="45" y="150" text-anchor="middle">Experts</text>
+      <text class="lbl" x="45" y="164" text-anchor="middle">E192..E223</text>
+    </g>
+    <g transform="translate(750,95)">
+      <rect class="gpubox" x="0" y="0" width="90" height="200" rx="4"/>
+      <text class="gpuhdr" x="45" y="14" text-anchor="middle">GPU 7</text>
+      <text class="role" x="45" y="26" text-anchor="middle">DP=7 / EP=7</text>
+      <rect class="attn" x="6" y="34" width="78" height="34" rx="3"/>
+      <text class="lbl" x="45" y="48" text-anchor="middle">MLA Attn</text>
+      <text class="lbl" x="45" y="60" text-anchor="middle">(本地)</text>
+      <rect class="kv" x="6" y="72" width="78" height="22" rx="3"/>
+      <text class="lbl" x="45" y="86" text-anchor="middle">KV cache</text>
+      <rect class="shared" x="6" y="98" width="78" height="20" rx="3"/>
+      <text class="lbl" x="45" y="111" text-anchor="middle">Shared Expert</text>
+      <rect class="expert" x="6" y="122" width="78" height="74" rx="3"/>
+      <text class="lbl" x="45" y="138" text-anchor="middle">Routed</text>
+      <text class="lbl" x="45" y="150" text-anchor="middle">Experts</text>
+      <text class="lbl" x="45" y="164" text-anchor="middle">E224..E255</text>
+    </g>
+  </g>
+  <!-- Flow labels left side -->
+  <text font-size="10" font-weight="600" fill="#1e40af" x="42" y="125" text-anchor="end">Attn</text>
+  <text font-size="10" font-weight="600" fill="#4338ca" x="42" y="173" text-anchor="end">KV</text>
+  <text font-size="10" font-weight="600" fill="#be185d" x="42" y="210" text-anchor="end">Shared</text>
+  <text font-size="10" font-weight="600" fill="#15803d" x="42" y="258" text-anchor="end">Routed</text>
+  <!-- A2A bar #1 -->
+  <g>
+    <rect class="a2a" x="50" y="310" width="790" height="32" rx="4"/>
+    <text class="a2aTxt" x="445" y="331" text-anchor="middle">★ All-to-All #1 (Dispatch) — DeepEP normal/low-latency, NVLink + IBGDA ★</text>
+  </g>
+  <text font-size="10" fill="#7c2d12" x="60" y="357" font-style="italic">router → top-8 of 256, 按 expert id 把 token 送到拥有目标 expert 的 GPU</text>
+  <!-- Grouped GEMM row -->
+  <g>
+    <rect class="expert" x="50" y="370" width="790" height="42" rx="4"/>
+    <text font-size="11" font-weight="700" fill="#14532d" x="445" y="388" text-anchor="middle">Grouped GEMM (各 GPU 本地: 32 个 routed experts × 收到的 token)</text>
+    <text font-size="10" fill="#14532d" x="445" y="403" text-anchor="middle">token 分布不均 → 慢卡拖累, 需 load balance + 冗余专家</text>
+  </g>
+  <!-- A2A bar #2 -->
+  <g>
+    <rect class="a2a" x="50" y="425" width="790" height="32" rx="4"/>
+    <text class="a2aTxt" x="445" y="446" text-anchor="middle">★ All-to-All #2 (Combine) — 输出送回原 token 所在 GPU ★</text>
+  </g>
+  <!-- DP attention summary -->
+  <g>
+    <rect x="50" y="475" width="380" height="70" rx="4" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1"/>
+    <text font-size="12" font-weight="700" fill="#1e3a8a" x="60" y="495">DP-Attention 路径 (蓝色)</text>
+    <text font-size="10" fill="#1e3a8a" x="60" y="513">• 每张卡持有完整 MLA 权重 + 1/8 batch + 自己的 KV</text>
+    <text font-size="10" fill="#1e3a8a" x="60" y="527">• Attention forward 完全本地, 跨 GPU 0 通信</text>
+    <text font-size="10" fill="#1e3a8a" x="60" y="541">• KV cache 总容量 ×8 → 长上下文 / 高并发友好</text>
+  </g>
+  <g>
+    <rect x="460" y="475" width="380" height="70" rx="4" fill="#fed7aa" stroke="#9a3412" stroke-width="1"/>
+    <text font-size="12" font-weight="700" fill="#7c2d12" x="470" y="495">EP-MoE 路径 (橙色)</text>
+    <text font-size="10" fill="#7c2d12" x="470" y="513">• 256 routed experts 均分 8 卡, 每卡 32 个</text>
+    <text font-size="10" fill="#7c2d12" x="470" y="527">• 每 MoE 层 2 次 All-to-All, DeepEP NVLink + IBGDA</text>
+    <text font-size="10" fill="#7c2d12" x="470" y="541">• Shared expert 本地 always-on, 不进 a2a</text>
+  </g>
+  <!-- Bottom comparison vs TP=8 -->
+  <g transform="translate(30,580)">
+    <rect x="0" y="0" width="820" height="120" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="1"/>
+    <text x="410" y="22" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2d12">为什么 DP-Attn + EP 比纯 TP=8 更优 (推理场景)</text>
+    <text x="20" y="44" font-size="11" fill="#451a03">① <tspan font-weight="700">KV cache 容量</tspan>: 纯 TP=8 把 KV 也切到 8 份 → 单卡承载并发受限; DP=8 每卡完整 KV → 并发能力 ×8</text>
+    <text x="20" y="62" font-size="11" fill="#451a03">② <tspan font-weight="700">attention 通信</tspan>: 纯 TP=8 每层 2 次 AllReduce; DP-attn 完全 0 通信 → 省下 attention 全部通信开销</text>
+    <text x="20" y="80" font-size="11" fill="#451a03">③ <tspan font-weight="700">MoE 通信</tspan>: 都是 2 次 all-to-all, 但 EP=8 的 a2a 数据量与 TP 的 AllReduce 量级接近, DeepEP 已优化到 100~300 µs</text>
+    <text x="20" y="98" font-size="11" fill="#451a03">④ <tspan font-weight="700">权重显存</tspan>: 671 B / 8 ≈ 84 GB/卡 (FP8), 含完整 attention + 1/8 experts; H200 (141 GB) 单机能装下</text>
+    <text x="20" y="113" font-size="11" fill="#451a03">⑤ vLLM/SGLang 启用: <tspan font-family="monospace">--enable-expert-parallel</tspan> + <tspan font-family="monospace">--enable-dp-attention</tspan> + <tspan font-family="monospace">--enable-deepep-moe</tspan></text>
+  </g>
+</svg>

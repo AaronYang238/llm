@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" font-family="system-ui, sans-serif">
+  <defs>
+    <marker id="arcp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/>
+    </marker>
+    <style>
+      .gpu{fill:#ede9fe;stroke:#6d28d9;stroke-width:1.5}
+      .gpu-txt{font-size:12px;font-weight:600;fill:#1e1b4b}
+      .lbl{font-size:10px;fill:#4b5563}
+      .ring{stroke:#7c3aed;stroke-width:2;fill:none;marker-end:url(#arcp)}
+      .title{font-size:15px;font-weight:700;fill:#0f172a}
+      .step{font-size:11px;font-weight:600;fill:#5b21b6}
+    </style>
+  </defs>
+  <text x="350" y="22" text-anchor="middle" class="title">CP=4 Ring Attention: K/V 在环上轮转</text>
+  <text x="350" y="40" text-anchor="middle" font-size="11" fill="#6b7280">每卡持有 S/4 的 Q/K/V, 经过 3 圈 SendRecv 后所有 Q 都看过完整 K/V</text>
+  <!-- Initial state -->
+  <g transform="translate(50,70)">
+    <text class="step" x="0" y="0">初始状态: 各卡持有 sequence 的 1/4 分片</text>
+    <rect class="gpu" x="0" y="15" width="130" height="60" rx="4"/>
+    <text class="gpu-txt" x="65" y="35" text-anchor="middle">GPU 0</text>
+    <text class="lbl" x="65" y="50" text-anchor="middle">Q₀, K₀, V₀</text>
+    <text class="lbl" x="65" y="65" text-anchor="middle">(seq[0:S/4])</text>
+    <rect class="gpu" x="150" y="15" width="130" height="60" rx="4"/>
+    <text class="gpu-txt" x="215" y="35" text-anchor="middle">GPU 1</text>
+    <text class="lbl" x="215" y="50" text-anchor="middle">Q₁, K₁, V₁</text>
+    <text class="lbl" x="215" y="65" text-anchor="middle">(seq[S/4:S/2])</text>
+    <rect class="gpu" x="300" y="15" width="130" height="60" rx="4"/>
+    <text class="gpu-txt" x="365" y="35" text-anchor="middle">GPU 2</text>
+    <text class="lbl" x="365" y="50" text-anchor="middle">Q₂, K₂, V₂</text>
+    <text class="lbl" x="365" y="65" text-anchor="middle">(seq[S/2:3S/4])</text>
+    <rect class="gpu" x="450" y="15" width="130" height="60" rx="4"/>
+    <text class="gpu-txt" x="515" y="35" text-anchor="middle">GPU 3</text>
+    <text class="lbl" x="515" y="50" text-anchor="middle">Q₃, K₃, V₃</text>
+    <text class="lbl" x="515" y="65" text-anchor="middle">(seq[3S/4:S])</text>
+  </g>
+  <!-- Ring topology -->
+  <g transform="translate(120,180)">
+    <text class="step" x="220" y="0" text-anchor="middle">Ring 拓扑: K/V 顺时针流转, Q 留在本卡</text>
+    <rect class="gpu" x="0" y="25" width="110" height="60" rx="4"/>
+    <text class="gpu-txt" x="55" y="50" text-anchor="middle">GPU 0</text>
+    <text class="lbl" x="55" y="68" text-anchor="middle">Q₀ + 轮转的 K/V</text>
+    <rect class="gpu" x="330" y="25" width="110" height="60" rx="4"/>
+    <text class="gpu-txt" x="385" y="50" text-anchor="middle">GPU 1</text>
+    <text class="lbl" x="385" y="68" text-anchor="middle">Q₁ + 轮转的 K/V</text>
+    <rect class="gpu" x="330" y="150" width="110" height="60" rx="4"/>
+    <text class="gpu-txt" x="385" y="175" text-anchor="middle">GPU 2</text>
+    <text class="lbl" x="385" y="193" text-anchor="middle">Q₂ + 轮转的 K/V</text>
+    <rect class="gpu" x="0" y="150" width="110" height="60" rx="4"/>
+    <text class="gpu-txt" x="55" y="175" text-anchor="middle">GPU 3</text>
+    <text class="lbl" x="55" y="193" text-anchor="middle">Q₃ + 轮转的 K/V</text>
+    <!-- Ring arrows -->
+    <line class="ring" x1="115" y1="55" x2="325" y2="55"/>
+    <line class="ring" x1="385" y1="90" x2="385" y2="145"/>
+    <line class="ring" x1="325" y1="180" x2="115" y2="180"/>
+    <line class="ring" x1="55" y1="145" x2="55" y2="90"/>
+    <text font-size="10" fill="#5b21b6" x="220" y="50" text-anchor="middle">SendRecv K,V</text>
+    <text font-size="10" fill="#5b21b6" x="220" y="200" text-anchor="middle">SendRecv K,V</text>
+    <text font-size="10" fill="#5b21b6" x="395" y="120" text-anchor="middle">SendRecv K,V</text>
+    <text font-size="10" fill="#5b21b6" x="45" y="120" text-anchor="middle">SendRecv K,V</text>
+  </g>
+  <!-- Steps & summary -->
+  <g transform="translate(50,400)">
+    <rect x="0" y="0" width="600" height="70" rx="6" fill="#ede9fe" stroke="#6d28d9" stroke-width="1"/>
+    <text x="300" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#4c1d95">CP 通信代价: 每层 (CP-1) 次 SendRecv, 单次 = B·S/CP·H × dtype</text>
+    <text x="20" y="40" font-size="11" fill="#3b0764">• 每步本地计算 attn(Q_local, K_recv, V_recv) 然后累加, 用 Flash Attention 的 online softmax</text>
+    <text x="20" y="56" font-size="11" fill="#3b0764">• 与 TP 正交: TP×CP 嵌套可同时切 head 和 sequence, 支撑 128K~1M+ 上下文</text>
+  </g>
+</svg>

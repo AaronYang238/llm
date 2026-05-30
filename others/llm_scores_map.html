@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;padding:20px 16px}
+h2{font-size:14px;font-weight:500;color:#718096;margin-bottom:16px;letter-spacing:.4px}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+
+.card{
+  background:#141720;border:1px solid #2d3748;border-radius:10px;
+  padding:14px 16px;cursor:pointer;transition:border-color .15s;
+}
+.card:hover{border-color:#4a5568}
+.card.open{border-color:#667eea}
+
+.card-header{display:flex;align-items:center;gap:10px}
+.pill{
+  font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;
+  white-space:nowrap;flex-shrink:0;
+}
+.pill-attn   {background:#1a365d;color:#90cdf4}
+.pill-router {background:#744210;color:#fbd38d}
+.pill-logit  {background:#1a202c;color:#a0aec0}
+.pill-reward {background:#276749;color:#9ae6b4}
+.pill-value  {background:#2d3561;color:#b794f4}
+.pill-beam   {background:#2c3a1a;color:#c6f6d5}
+.pill-spec   {background:#4a1942;color:#f9a8d4}
+.pill-kvc    {background:#2d2020;color:#feb2b2}
+
+.card-title{font-size:13px;font-weight:500;color:#e2e8f0}
+.card-phase{font-size:11px;color:#4a5568;margin-left:auto;white-space:nowrap}
+
+.card-body{display:none;margin-top:12px;padding-top:12px;border-top:1px solid #1e2433}
+.card.open .card-body{display:block}
+
+.card-formula{
+  background:#0d0f18;border-radius:6px;padding:10px 12px;
+  font-family:monospace;font-size:12px;color:#c3dafe;line-height:1.7;
+  margin-bottom:10px;white-space:pre;overflow-x:auto;
+}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.meta-item{font-size:11px;background:#1a202c;border-radius:4px;padding:2px 8px;color:#a0aec0}
+.meta-item span{color:#667eea}
+.desc{font-size:12px;color:#718096;line-height:1.65}
+.diff{font-size:12px;color:#fc8181;margin-top:6px;line-height:1.6;
+  border-left:2px solid #c53030;padding-left:8px}
+
+/* comparison table */
+.table-wrap{margin-top:20px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:#141720;color:#718096;font-weight:500;padding:8px 10px;
+  border-bottom:1px solid #2d3748;text-align:left}
+.tbl td{padding:7px 10px;border-bottom:1px solid #1e2433;color:#c4cde0;vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#161b27}
+</style>
+</head>
+<body>
+<h2>大模型中的 score 分类图谱 — 点击展开</h2>
+
+<div class="grid" id="cards"></div>
+
+<div class="table-wrap">
+<table class="tbl">
+<thead>
+<tr>
+  <th>Score 类型</th><th>输入</th><th>输出 shape</th><th>发生阶段</th><th>核心用途</th>
+</tr>
+</thead>
+<tbody id="tbl-body"></tbody>
+</table>
+</div>
+
+<script>
+const data = [
+  {
+    id:'attn', label:'Attention score', pill:'pill-attn', phase:'forward（每层）',
+    formula:`q · k / sqrt(d_k)   → softmax → attn_weight
+shape: [batch, heads, seq, seq]`,
+    input:'query, key 向量', shape:'[seq, seq]', stage:'每层 forward',
+    use:'加权聚合 value，建模 token 间依赖',
+    desc:'最核心的 score。除以 sqrt(d_k) 是为了防止高维空间中点积绝对值过大，导致 softmax 进入饱和区（梯度消失）。Flash Attention 的核心优化就是避免把这个矩阵完整写到 HBM。',
+    diff:'作用域：token ↔ token（序列内部）'
+  },
+  {
+    id:'router', label:'Router gate score', pill:'pill-router', phase:'forward（MoE 层）',
+    formula:`h @ W_gate → softmax → top_k
+gate_score ∈ [0,1], Σ = 1 (top-k 归一化后)`,
+    input:'token hidden state h', shape:'[num_experts]', stage:'MoE 层 forward',
+    use:'combine 阶段的加权系数',
+    desc:'本质和 attention score 一样是点积相似度，但目标是 token 对 expert 的"亲和度"而非 token 对 token 的"关注度"。有 auxiliary load balancing loss 防止所有 token 都路由到同一 expert。',
+    diff:'作用域：token → expert（跨 GPU 路由）'
+  },
+  {
+    id:'logit', label:'Vocab logit score', pill:'pill-logit', phase:'forward（最后层）',
+    formula:`h_last @ W_vocab → logits
+probs = softmax(logits / temperature)`,
+    input:'最后一层 hidden state', shape:'[vocab_size]', stage:'输出层',
+    use:'选下一个 token（greedy / sampling）',
+    desc:'W_vocab 通常与输入 embedding 权重共享（weight tying）。vocab_size 可达 128k+，这个矩阵乘法是推理阶段的显存热点之一。Temperature 控制分布的"平坦程度"，TopP/TopK 在这层 score 上做截断。',
+    diff:'作用域：hidden → 词表（最终决策层）'
+  },
+  {
+    id:'reward', label:'Reward score', pill:'pill-reward', phase:'RLHF 训练',
+    formula:`r = RM(prompt, response)   → scalar
+loss = -E[r] + β·KL(π || π_ref)`,
+    input:'完整 prompt + response', shape:'scalar', stage:'RLHF / DPO 训练',
+    use:'PPO 的奖励信号，指导 policy 更新',
+    desc:'Outcome Reward Model (ORM) 只给最终答案打分；Process Reward Model (PRM) 给每个推理步骤打分，更适合数学/代码等需要中间验证的任务。与其他 score 最大的区别：不参与实时 forward，是离线训练信号。',
+    diff:'作用域：整条 response → 标量偏好值'
+  },
+  {
+    id:'value', label:'Value score (PPO)', pill:'pill-value', phase:'RLHF 训练',
+    formula:`V(s_t) = value_head(h_t)   → scalar
+advantage = r_t + γV(s_{t+1}) - V(s_t)`,
+    input:'当前 step 的 hidden state', shape:'scalar/token', stage:'PPO 训练',
+    use:'估计期望回报，计算 advantage',
+    desc:'Value head 通常是接在 LM 主干上的一个额外线性层。容易和 reward score 混淆：reward 是环境/RM 给的外部信号，value 是模型自己对"未来回报"的预测。两者共同构成 PPO 的 actor-critic 框架。',
+    diff:'作用域：单步 token → 累积回报预测'
+  },
+  {
+    id:'beam', label:'Beam search score', pill:'pill-beam', phase:'decoding',
+    formula:`score(seq) = Σ log P(t_i|ctx) / len^α
+α ≈ 0.6~0.7 (length penalty)`,
+    input:'候选序列的 token 概率', shape:'scalar/sequence', stage:'decoding',
+    use:'在 beam 宽内保留最优序列',
+    desc:'本质是对数概率累加（等价于概率连乘），但需要长度惩罚 α 防止模型倾向于生成短序列。现代 LLM 推理已较少用 beam search（延迟高、显存大），更多用 sampling。',
+    diff:'作用域：整条序列 → 排序选优'
+  },
+  {
+    id:'spec', label:'Speculative accept rate', pill:'pill-spec', phase:'decoding',
+    formula:`accept_prob = min(1, p_target(x) / p_draft(x))
+rejected → resample from (p_t - p_d)+`,
+    input:'draft/target 对同一 token 的概率', shape:'scalar/token', stage:'推理 decoding',
+    use:'决定是否接受 draft token',
+    desc:'不是传统意义的"score"，但本质是两个分布之间的比值。关键性质：接受/拒绝采样保证输出分布等价于 target model，不损失质量。draft model 越接近 target，接受率越高，加速比越大。',
+    diff:'作用域：draft token → 是否采用'
+  },
+  {
+    id:'kvc', label:'KV Cache 重要性 score', pill:'pill-kvc', phase:'长上下文推理',
+    formula:`importance(k) = Σ_t attn_weight[t][k]
+低分 token 的 KV 对从 cache 驱逐`,
+    input:'历史 attention weight 矩阵', shape:'[seq_len]', stage:'长上下文推理',
+    use:'决定哪些 KV 对可以从 cache 中淘汰',
+    desc:'H2O、SnapKV 等工作的核心。本质是对 attention score 的二阶利用：如果一个 token 从未被关注过（累积 attn weight 低），则其 KV 对不太可能在未来被用到，可以安全驱逐以节省显存。',
+    diff:'作用域：历史 token → 保留/驱逐决策'
+  }
+];
+
+const table_data = [
+  ['Attention score','q, k 向量','[seq, seq]','每层 forward','加权聚合 value'],
+  ['Router gate score','token hidden h','[num_experts]','MoE 层 forward','combine 加权 / expert 路由'],
+  ['Vocab logit score','最后层 hidden','[vocab_size]','输出层','选下一个 token'],
+  ['Reward score','prompt + response','scalar','RLHF 训练','PPO 奖励信号'],
+  ['Value score','单步 hidden','scalar/token','PPO 训练','advantage 计算'],
+  ['Beam search score','候选序列概率','scalar/seq','decoding','beam 内排序选优'],
+  ['Speculative accept rate','draft/target 概率','scalar/token','推理 decoding','是否接受 draft token'],
+  ['KV Cache 重要性','attn weight 历史','[seq_len]','长上下文推理','KV 对驱逐决策'],
+];
+
+const cards = document.getElementById('cards');
+data.forEach(d => {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = `
+    <div class="card-header">
+      <span class="pill ${d.pill}">${d.label}</span>
+      <span class="card-phase">${d.phase}</span>
+    </div>
+    <div class="card-body">
+      <div class="card-formula">${d.formula}</div>
+      <div class="meta">
+        <div class="meta-item">输入 <span>${d.input}</span></div>
+        <div class="meta-item">shape <span>${d.shape}</span></div>
+      </div>
+      <div class="desc">${d.desc}</div>
+      <div class="diff">${d.diff}</div>
+    </div>
+  `;
+  div.addEventListener('click', () => div.classList.toggle('open'));
+  cards.appendChild(div);
+});
+
+const tbody = document.getElementById('tbl-body');
+table_data.forEach(row => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = row.map(c=>`<td>${c}</td>`).join('');
+  tbody.appendChild(tr);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 720" font-family="system-ui, sans-serif">
+  <defs>
+    <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+    <linearGradient id="syncGrad" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <style>
+      .gpu-band{fill:#f9fafb;stroke:#9ca3af;stroke-width:1;stroke-dasharray:3,3}
+      .gpu-label{font-size:12px;font-weight:600;fill:#374151}
+      .op{fill:#dbeafe;stroke:#1d4ed8;stroke-width:1.2}
+      .op-row{fill:#fce7f3;stroke:#be185d;stroke-width:1.2}
+      .op-col{fill:#dcfce7;stroke:#15803d;stroke-width:1.2}
+      .op-local{fill:#f3f4f6;stroke:#6b7280;stroke-width:1.2}
+      .sync{fill:url(#syncGrad);stroke:#b45309;stroke-width:1.5}
+      .op-txt{font-size:10px;fill:#0f172a;font-weight:500}
+      .lbl{font-size:10px;fill:#4b5563}
+      .title{font-size:15px;font-weight:700;fill:#0f172a}
+    </style>
+  </defs>
+  <text x="390" y="22" text-anchor="middle" class="title">TP=4 在 Transformer Block 内的通信序列 (Llama / Qwen Dense)</text>
+  <g>
+    <rect class="gpu-band" x="40" y="40" width="170" height="540" rx="4"/>
+    <rect class="gpu-band" x="220" y="40" width="170" height="540" rx="4"/>
+    <rect class="gpu-band" x="400" y="40" width="170" height="540" rx="4"/>
+    <rect class="gpu-band" x="580" y="40" width="170" height="540" rx="4"/>
+    <text class="gpu-label" x="125" y="58" text-anchor="middle">GPU 0 (TP rank 0)</text>
+    <text class="gpu-label" x="305" y="58" text-anchor="middle">GPU 1 (TP rank 1)</text>
+    <text class="gpu-label" x="485" y="58" text-anchor="middle">GPU 2 (TP rank 2)</text>
+    <text class="gpu-label" x="665" y="58" text-anchor="middle">GPU 3 (TP rank 3)</text>
+  </g>
+  <g>
+    <rect class="op" x="60" y="72" width="130" height="26" rx="4"/><text class="op-txt" x="125" y="89" text-anchor="middle">X [B,S,H] (复制)</text>
+    <rect class="op" x="240" y="72" width="130" height="26" rx="4"/><text class="op-txt" x="305" y="89" text-anchor="middle">X [B,S,H] (复制)</text>
+    <rect class="op" x="420" y="72" width="130" height="26" rx="4"/><text class="op-txt" x="485" y="89" text-anchor="middle">X [B,S,H] (复制)</text>
+    <rect class="op" x="600" y="72" width="130" height="26" rx="4"/><text class="op-txt" x="665" y="89" text-anchor="middle">X [B,S,H] (复制)</text>
+  </g>
+  <g>
+    <rect class="op-local" x="60" y="104" width="130" height="22" rx="4"/><text class="op-txt" x="125" y="119" text-anchor="middle">RMSNorm (本地)</text>
+    <rect class="op-local" x="240" y="104" width="130" height="22" rx="4"/><text class="op-txt" x="305" y="119" text-anchor="middle">RMSNorm</text>
+    <rect class="op-local" x="420" y="104" width="130" height="22" rx="4"/><text class="op-txt" x="485" y="119" text-anchor="middle">RMSNorm</text>
+    <rect class="op-local" x="600" y="104" width="130" height="22" rx="4"/><text class="op-txt" x="665" y="119" text-anchor="middle">RMSNorm</text>
+  </g>
+  <g>
+    <rect class="op-col" x="60" y="134" width="130" height="40" rx="4"/><text class="op-txt" x="125" y="152" text-anchor="middle">Q,K,V (本地切片)</text><text class="lbl" x="125" y="166" text-anchor="middle">heads 0..h/4</text>
+    <rect class="op-col" x="240" y="134" width="130" height="40" rx="4"/><text class="op-txt" x="305" y="152" text-anchor="middle">Q,K,V (本地切片)</text><text class="lbl" x="305" y="166" text-anchor="middle">heads h/4..h/2</text>
+    <rect class="op-col" x="420" y="134" width="130" height="40" rx="4"/><text class="op-txt" x="485" y="152" text-anchor="middle">Q,K,V (本地切片)</text><text class="lbl" x="485" y="166" text-anchor="middle">heads h/2..3h/4</text>
+    <rect class="op-col" x="600" y="134" width="130" height="40" rx="4"/><text class="op-txt" x="665" y="152" text-anchor="middle">Q,K,V (本地切片)</text><text class="lbl" x="665" y="166" text-anchor="middle">heads 3h/4..h</text>
+  </g>
+  <g>
+    <rect class="op-local" x="60" y="180" width="130" height="28" rx="4"/><text class="op-txt" x="125" y="198" text-anchor="middle">FlashAttention</text>
+    <rect class="op-local" x="240" y="180" width="130" height="28" rx="4"/><text class="op-txt" x="305" y="198" text-anchor="middle">FlashAttention</text>
+    <rect class="op-local" x="420" y="180" width="130" height="28" rx="4"/><text class="op-txt" x="485" y="198" text-anchor="middle">FlashAttention</text>
+    <rect class="op-local" x="600" y="180" width="130" height="28" rx="4"/><text class="op-txt" x="665" y="198" text-anchor="middle">FlashAttention</text>
+  </g>
+  <g>
+    <rect class="op-row" x="60" y="214" width="130" height="30" rx="4"/><text class="op-txt" x="125" y="233" text-anchor="middle">O_proj (partial)</text>
+    <rect class="op-row" x="240" y="214" width="130" height="30" rx="4"/><text class="op-txt" x="305" y="233" text-anchor="middle">O_proj (partial)</text>
+    <rect class="op-row" x="420" y="214" width="130" height="30" rx="4"/><text class="op-txt" x="485" y="233" text-anchor="middle">O_proj (partial)</text>
+    <rect class="op-row" x="600" y="214" width="130" height="30" rx="4"/><text class="op-txt" x="665" y="233" text-anchor="middle">O_proj (partial)</text>
+  </g>
+  <g>
+    <rect class="sync" x="40" y="252" width="710" height="32" rx="4"/>
+    <text x="395" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2d12">★ AllReduce (NCCL Ring/NVLS) — Attention 末尾 ★</text>
+  </g>
+  <g>
+    <rect class="op-local" x="60" y="292" width="130" height="22" rx="4"/><text class="op-txt" x="125" y="307" text-anchor="middle">+Residual, RMSNorm</text>
+    <rect class="op-local" x="240" y="292" width="130" height="22" rx="4"/><text class="op-txt" x="305" y="307" text-anchor="middle">+Residual, RMSNorm</text>
+    <rect class="op-local" x="420" y="292" width="130" height="22" rx="4"/><text class="op-txt" x="485" y="307" text-anchor="middle">+Residual, RMSNorm</text>
+    <rect class="op-local" x="600" y="292" width="130" height="22" rx="4"/><text class="op-txt" x="665" y="307" text-anchor="middle">+Residual, RMSNorm</text>
+  </g>
+  <g>
+    <rect class="op-col" x="60" y="322" width="130" height="40" rx="4"/><text class="op-txt" x="125" y="340" text-anchor="middle">gate_proj / up_proj</text><text class="lbl" x="125" y="354" text-anchor="middle">intermediate/4</text>
+    <rect class="op-col" x="240" y="322" width="130" height="40" rx="4"/><text class="op-txt" x="305" y="340" text-anchor="middle">gate_proj / up_proj</text><text class="lbl" x="305" y="354" text-anchor="middle">intermediate/4</text>
+    <rect class="op-col" x="420" y="322" width="130" height="40" rx="4"/><text class="op-txt" x="485" y="340" text-anchor="middle">gate_proj / up_proj</text><text class="lbl" x="485" y="354" text-anchor="middle">intermediate/4</text>
+    <rect class="op-col" x="600" y="322" width="130" height="40" rx="4"/><text class="op-txt" x="665" y="340" text-anchor="middle">gate_proj / up_proj</text><text class="lbl" x="665" y="354" text-anchor="middle">intermediate/4</text>
+  </g>
+  <g>
+    <rect class="op-local" x="60" y="368" width="130" height="22" rx="4"/><text class="op-txt" x="125" y="383" text-anchor="middle">SiLU(gate) * up</text>
+    <rect class="op-local" x="240" y="368" width="130" height="22" rx="4"/><text class="op-txt" x="305" y="383" text-anchor="middle">SiLU(gate) * up</text>
+    <rect class="op-local" x="420" y="368" width="130" height="22" rx="4"/><text class="op-txt" x="485" y="383" text-anchor="middle">SiLU(gate) * up</text>
+    <rect class="op-local" x="600" y="368" width="130" height="22" rx="4"/><text class="op-txt" x="665" y="383" text-anchor="middle">SiLU(gate) * up</text>
+  </g>
+  <g>
+    <rect class="op-row" x="60" y="398" width="130" height="30" rx="4"/><text class="op-txt" x="125" y="417" text-anchor="middle">down_proj (partial)</text>
+    <rect class="op-row" x="240" y="398" width="130" height="30" rx="4"/><text class="op-txt" x="305" y="417" text-anchor="middle">down_proj (partial)</text>
+    <rect class="op-row" x="420" y="398" width="130" height="30" rx="4"/><text class="op-txt" x="485" y="417" text-anchor="middle">down_proj (partial)</text>
+    <rect class="op-row" x="600" y="398" width="130" height="30" rx="4"/><text class="op-txt" x="665" y="417" text-anchor="middle">down_proj (partial)</text>
+  </g>
+  <g>
+    <rect class="sync" x="40" y="436" width="710" height="32" rx="4"/>
+    <text x="395" y="456" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2d12">★ AllReduce (NCCL Ring/NVLS) — FFN 末尾 ★</text>
+  </g>
+  <g>
+    <rect class="op-local" x="60" y="476" width="130" height="22" rx="4"/><text class="op-txt" x="125" y="491" text-anchor="middle">+Residual → 输出 Y</text>
+    <rect class="op-local" x="240" y="476" width="130" height="22" rx="4"/><text class="op-txt" x="305" y="491" text-anchor="middle">+Residual → 输出 Y</text>
+    <rect class="op-local" x="420" y="476" width="130" height="22" rx="4"/><text class="op-txt" x="485" y="491" text-anchor="middle">+Residual → 输出 Y</text>
+    <rect class="op-local" x="600" y="476" width="130" height="22" rx="4"/><text class="op-txt" x="665" y="491" text-anchor="middle">+Residual → 输出 Y</text>
+  </g>
+  <g>
+    <rect x="40" y="510" width="710" height="92" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="1"/>
+    <text x="395" y="530" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2d12">每层 TP 通信代价: 2 × AllReduce, 单次 = B·S·H × 2 bytes (BF16)</text>
+    <text x="60" y="552" font-size="11" fill="#451a03">• ColumnParallel (绿色): 权重按列切, 输入复制, 输出本地分片 → 无通信</text>
+    <text x="60" y="568" font-size="11" fill="#451a03">• RowParallel (粉色): 权重按行切, 输入分片, 输出 partial sum → 末尾 AllReduce</text>
+    <text x="60" y="584" font-size="11" fill="#451a03">• Llama-3 70B (80 层) prefill ≈ 160 次 AllReduce, ~11 ms 纯通信 (TP=8 NVLink)</text>
+  </g>
+</svg>

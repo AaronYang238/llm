@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 700" font-family="system-ui, sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4b5563"/>
+    </marker>
+    <style>
+      .in{fill:#dbeafe;stroke:#1d4ed8;stroke-width:1.4}
+      .out{fill:#dcfce7;stroke:#15803d;stroke-width:1.4}
+      .mix{fill:#fef3c7;stroke:#b45309;stroke-width:1.4}
+      .root{fill:#fee2e2;stroke:#b91c1c;stroke-width:1.4}
+      .a{stroke:#4b5563;stroke-width:1.4;fill:none;marker-end:url(#ar)}
+      .t{font-size:11px;fill:#111827}
+      .h{font-size:14px;font-weight:700;fill:#0f172a}
+      .d{font-size:10px;fill:#475569}
+    </style>
+  </defs>
+  <g transform="translate(20,30)">
+    <text class="h" x="170" y="0" text-anchor="middle">① AllReduce (sum)</text>
+    <rect class="in" x="10" y="20" width="60" height="34" rx="4"/><text class="t" x="40" y="42" text-anchor="middle">a₀</text>
+    <rect class="in" x="90" y="20" width="60" height="34" rx="4"/><text class="t" x="120" y="42" text-anchor="middle">a₁</text>
+    <rect class="in" x="170" y="20" width="60" height="34" rx="4"/><text class="t" x="200" y="42" text-anchor="middle">a₂</text>
+    <rect class="in" x="250" y="20" width="60" height="34" rx="4"/><text class="t" x="280" y="42" text-anchor="middle">a₃</text>
+    <line class="a" x1="40" y1="58" x2="40" y2="95"/>
+    <line class="a" x1="120" y1="58" x2="120" y2="95"/>
+    <line class="a" x1="200" y1="58" x2="200" y2="95"/>
+    <line class="a" x1="280" y1="58" x2="280" y2="95"/>
+    <rect class="out" x="10" y="100" width="60" height="34" rx="4"/><text class="t" x="40" y="122" text-anchor="middle">Σa</text>
+    <rect class="out" x="90" y="100" width="60" height="34" rx="4"/><text class="t" x="120" y="122" text-anchor="middle">Σa</text>
+    <rect class="out" x="170" y="100" width="60" height="34" rx="4"/><text class="t" x="200" y="122" text-anchor="middle">Σa</text>
+    <rect class="out" x="250" y="100" width="60" height="34" rx="4"/><text class="t" x="280" y="122" text-anchor="middle">Σa</text>
+    <text class="d" x="170" y="155" text-anchor="middle">DP 梯度聚合 / TP RowParallel 末尾</text>
+    <text class="d" x="170" y="170" text-anchor="middle">≡ ReduceScatter + AllGather</text>
+  </g>
+  <g transform="translate(410,30)">
+    <text class="h" x="170" y="0" text-anchor="middle">② Broadcast (root=0)</text>
+    <rect class="root" x="10" y="20" width="60" height="34" rx="4"/><text class="t" x="40" y="42" text-anchor="middle">A</text>
+    <rect class="in" x="90" y="20" width="60" height="34" rx="4" stroke-dasharray="3,3" opacity="0.4"/><text class="t" x="120" y="42" text-anchor="middle" opacity="0.5">∅</text>
+    <rect class="in" x="170" y="20" width="60" height="34" rx="4" stroke-dasharray="3,3" opacity="0.4"/><text class="t" x="200" y="42" text-anchor="middle" opacity="0.5">∅</text>
+    <rect class="in" x="250" y="20" width="60" height="34" rx="4" stroke-dasharray="3,3" opacity="0.4"/><text class="t" x="280" y="42" text-anchor="middle" opacity="0.5">∅</text>
+    <path class="a" d="M 40 58 L 40 95"/>
+    <path class="a" d="M 40 60 Q 80 80 120 95"/>
+    <path class="a" d="M 40 60 Q 120 80 200 95"/>
+    <path class="a" d="M 40 60 Q 160 80 280 95"/>
+    <rect class="out" x="10" y="100" width="60" height="34" rx="4"/><text class="t" x="40" y="122" text-anchor="middle">A</text>
+    <rect class="out" x="90" y="100" width="60" height="34" rx="4"/><text class="t" x="120" y="122" text-anchor="middle">A</text>
+    <rect class="out" x="170" y="100" width="60" height="34" rx="4"/><text class="t" x="200" y="122" text-anchor="middle">A</text>
+    <rect class="out" x="250" y="100" width="60" height="34" rx="4"/><text class="t" x="280" y="122" text-anchor="middle">A</text>
+    <text class="d" x="170" y="155" text-anchor="middle">参数初始化, 配置 / Token 下发</text>
+  </g>
+  <g transform="translate(20,230)">
+    <text class="h" x="170" y="0" text-anchor="middle">③ AllGather</text>
+    <rect class="in" x="10" y="20" width="60" height="34" rx="4"/><text class="t" x="40" y="42" text-anchor="middle">a₀</text>
+    <rect class="in" x="90" y="20" width="60" height="34" rx="4"/><text class="t" x="120" y="42" text-anchor="middle">a₁</text>
+    <rect class="in" x="170" y="20" width="60" height="34" rx="4"/><text class="t" x="200" y="42" text-anchor="middle">a₂</text>
+    <rect class="in" x="250" y="20" width="60" height="34" rx="4"/><text class="t" x="280" y="42" text-anchor="middle">a₃</text>
+    <line class="a" x1="40" y1="58" x2="40" y2="95"/>
+    <line class="a" x1="120" y1="58" x2="120" y2="95"/>
+    <line class="a" x1="200" y1="58" x2="200" y2="95"/>
+    <line class="a" x1="280" y1="58" x2="280" y2="95"/>
+    <rect class="out" x="10" y="100" width="60" height="34" rx="4"/><text class="t" x="40" y="120" text-anchor="middle" font-size="9">a₀a₁a₂a₃</text>
+    <rect class="out" x="90" y="100" width="60" height="34" rx="4"/><text class="t" x="120" y="120" text-anchor="middle" font-size="9">a₀a₁a₂a₃</text>
+    <rect class="out" x="170" y="100" width="60" height="34" rx="4"/><text class="t" x="200" y="120" text-anchor="middle" font-size="9">a₀a₁a₂a₃</text>
+    <rect class="out" x="250" y="100" width="60" height="34" rx="4"/><text class="t" x="280" y="120" text-anchor="middle" font-size="9">a₀a₁a₂a₃</text>
+    <text class="d" x="170" y="155" text-anchor="middle">FSDP 前向取权重, SP 末尾恢复序列</text>
+  </g>
+  <g transform="translate(410,230)">
+    <text class="h" x="170" y="0" text-anchor="middle">④ ReduceScatter</text>
+    <rect class="in" x="10" y="20" width="60" height="34" rx="4"/><text class="t" x="40" y="40" text-anchor="middle" font-size="9">a₀b₀c₀d₀</text>
+    <rect class="in" x="90" y="20" width="60" height="34" rx="4"/><text class="t" x="120" y="40" text-anchor="middle" font-size="9">a₁b₁c₁d₁</text>
+    <rect class="in" x="170" y="20" width="60" height="34" rx="4"/><text class="t" x="200" y="40" text-anchor="middle" font-size="9">a₂b₂c₂d₂</text>
+    <rect class="in" x="250" y="20" width="60" height="34" rx="4"/><text class="t" x="280" y="40" text-anchor="middle" font-size="9">a₃b₃c₃d₃</text>
+    <line class="a" x1="40" y1="58" x2="40" y2="95"/>
+    <line class="a" x1="120" y1="58" x2="120" y2="95"/>
+    <line class="a" x1="200" y1="58" x2="200" y2="95"/>
+    <line class="a" x1="280" y1="58" x2="280" y2="95"/>
+    <rect class="out" x="10" y="100" width="60" height="34" rx="4"/><text class="t" x="40" y="122" text-anchor="middle">Σa</text>
+    <rect class="out" x="90" y="100" width="60" height="34" rx="4"/><text class="t" x="120" y="122" text-anchor="middle">Σb</text>
+    <rect class="out" x="170" y="100" width="60" height="34" rx="4"/><text class="t" x="200" y="122" text-anchor="middle">Σc</text>
+    <rect class="out" x="250" y="100" width="60" height="34" rx="4"/><text class="t" x="280" y="122" text-anchor="middle">Σd</text>
+    <text class="d" x="170" y="155" text-anchor="middle">FSDP 梯度归并, TP+SP 前半</text>
+  </g>
+  <g transform="translate(20,430)">
+    <text class="h" x="170" y="0" text-anchor="middle">⑤ All-to-All</text>
+    <rect class="in" x="10" y="20" width="60" height="34" rx="4"/><text class="t" x="40" y="40" text-anchor="middle" font-size="9">a→0,1,2,3</text>
+    <rect class="in" x="90" y="20" width="60" height="34" rx="4"/><text class="t" x="120" y="40" text-anchor="middle" font-size="9">b→0,1,2,3</text>
+    <rect class="in" x="170" y="20" width="60" height="34" rx="4"/><text class="t" x="200" y="40" text-anchor="middle" font-size="9">c→0,1,2,3</text>
+    <rect class="in" x="250" y="20" width="60" height="34" rx="4"/><text class="t" x="280" y="40" text-anchor="middle" font-size="9">d→0,1,2,3</text>
+    <line class="a" x1="40" y1="58" x2="40" y2="95"/>
+    <line class="a" x1="40" y1="58" x2="120" y2="95" opacity="0.45"/>
+    <line class="a" x1="40" y1="58" x2="200" y2="95" opacity="0.45"/>
+    <line class="a" x1="40" y1="58" x2="280" y2="95" opacity="0.45"/>
+    <line class="a" x1="120" y1="58" x2="40" y2="95" opacity="0.45"/>
+    <line class="a" x1="120" y1="58" x2="120" y2="95"/>
+    <line class="a" x1="200" y1="58" x2="200" y2="95"/>
+    <line class="a" x1="280" y1="58" x2="280" y2="95"/>
+    <rect class="mix" x="10" y="100" width="60" height="34" rx="4"/><text class="t" x="40" y="122" text-anchor="middle" font-size="9">a₀b₀c₀d₀</text>
+    <rect class="mix" x="90" y="100" width="60" height="34" rx="4"/><text class="t" x="120" y="122" text-anchor="middle" font-size="9">a₁b₁c₁d₁</text>
+    <rect class="mix" x="170" y="100" width="60" height="34" rx="4"/><text class="t" x="200" y="122" text-anchor="middle" font-size="9">a₂b₂c₂d₂</text>
+    <rect class="mix" x="250" y="100" width="60" height="34" rx="4"/><text class="t" x="280" y="122" text-anchor="middle" font-size="9">a₃b₃c₃d₃</text>
+    <text class="d" x="170" y="155" text-anchor="middle">MoE dispatch / combine (EP 核心)</text>
+    <text class="d" x="170" y="170" text-anchor="middle">N² 对小消息, 延迟敏感 → DeepEP / pplx</text>
+  </g>
+  <g transform="translate(410,430)">
+    <text class="h" x="170" y="0" text-anchor="middle">⑥ SendRecv (P2P)</text>
+    <rect class="in" x="40" y="30" width="80" height="40" rx="4"/><text class="t" x="80" y="55" text-anchor="middle">rank i</text>
+    <rect class="out" x="220" y="30" width="80" height="40" rx="4"/><text class="t" x="260" y="55" text-anchor="middle">rank j</text>
+    <line class="a" x1="125" y1="50" x2="215" y2="50"/>
+    <text class="d" x="170" y="42" text-anchor="middle">tensor (send / recv)</text>
+    <text class="t" x="170" y="100" text-anchor="middle">仅一对 rank, 无集合语义</text>
+    <text class="d" x="170" y="155" text-anchor="middle">PP stage 边界, Ring-Attn K/V 轮转</text>
+    <text class="d" x="170" y="170" text-anchor="middle">PD 分离 KV 传输 (NIXL / Mooncake)</text>
+  </g>
+</svg>

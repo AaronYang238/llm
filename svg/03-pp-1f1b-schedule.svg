@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 380" font-family="system-ui, sans-serif">
+  <defs>
+    <pattern id="bubble" patternUnits="userSpaceOnUse" width="6" height="6">
+      <path d="M 0 6 L 6 0" stroke="#cbd5e1" stroke-width="1"/>
+    </pattern>
+    <marker id="arpp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/>
+    </marker>
+    <style>
+      .f{fill:#dbeafe;stroke:#1d4ed8;stroke-width:1}
+      .b{fill:#fce7f3;stroke:#be185d;stroke-width:1}
+      .bub{fill:url(#bubble);stroke:#cbd5e1;stroke-width:1}
+      .lbl{font-size:9px;fill:#0f172a;font-weight:500}
+      .sl{font-size:11px;font-weight:600;fill:#374151}
+      .title{font-size:14px;font-weight:700;fill:#0f172a}
+      .sr{stroke:#dc2626;stroke-width:1.5;fill:none;marker-end:url(#arpp)}
+    </style>
+  </defs>
+  <text x="410" y="22" text-anchor="middle" class="title">Pipeline Parallelism: 1F1B 调度 (PP=4, micro-batches=8)</text>
+  <text x="410" y="40" text-anchor="middle" font-size="11" fill="#475569">通信原语: stage 边界 SendRecv (P2P), 每 micro-batch 1 次</text>
+  <text class="sl" x="20" y="74">Stage 0</text>
+  <text class="sl" x="20" y="114">Stage 1</text>
+  <text class="sl" x="20" y="154">Stage 2</text>
+  <text class="sl" x="20" y="194">Stage 3</text>
+  <!-- Stage 0 -->
+  <g transform="translate(75,60)">
+    <rect class="f" x="0" y="0" width="32" height="22"/><text class="lbl" x="16" y="15" text-anchor="middle">F0</text>
+    <rect class="f" x="32" y="0" width="32" height="22"/><text class="lbl" x="48" y="15" text-anchor="middle">F1</text>
+    <rect class="f" x="64" y="0" width="32" height="22"/><text class="lbl" x="80" y="15" text-anchor="middle">F2</text>
+    <rect class="f" x="96" y="0" width="32" height="22"/><text class="lbl" x="112" y="15" text-anchor="middle">F3</text>
+    <rect class="b" x="128" y="0" width="32" height="22"/><text class="lbl" x="144" y="15" text-anchor="middle">B0</text>
+    <rect class="f" x="160" y="0" width="32" height="22"/><text class="lbl" x="176" y="15" text-anchor="middle">F4</text>
+    <rect class="b" x="192" y="0" width="32" height="22"/><text class="lbl" x="208" y="15" text-anchor="middle">B1</text>
+    <rect class="f" x="224" y="0" width="32" height="22"/><text class="lbl" x="240" y="15" text-anchor="middle">F5</text>
+    <rect class="b" x="256" y="0" width="32" height="22"/><text class="lbl" x="272" y="15" text-anchor="middle">B2</text>
+    <rect class="f" x="288" y="0" width="32" height="22"/><text class="lbl" x="304" y="15" text-anchor="middle">F6</text>
+    <rect class="b" x="320" y="0" width="32" height="22"/><text class="lbl" x="336" y="15" text-anchor="middle">B3</text>
+    <rect class="f" x="352" y="0" width="32" height="22"/><text class="lbl" x="368" y="15" text-anchor="middle">F7</text>
+    <rect class="b" x="384" y="0" width="32" height="22"/><text class="lbl" x="400" y="15" text-anchor="middle">B4</text>
+    <rect class="b" x="416" y="0" width="32" height="22"/><text class="lbl" x="432" y="15" text-anchor="middle">B5</text>
+    <rect class="b" x="448" y="0" width="32" height="22"/><text class="lbl" x="464" y="15" text-anchor="middle">B6</text>
+    <rect class="b" x="480" y="0" width="32" height="22"/><text class="lbl" x="496" y="15" text-anchor="middle">B7</text>
+    <rect class="bub" x="512" y="0" width="96" height="22"/>
+  </g>
+  <!-- Stage 1 -->
+  <g transform="translate(75,100)">
+    <rect class="bub" x="0" y="0" width="32" height="22"/>
+    <rect class="f" x="32" y="0" width="32" height="22"/><text class="lbl" x="48" y="15" text-anchor="middle">F0</text>
+    <rect class="f" x="64" y="0" width="32" height="22"/><text class="lbl" x="80" y="15" text-anchor="middle">F1</text>
+    <rect class="f" x="96" y="0" width="32" height="22"/><text class="lbl" x="112" y="15" text-anchor="middle">F2</text>
+    <rect class="f" x="128" y="0" width="32" height="22"/><text class="lbl" x="144" y="15" text-anchor="middle">F3</text>
+    <rect class="b" x="160" y="0" width="32" height="22"/><text class="lbl" x="176" y="15" text-anchor="middle">B0</text>
+    <rect class="f" x="192" y="0" width="32" height="22"/><text class="lbl" x="208" y="15" text-anchor="middle">F4</text>
+    <rect class="b" x="224" y="0" width="32" height="22"/><text class="lbl" x="240" y="15" text-anchor="middle">B1</text>
+    <rect class="f" x="256" y="0" width="32" height="22"/><text class="lbl" x="272" y="15" text-anchor="middle">F5</text>
+    <rect class="b" x="288" y="0" width="32" height="22"/><text class="lbl" x="304" y="15" text-anchor="middle">B2</text>
+    <rect class="f" x="320" y="0" width="32" height="22"/><text class="lbl" x="336" y="15" text-anchor="middle">F6</text>
+    <rect class="b" x="352" y="0" width="32" height="22"/><text class="lbl" x="368" y="15" text-anchor="middle">B3</text>
+    <rect class="f" x="384" y="0" width="32" height="22"/><text class="lbl" x="400" y="15" text-anchor="middle">F7</text>
+    <rect class="b" x="416" y="0" width="32" height="22"/><text class="lbl" x="432" y="15" text-anchor="middle">B4</text>
+    <rect class="b" x="448" y="0" width="32" height="22"/><text class="lbl" x="464" y="15" text-anchor="middle">B5</text>
+    <rect class="b" x="480" y="0" width="32" height="22"/><text class="lbl" x="496" y="15" text-anchor="middle">B6</text>
+    <rect class="b" x="512" y="0" width="32" height="22"/><text class="lbl" x="528" y="15" text-anchor="middle">B7</text>
+    <rect class="bub" x="544" y="0" width="64" height="22"/>
+  </g>
+  <!-- Stage 2 -->
+  <g transform="translate(75,140)">
+    <rect class="bub" x="0" y="0" width="64" height="22"/>
+    <rect class="f" x="64" y="0" width="32" height="22"/><text class="lbl" x="80" y="15" text-anchor="middle">F0</text>
+    <rect class="f" x="96" y="0" width="32" height="22"/><text class="lbl" x="112" y="15" text-anchor="middle">F1</text>
+    <rect class="f" x="128" y="0" width="32" height="22"/><text class="lbl" x="144" y="15" text-anchor="middle">F2</text>
+    <rect class="f" x="160" y="0" width="32" height="22"/><text class="lbl" x="176" y="15" text-anchor="middle">F3</text>
+    <rect class="b" x="192" y="0" width="32" height="22"/><text class="lbl" x="208" y="15" text-anchor="middle">B0</text>
+    <rect class="f" x="224" y="0" width="32" height="22"/><text class="lbl" x="240" y="15" text-anchor="middle">F4</text>
+    <rect class="b" x="256" y="0" width="32" height="22"/><text class="lbl" x="272" y="15" text-anchor="middle">B1</text>
+    <rect class="f" x="288" y="0" width="32" height="22"/><text class="lbl" x="304" y="15" text-anchor="middle">F5</text>
+    <rect class="b" x="320" y="0" width="32" height="22"/><text class="lbl" x="336" y="15" text-anchor="middle">B2</text>
+    <rect class="f" x="352" y="0" width="32" height="22"/><text class="lbl" x="368" y="15" text-anchor="middle">F6</text>
+    <rect class="b" x="384" y="0" width="32" height="22"/><text class="lbl" x="400" y="15" text-anchor="middle">B3</text>
+    <rect class="f" x="416" y="0" width="32" height="22"/><text class="lbl" x="432" y="15" text-anchor="middle">F7</text>
+    <rect class="b" x="448" y="0" width="32" height="22"/><text class="lbl" x="464" y="15" text-anchor="middle">B4</text>
+    <rect class="b" x="480" y="0" width="32" height="22"/><text class="lbl" x="496" y="15" text-anchor="middle">B5</text>
+    <rect class="b" x="512" y="0" width="32" height="22"/><text class="lbl" x="528" y="15" text-anchor="middle">B6</text>
+    <rect class="b" x="544" y="0" width="32" height="22"/><text class="lbl" x="560" y="15" text-anchor="middle">B7</text>
+    <rect class="bub" x="576" y="0" width="32" height="22"/>
+  </g>
+  <!-- Stage 3 -->
+  <g transform="translate(75,180)">
+    <rect class="bub" x="0" y="0" width="96" height="22"/>
+    <rect class="f" x="96" y="0" width="32" height="22"/><text class="lbl" x="112" y="15" text-anchor="middle">F0</text>
+    <rect class="b" x="128" y="0" width="32" height="22"/><text class="lbl" x="144" y="15" text-anchor="middle">B0</text>
+    <rect class="f" x="160" y="0" width="32" height="22"/><text class="lbl" x="176" y="15" text-anchor="middle">F1</text>
+    <rect class="b" x="192" y="0" width="32" height="22"/><text class="lbl" x="208" y="15" text-anchor="middle">B1</text>
+    <rect class="f" x="224" y="0" width="32" height="22"/><text class="lbl" x="240" y="15" text-anchor="middle">F2</text>
+    <rect class="b" x="256" y="0" width="32" height="22"/><text class="lbl" x="272" y="15" text-anchor="middle">B2</text>
+    <rect class="f" x="288" y="0" width="32" height="22"/><text class="lbl" x="304" y="15" text-anchor="middle">F3</text>
+    <rect class="b" x="320" y="0" width="32" height="22"/><text class="lbl" x="336" y="15" text-anchor="middle">B3</text>
+    <rect class="f" x="352" y="0" width="32" height="22"/><text class="lbl" x="368" y="15" text-anchor="middle">F4</text>
+    <rect class="b" x="384" y="0" width="32" height="22"/><text class="lbl" x="400" y="15" text-anchor="middle">B4</text>
+    <rect class="f" x="416" y="0" width="32" height="22"/><text class="lbl" x="432" y="15" text-anchor="middle">F5</text>
+    <rect class="b" x="448" y="0" width="32" height="22"/><text class="lbl" x="464" y="15" text-anchor="middle">B5</text>
+    <rect class="f" x="480" y="0" width="32" height="22"/><text class="lbl" x="496" y="15" text-anchor="middle">F6</text>
+    <rect class="b" x="512" y="0" width="32" height="22"/><text class="lbl" x="528" y="15" text-anchor="middle">B6</text>
+    <rect class="f" x="544" y="0" width="32" height="22"/><text class="lbl" x="560" y="15" text-anchor="middle">F7</text>
+    <rect class="b" x="576" y="0" width="32" height="22"/><text class="lbl" x="592" y="15" text-anchor="middle">B7</text>
+  </g>
+  <!-- SendRecv arrows -->
+  <g>
+    <line class="sr" x1="120" y1="84" x2="120" y2="98"/>
+    <line class="sr" x1="155" y1="124" x2="155" y2="138"/>
+    <line class="sr" x1="190" y1="164" x2="190" y2="178"/>
+    <text font-size="9" fill="#991b1b" x="135" y="93">SendRecv H</text>
+    <text font-size="9" fill="#991b1b" x="170" y="133">SendRecv H</text>
+    <text font-size="9" fill="#991b1b" x="205" y="173">SendRecv H</text>
+  </g>
+  <!-- Legend -->
+  <g transform="translate(75,235)">
+    <rect class="f" x="0" y="0" width="16" height="14"/><text font-size="11" x="22" y="12" fill="#374151">Forward (F)</text>
+    <rect class="b" x="110" y="0" width="16" height="14"/><text font-size="11" x="132" y="12" fill="#374151">Backward (B)</text>
+    <rect class="bub" x="230" y="0" width="16" height="14"/><text font-size="11" x="252" y="12" fill="#374151">Bubble (空泡)</text>
+    <line class="sr" x1="370" y1="7" x2="395" y2="7"/><text font-size="11" x="402" y="12" fill="#374151">P2P SendRecv (stage 间)</text>
+  </g>
+  <!-- Summary box -->
+  <g transform="translate(75,265)">
+    <rect x="0" y="0" width="700" height="95" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="1"/>
+    <text x="350" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2d12">PP 通信代价: 每 micro-batch 在每个 stage 边界 1 次 SendRecv, 消息 = B·S·H × dtype</text>
+    <text x="20" y="42" font-size="11" fill="#451a03">• 1F1B 比 GPipe 显存峰值低 (in-flight micro-batch 数 ≤ PP), bubble 比例 ≈ (PP-1) / (PP + m - 1)</text>
+    <text x="20" y="58" font-size="11" fill="#451a03">• 想压低 bubble: micro-batch 数 m ≥ 4 × PP; 或上 Interleaved 1F1B / Zero-Bubble PP</text>
+    <text x="20" y="74" font-size="11" fill="#451a03">• 推理只有 forward (上半部分), bubble 几乎为 0; PP 主要用于装下超大模型而非提速</text>
+    <text x="20" y="88" font-size="11" fill="#451a03">• P2P 跨机友好 (小消息 + 异步), 是 TP 装不下时跨节点扩展的首选</text>
+  </g>
+</svg>

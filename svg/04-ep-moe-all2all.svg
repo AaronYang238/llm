@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 540" font-family="system-ui, sans-serif">
+  <defs>
+    <linearGradient id="a2aGrad" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#fed7aa"/>
+      <stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+    <style>
+      .gpu-band{fill:#f9fafb;stroke:#9ca3af;stroke-width:1;stroke-dasharray:3,3}
+      .gpu-label{font-size:12px;font-weight:600;fill:#374151}
+      .tok{fill:#dbeafe;stroke:#1d4ed8;stroke-width:1.2}
+      .router{fill:#fee2e2;stroke:#b91c1c;stroke-width:1.2}
+      .expert{fill:#dcfce7;stroke:#15803d;stroke-width:1.2}
+      .out{fill:#e0e7ff;stroke:#4338ca;stroke-width:1.2}
+      .a2a{fill:url(#a2aGrad);stroke:#9a3412;stroke-width:1.5}
+      .txt{font-size:10px;fill:#0f172a}
+      .lbl{font-size:10px;fill:#4b5563}
+      .title{font-size:15px;font-weight:700;fill:#0f172a}
+    </style>
+  </defs>
+  <text x="400" y="22" text-anchor="middle" class="title">EP=4 在 MoE 层的通信序列 (Mixtral / DeepSeek-V3)</text>
+  <text x="400" y="40" text-anchor="middle" font-size="11" fill="#6b7280">8 experts (E0..E7), top-k=2, 每 GPU 持有 2 个 experts</text>
+  <g>
+    <rect class="gpu-band" x="30" y="55" width="180" height="380" rx="4"/>
+    <rect class="gpu-band" x="220" y="55" width="180" height="380" rx="4"/>
+    <rect class="gpu-band" x="410" y="55" width="180" height="380" rx="4"/>
+    <rect class="gpu-band" x="600" y="55" width="180" height="380" rx="4"/>
+    <text class="gpu-label" x="120" y="72" text-anchor="middle">GPU 0 (EP rank 0)</text>
+    <text class="gpu-label" x="310" y="72" text-anchor="middle">GPU 1 (EP rank 1)</text>
+    <text class="gpu-label" x="500" y="72" text-anchor="middle">GPU 2 (EP rank 2)</text>
+    <text class="gpu-label" x="690" y="72" text-anchor="middle">GPU 3 (EP rank 3)</text>
+    <text class="lbl" x="120" y="86" text-anchor="middle">[E0, E1]</text>
+    <text class="lbl" x="310" y="86" text-anchor="middle">[E2, E3]</text>
+    <text class="lbl" x="500" y="86" text-anchor="middle">[E4, E5]</text>
+    <text class="lbl" x="690" y="86" text-anchor="middle">[E6, E7]</text>
+  </g>
+  <g>
+    <rect class="tok" x="50" y="100" width="140" height="28" rx="4"/><text class="txt" x="120" y="118" text-anchor="middle">本卡 batch 的 tokens</text>
+    <rect class="tok" x="240" y="100" width="140" height="28" rx="4"/><text class="txt" x="310" y="118" text-anchor="middle">本卡 batch 的 tokens</text>
+    <rect class="tok" x="430" y="100" width="140" height="28" rx="4"/><text class="txt" x="500" y="118" text-anchor="middle">本卡 batch 的 tokens</text>
+    <rect class="tok" x="620" y="100" width="140" height="28" rx="4"/><text class="txt" x="690" y="118" text-anchor="middle">本卡 batch 的 tokens</text>
+  </g>
+  <g>
+    <rect class="router" x="50" y="136" width="140" height="28" rx="4"/><text class="txt" x="120" y="154" text-anchor="middle">Router → top-2 expert id</text>
+    <rect class="router" x="240" y="136" width="140" height="28" rx="4"/><text class="txt" x="310" y="154" text-anchor="middle">Router → top-2 expert id</text>
+    <rect class="router" x="430" y="136" width="140" height="28" rx="4"/><text class="txt" x="500" y="154" text-anchor="middle">Router → top-2 expert id</text>
+    <rect class="router" x="620" y="136" width="140" height="28" rx="4"/><text class="txt" x="690" y="154" text-anchor="middle">Router → top-2 expert id</text>
+  </g>
+  <g>
+    <rect class="a2a" x="30" y="178" width="750" height="34" rx="4"/>
+    <text x="405" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2d12">★ All-to-All #1: Dispatch (DeepEP) — 按 expert id 重排 tokens ★</text>
+  </g>
+  <g>
+    <rect class="expert" x="50" y="222" width="65" height="78" rx="4"/><text class="txt" x="82" y="247" text-anchor="middle">E0</text><text class="lbl" x="82" y="263" text-anchor="middle">收到</text><text class="lbl" x="82" y="277" text-anchor="middle">n₀ tokens</text><text class="lbl" x="82" y="291" text-anchor="middle">Grouped GEMM</text>
+    <rect class="expert" x="125" y="222" width="65" height="78" rx="4"/><text class="txt" x="157" y="247" text-anchor="middle">E1</text><text class="lbl" x="157" y="263" text-anchor="middle">收到</text><text class="lbl" x="157" y="277" text-anchor="middle">n₁ tokens</text><text class="lbl" x="157" y="291" text-anchor="middle">Grouped GEMM</text>
+    <rect class="expert" x="240" y="222" width="65" height="78" rx="4"/><text class="txt" x="272" y="247" text-anchor="middle">E2</text><text class="lbl" x="272" y="263" text-anchor="middle">收到</text><text class="lbl" x="272" y="277" text-anchor="middle">n₂ tokens</text><text class="lbl" x="272" y="291" text-anchor="middle">Grouped GEMM</text>
+    <rect class="expert" x="315" y="222" width="65" height="78" rx="4"/><text class="txt" x="347" y="247" text-anchor="middle">E3</text><text class="lbl" x="347" y="263" text-anchor="middle">收到</text><text class="lbl" x="347" y="277" text-anchor="middle">n₃ tokens</text><text class="lbl" x="347" y="291" text-anchor="middle">Grouped GEMM</text>
+    <rect class="expert" x="430" y="222" width="65" height="78" rx="4"/><text class="txt" x="462" y="247" text-anchor="middle">E4</text><text class="lbl" x="462" y="263" text-anchor="middle">收到</text><text class="lbl" x="462" y="277" text-anchor="middle">n₄ tokens</text><text class="lbl" x="462" y="291" text-anchor="middle">Grouped GEMM</text>
+    <rect class="expert" x="505" y="222" width="65" height="78" rx="4"/><text class="txt" x="537" y="247" text-anchor="middle">E5</text><text class="lbl" x="537" y="263" text-anchor="middle">收到</text><text class="lbl" x="537" y="277" text-anchor="middle">n₅ tokens</text><text class="lbl" x="537" y="291" text-anchor="middle">Grouped GEMM</text>
+    <rect class="expert" x="620" y="222" width="65" height="78" rx="4"/><text class="txt" x="652" y="247" text-anchor="middle">E6</text><text class="lbl" x="652" y="263" text-anchor="middle">收到</text><text class="lbl" x="652" y="277" text-anchor="middle">n₆ tokens</text><text class="lbl" x="652" y="291" text-anchor="middle">Grouped GEMM</text>
+    <rect class="expert" x="695" y="222" width="65" height="78" rx="4"/><text class="txt" x="727" y="247" text-anchor="middle">E7</text><text class="lbl" x="727" y="263" text-anchor="middle">收到</text><text class="lbl" x="727" y="277" text-anchor="middle">n₇ tokens</text><text class="lbl" x="727" y="291" text-anchor="middle">Grouped GEMM</text>
+  </g>
+  <g>
+    <rect class="a2a" x="30" y="315" width="750" height="34" rx="4"/>
+    <text x="405" y="337" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2d12">★ All-to-All #2: Combine (DeepEP) — 输出送回原 token 所在卡 ★</text>
+  </g>
+  <g>
+    <rect class="out" x="50" y="361" width="140" height="32" rx="4"/><text class="txt" x="120" y="381" text-anchor="middle">weighted sum (top-2)</text>
+    <rect class="out" x="240" y="361" width="140" height="32" rx="4"/><text class="txt" x="310" y="381" text-anchor="middle">weighted sum (top-2)</text>
+    <rect class="out" x="430" y="361" width="140" height="32" rx="4"/><text class="txt" x="500" y="381" text-anchor="middle">weighted sum (top-2)</text>
+    <rect class="out" x="620" y="361" width="140" height="32" rx="4"/><text class="txt" x="690" y="381" text-anchor="middle">weighted sum (top-2)</text>
+  </g>
+  <g>
+    <rect x="30" y="410" width="750" height="118" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="1"/>
+    <text x="405" y="430" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2d12">每层 EP 通信代价: 2 × All-to-All, 数据量 ≈ B·S·top_k·H / EP × dtype</text>
+    <text x="50" y="450" font-size="11" fill="#451a03">• 难点: N² 对小消息, 延迟敏感; token 分布不均时慢卡拖累整体 → load balance loss / capacity factor</text>
+    <text x="50" y="466" font-size="11" fill="#451a03">• DeepEP: NVLink+RDMA 高吞吐内核 (prefill) + IBGDA 低延迟内核 (decode), 计算 / 通信 hook 重叠</text>
+    <text x="50" y="482" font-size="11" fill="#451a03">• DeepSeek-V3: FP8 dispatch + BF16 combine → 通信量 / 2; 共享专家 (always-on) 走本地不进 all-to-all</text>
+    <text x="50" y="498" font-size="11" fill="#451a03">• 与 TP 正交: 可以 TP × EP 嵌套, 也可推理时用 DP-attention + EP-FFN (DeepSeek-V3 标杆)</text>
+    <text x="50" y="514" font-size="11" fill="#451a03">• 训练反向也是 2 次 all-to-all (路径反向), 与 forward 对称</text>
+  </g>
+</svg>
