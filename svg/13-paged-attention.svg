@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" width="960" height="520" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#546e7a"/>
+    </marker>
+    <marker id="arr-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#c62828"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="600" fill="#212121">PagedAttention：logical KV → block table → physical block pool（block_size=4 示意）</text>
+
+  <!-- ===== Logical sequences (top) ===== -->
+  <text x="40" y="64" font-size="13" font-weight="600" fill="#1565c0">Logical 视角（每个请求看到一段 KV 序列）</text>
+
+  <!-- Request A: 6 tokens -->
+  <g transform="translate(40, 76)">
+    <text x="0" y="12" font-size="12" fill="#37474f">Request A (seq_len=6)</text>
+    <g transform="translate(160, 0)">
+      <rect x="0"   y="0" width="40" height="28" fill="#bbdefb" stroke="#1565c0"/>
+      <text x="20" y="19" text-anchor="middle" font-size="11" fill="#0d47a1">t₀</text>
+      <rect x="40"  y="0" width="40" height="28" fill="#bbdefb" stroke="#1565c0"/>
+      <text x="60" y="19" text-anchor="middle" font-size="11" fill="#0d47a1">t₁</text>
+      <rect x="80"  y="0" width="40" height="28" fill="#bbdefb" stroke="#1565c0"/>
+      <text x="100" y="19" text-anchor="middle" font-size="11" fill="#0d47a1">t₂</text>
+      <rect x="120" y="0" width="40" height="28" fill="#bbdefb" stroke="#1565c0"/>
+      <text x="140" y="19" text-anchor="middle" font-size="11" fill="#0d47a1">t₃</text>
+      <!-- Block boundary -->
+      <line x1="160" y1="-4" x2="160" y2="32" stroke="#37474f" stroke-width="1" stroke-dasharray="3 2"/>
+      <rect x="160" y="0" width="40" height="28" fill="#bbdefb" stroke="#1565c0"/>
+      <text x="180" y="19" text-anchor="middle" font-size="11" fill="#0d47a1">t₄</text>
+      <rect x="200" y="0" width="40" height="28" fill="#bbdefb" stroke="#1565c0"/>
+      <text x="220" y="19" text-anchor="middle" font-size="11" fill="#0d47a1">t₅</text>
+    </g>
+  </g>
+
+  <!-- Request B: 5 tokens (shares prefix t0-t3 with A) -->
+  <g transform="translate(40, 116)">
+    <text x="0" y="12" font-size="12" fill="#37474f">Request B (seq_len=5)</text>
+    <g transform="translate(160, 0)">
+      <rect x="0"   y="0" width="40" height="28" fill="#ffcdd2" stroke="#c62828"/>
+      <text x="20" y="19" text-anchor="middle" font-size="11" fill="#b71c1c">t₀</text>
+      <rect x="40"  y="0" width="40" height="28" fill="#ffcdd2" stroke="#c62828"/>
+      <text x="60" y="19" text-anchor="middle" font-size="11" fill="#b71c1c">t₁</text>
+      <rect x="80"  y="0" width="40" height="28" fill="#ffcdd2" stroke="#c62828"/>
+      <text x="100" y="19" text-anchor="middle" font-size="11" fill="#b71c1c">t₂</text>
+      <rect x="120" y="0" width="40" height="28" fill="#ffcdd2" stroke="#c62828"/>
+      <text x="140" y="19" text-anchor="middle" font-size="11" fill="#b71c1c">t₃</text>
+      <line x1="160" y1="-4" x2="160" y2="32" stroke="#37474f" stroke-width="1" stroke-dasharray="3 2"/>
+      <rect x="160" y="0" width="40" height="28" fill="#bbdefb" stroke="#1565c0"/>
+      <text x="180" y="19" text-anchor="middle" font-size="11" fill="#0d47a1">t₄</text>
+    </g>
+    <text x="420" y="19" font-size="11" font-style="italic" fill="#c62828">↑ t₀–t₃ 与 A 共享前缀（红色）</text>
+  </g>
+
+  <!-- ===== Block tables (middle) ===== -->
+  <text x="40" y="184" font-size="13" font-weight="600" fill="#f57f17">Block table（per-request，逻辑 block 索引 → 物理 block 编号）</text>
+
+  <g transform="translate(40, 200)">
+    <text x="0" y="20" font-size="12" fill="#37474f">A.block_table:</text>
+    <rect x="120" y="0" width="60" height="32" fill="#fbc02d" stroke="#f57f17" stroke-width="1.5"/>
+    <text x="150" y="21" text-anchor="middle" font-size="13" fill="#212121" font-weight="600">3</text>
+    <rect x="200" y="0" width="60" height="32" fill="#fbc02d" stroke="#f57f17" stroke-width="1.5"/>
+    <text x="230" y="21" text-anchor="middle" font-size="13" fill="#212121" font-weight="600">7</text>
+    <text x="280" y="20" font-size="11" fill="#546e7a">(2 blocks)</text>
+  </g>
+
+  <g transform="translate(40, 240)">
+    <text x="0" y="20" font-size="12" fill="#37474f">B.block_table:</text>
+    <rect x="120" y="0" width="60" height="32" fill="#fbc02d" stroke="#f57f17" stroke-width="1.5"/>
+    <text x="150" y="21" text-anchor="middle" font-size="13" fill="#212121" font-weight="600">3</text>
+    <rect x="200" y="0" width="60" height="32" fill="#fbc02d" stroke="#f57f17" stroke-width="1.5"/>
+    <text x="230" y="21" text-anchor="middle" font-size="13" fill="#212121" font-weight="600">5</text>
+    <text x="280" y="20" font-size="11" fill="#546e7a">(2 blocks，第 0 项与 A 相同 = 前缀共享)</text>
+  </g>
+
+  <!-- Address-of-token-t formula -->
+  <g transform="translate(540, 200)">
+    <rect x="0" y="0" width="380" height="72" fill="#eceff1" stroke="#90a4ae" rx="6"/>
+    <text x="190" y="20" text-anchor="middle" font-size="12" font-weight="600" fill="#37474f">取 request r 第 t 个 token 的 KV 地址</text>
+    <text x="12" y="40" font-size="11" fill="#212121" font-family="monospace">block_idx_in_table = t // block_size</text>
+    <text x="12" y="56" font-size="11" fill="#212121" font-family="monospace">slot_in_block      = t % block_size</text>
+    <text x="12" y="68" font-size="11" fill="#212121" font-family="monospace">phys = kv_cache[:, block_table[r][b], :, slot, :]</text>
+  </g>
+
+  <!-- ===== Physical KV block pool (bottom) ===== -->
+  <text x="40" y="316" font-size="13" font-weight="600" fill="#37474f">Physical KV cache pool（全局共享）</text>
+
+  <g transform="translate(40, 332)">
+    <!-- 10 physical blocks numbered 0-9 -->
+    <!-- Block 0: free -->
+    <rect x="0"   y="0" width="80" height="56" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+    <text x="40"  y="22" text-anchor="middle" font-size="11" fill="#546e7a">block 0</text>
+    <text x="40"  y="42" text-anchor="middle" font-size="10" fill="#90a4ae">free</text>
+
+    <rect x="85"  y="0" width="80" height="56" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+    <text x="125" y="22" text-anchor="middle" font-size="11" fill="#546e7a">block 1</text>
+    <text x="125" y="42" text-anchor="middle" font-size="10" fill="#90a4ae">free</text>
+
+    <rect x="170" y="0" width="80" height="56" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+    <text x="210" y="22" text-anchor="middle" font-size="11" fill="#546e7a">block 2</text>
+    <text x="210" y="42" text-anchor="middle" font-size="10" fill="#90a4ae">free</text>
+
+    <!-- Block 3: shared (prefix) - red border, both A and B -->
+    <rect x="255" y="0" width="80" height="56" fill="#1e88e5" stroke="#e53935" stroke-width="3"/>
+    <text x="295" y="22" text-anchor="middle" font-size="11" fill="white" font-weight="600">block 3</text>
+    <text x="295" y="42" text-anchor="middle" font-size="10" fill="white">A + B（共享）</text>
+
+    <rect x="340" y="0" width="80" height="56" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+    <text x="380" y="22" text-anchor="middle" font-size="11" fill="#546e7a">block 4</text>
+    <text x="380" y="42" text-anchor="middle" font-size="10" fill="#90a4ae">free</text>
+
+    <!-- Block 5: used by B -->
+    <rect x="425" y="0" width="80" height="56" fill="#1e88e5" stroke="#0d47a1" stroke-width="1.5"/>
+    <text x="465" y="22" text-anchor="middle" font-size="11" fill="white" font-weight="600">block 5</text>
+    <text x="465" y="42" text-anchor="middle" font-size="10" fill="white">B 独占</text>
+
+    <rect x="510" y="0" width="80" height="56" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+    <text x="550" y="22" text-anchor="middle" font-size="11" fill="#546e7a">block 6</text>
+    <text x="550" y="42" text-anchor="middle" font-size="10" fill="#90a4ae">free</text>
+
+    <!-- Block 7: used by A -->
+    <rect x="595" y="0" width="80" height="56" fill="#1e88e5" stroke="#0d47a1" stroke-width="1.5"/>
+    <text x="635" y="22" text-anchor="middle" font-size="11" fill="white" font-weight="600">block 7</text>
+    <text x="635" y="42" text-anchor="middle" font-size="10" fill="white">A 独占</text>
+
+    <rect x="680" y="0" width="80" height="56" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+    <text x="720" y="22" text-anchor="middle" font-size="11" fill="#546e7a">block 8</text>
+    <text x="720" y="42" text-anchor="middle" font-size="10" fill="#90a4ae">free</text>
+
+    <rect x="765" y="0" width="80" height="56" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+    <text x="805" y="22" text-anchor="middle" font-size="11" fill="#546e7a">block 9</text>
+    <text x="805" y="42" text-anchor="middle" font-size="10" fill="#90a4ae">free</text>
+  </g>
+
+  <!-- Arrows from block table entries to physical blocks -->
+  <!-- A.block_table[0]=3 → block 3 -->
+  <path d="M 190,224 Q 230,300 295,332" stroke="#546e7a" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <!-- A.block_table[1]=7 → block 7 -->
+  <path d="M 270,224 Q 450,310 635,332" stroke="#546e7a" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <!-- B.block_table[0]=3 → block 3 (red, shared) -->
+  <path d="M 190,264 Q 230,310 295,332" stroke="#c62828" stroke-width="1.5" fill="none" marker-end="url(#arr-red)"/>
+  <!-- B.block_table[1]=5 → block 5 -->
+  <path d="M 270,264 Q 350,310 465,332" stroke="#546e7a" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+  <!-- Legend -->
+  <g transform="translate(40, 470)">
+    <rect x="0" y="0" width="14" height="14" fill="#bbdefb" stroke="#1565c0"/>
+    <text x="22" y="11" font-size="11" fill="#37474f">A 独占 token</text>
+
+    <rect x="120" y="0" width="14" height="14" fill="#ffcdd2" stroke="#c62828"/>
+    <text x="142" y="11" font-size="11" fill="#37474f">A/B 共享前缀 token</text>
+
+    <rect x="280" y="0" width="14" height="14" fill="#fbc02d" stroke="#f57f17"/>
+    <text x="302" y="11" font-size="11" fill="#37474f">block_table 表项</text>
+
+    <rect x="430" y="0" width="14" height="14" fill="#1e88e5"/>
+    <text x="452" y="11" font-size="11" fill="#37474f">已用物理 block</text>
+
+    <rect x="570" y="0" width="14" height="14" fill="#1e88e5" stroke="#e53935" stroke-width="2"/>
+    <text x="592" y="11" font-size="11" fill="#37474f">共享物理 block</text>
+
+    <rect x="720" y="0" width="14" height="14" fill="#eceff1" stroke="#90a4ae"/>
+    <text x="742" y="11" font-size="11" fill="#37474f">空闲 block</text>
+  </g>
+</svg>

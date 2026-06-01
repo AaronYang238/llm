@@ -61,15 +61,17 @@
 
 ---
 
-## 阶段 4｜核心算子与高性能 Kernel
+## 阶段 4｜核心算子与高性能 Kernel ✓
 
-- [ ] **Attention kernel 演进**：FlashAttention v1 → v2 → v3 → FlashAttention-3 FP8 / Hopper TMA
-- [ ] **PagedAttention**：block table、KV 分页布局
-- [ ] **FlashInfer**：变长 batch、append/decode 专用 kernel、CUDA Graph 友好接口
-- [ ] **FlashMLA**：DeepSeek MLA 在 Hopper 上的低秩 KV cache 加速
-- [ ] **Triton 基础**：写一个 RMSNorm + Fused Residual 的 Triton kernel
-- [ ] **CUTLASS / cuBLASLt**：GEMM epilogue 融合、FP8 GEMM
-- [ ] **All-Reduce 融合**：Norm + AllReduce、Allgather + GEMM（`flux`、`async-TP`）
+> 已就位：[chapters/04-kernels.md](chapters/04-kernels.md)，主图 [svg/12-flashattn-tiling.svg](svg/12-flashattn-tiling.svg)（FlashAttention tiling + online softmax）+ [svg/13-paged-attention.svg](svg/13-paged-attention.svg)（PagedAttention block table 与 prefix sharing）。
+
+- [x] **Attention kernel 演进**：FlashAttention v1 → v2 → v3 → FlashAttention-3 FP8 / Hopper TMA（04 §4.2，主图 `svg/12-flashattn-tiling.svg`）
+- [x] **PagedAttention**：block table、KV 分页布局（04 §4.3，主图 `svg/13-paged-attention.svg`）
+- [x] **FlashInfer**：变长 batch、append/decode 专用 kernel、CUDA Graph 友好接口（04 §4.4）
+- [x] **FlashMLA**：DeepSeek MLA 在 Hopper 上的低秩 KV cache 加速（04 §4.5）
+- [x] **Triton 基础**：写一个 RMSNorm + Fused Residual 的 Triton kernel（04 §4.6，含完整 ~80 行可跑代码 + benchmark）
+- [x] **CUTLASS / cuBLASLt**：GEMM epilogue 融合、FP8 GEMM（04 §4.7）
+- [x] **All-Reduce 融合**：Norm + AllReduce、Allgather + GEMM（`flux`、`async-TP`）（04 §4.8）
 
 ---
 
