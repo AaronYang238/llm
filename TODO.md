@@ -47,17 +47,17 @@
 
 ---
 
-## 阶段 3｜集合通信与高性能通信库
+## 阶段 3｜集合通信与高性能通信库 ✓
 
-> 已有：[chapters/02-parallelism.md](chapters/02-parallelism.md) 2.1 节已覆盖七大原语 + Ring/Tree/NVLS 算法。本阶段后续聚焦 NCCL 调优、NVSHMEM、DeepEP、PD 分离 KV 传输、nccl-tests 微基准——这些是阶段 6 推理引擎、阶段 9 MoE 专题、阶段 11 profiling 的共同前置。
+> 已就位：[chapters/03-collective-comm.md](chapters/03-collective-comm.md)，主图 [svg/10-nccl-algos.svg](svg/10-nccl-algos.svg)（四种 AllReduce 算法对比）+ [svg/11-nccl-busbw-curve.svg](svg/11-nccl-busbw-curve.svg)（busbw 随消息大小的典型曲线）。原语层基础参见 [chapters/02-parallelism.md](chapters/02-parallelism.md) §2.1。
 
 - [x] **七大原语**：Broadcast / Reduce / AllReduce / AllGather / ReduceScatter / All-to-All / Send-Recv（02 §2.1.2，参见 `svg/01-collective-primitives.svg`）
-- [x] **NCCL 算法**：Ring / Tree / NVLS / Double Binary Tree；`NCCL_ALGO`、`NCCL_PROTO`（02 §2.1.3）
-- [ ] **NCCL 调优**：`NCCL_DEBUG=INFO`、`NCCL_IB_HCA`、`NCCL_P2P_LEVEL`、SHARP、PXN、IBGDA
-- [ ] **NVSHMEM**：单边通信模型；与传统 send/recv 的差异
-- [ ] **DeepEP**：MoE All-to-All 内核（dispatch/combine、low-latency vs normal）
-- [ ] **PD 分离的 KV 传输**：Mooncake、NIXL、LMCache、`NCCL_RDMA_RW` 的 KV 拷贝路径
-- [ ] **微基准**：用 `nccl-tests` 跑 allreduce / alltoall 的 busbw 曲线，画一张随消息大小的图
+- [x] **NCCL 算法**：Ring / Tree / NVLS / Double Binary Tree；`NCCL_ALGO`、`NCCL_PROTO`（02 §2.1.3 + 03 §3.2 busbw 推导与自动选择规则）
+- [x] **NCCL 调优**：`NCCL_DEBUG=INFO`、`NCCL_IB_HCA`、`NCCL_P2P_LEVEL`、SHARP、PXN、IBGDA（03 §3.3）
+- [x] **NVSHMEM**：单边通信模型；与传统 send/recv 的差异（03 §3.4.1–3.4.2）
+- [x] **DeepEP**：MoE All-to-All 内核（dispatch/combine、low-latency vs normal）（03 §3.4.3）
+- [x] **PD 分离的 KV 传输**：Mooncake、NIXL、LMCache、`NCCL_RDMA_RW` 的 KV 拷贝路径（03 §3.5，通信侧；KV cache 管理与调度详见阶段 5）
+- [x] **微基准**：用 `nccl-tests` 跑 allreduce / alltoall 的 busbw 曲线，画一张随消息大小的图（03 §3.7 + `svg/11`）
 
 ---
 
