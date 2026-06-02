@@ -110,7 +110,7 @@
 ## 阶段 7｜训练框架深读
 
 - [ ] **PyTorch 分布式**：`torch.distributed`、`DTensor`、`DeviceMesh`、`pipeline_parallel`
-- [ ] **FSDP2 (`fully_shard`)**：与 FSDP1 的 API/性能差异
+- [x] **FSDP2 (`fully_shard`)**：与 FSDP1 的 API/性能差异（已由 02 §2.2.8.2 完整覆盖；本阶段聚焦 PyTorch distributed 整体、DTensor、与 TP/PP/CP 的组合而不再单独讲 FSDP2 自身）
 - [ ] **Megatron-LM / Megatron-Core**：TP+PP+DP+EP+CP 的官方实现
 - [ ] **DeepSpeed**：ZeRO-3、ZeRO-Infinity、MoE、Ulysses
 - [ ] **TorchTitan**：原生 PyTorch 写的训练范例
