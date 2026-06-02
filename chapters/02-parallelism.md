@@ -436,6 +436,117 @@ for step in 0..N-1:
 
 ---
 
+### 2.2.8 ZeRO 与 FSDP 深入（DP 的内存分片扩展）
+
+§2.2.1 给过 DDP / ZeRO 1/2/3 / FSDP 的通信原语对照。本节进一步回答三个工程问题：**每一档具体省了多少显存？FSDP1 与 FSDP2 API 怎么选？`FULL_SHARD` vs `HYBRID_SHARD` 在多节点上谁更稳？**
+
+#### 2.2.8.1 ZeRO 三档：分片对象与显存账
+
+混合精度训练（BF16 forward + FP32 主权重 + Adam 优化器）下，**每个参数**的显存开销（DDP baseline）：
+
+| 项目 | 字节 / param | 说明 |
+|---|---|---|
+| BF16 参数（forward 用） | 2 | 与权重等长 |
+| BF16 梯度 | 2 | backward 后 |
+| FP32 主权重 | 4 | 优化器更新基准 |
+| FP32 Adam momentum (m) | 4 | 一阶矩 |
+| FP32 Adam variance (v) | 4 | 二阶矩 |
+| **合计** | **16** | |
+
+`16 × num_params` 加上激活就是单卡显存——LLaMA-2-70B 单卡裸需 **1.12 TB**，**完全装不下**。ZeRO 把上面这 16 字节按 DP 度 N 切分：
+
+| 方案 | 切谁（DP 度 N 分片） | 单卡 byte/param | LLaMA-70B、N=8 | 通信代价（vs DDP） |
+|---|---|---|---|---|
+| **DDP** | 不切 | 16 | 1120 GB ❌ | baseline：每 step 1 × `AllReduce(grad)` |
+| **ZeRO-1** | 优化器状态（m, v, FP32 主权重）= 12 字节 | `4 + 12/N` | 5.5 × 70 = **385 GB** | `AllReduce(grad)` → `ReduceScatter(grad)` |
+| **ZeRO-2** | + 梯度（再 +2 字节） | `2 + 14/N` | ≈ **263 GB** | 同 ZeRO-1 |
+| **ZeRO-3 / FSDP** | + 参数（再 +2 字节），全部切 | `16/N` | **140 GB** | 每层 +1 × `AllGather(W)`；backward +1 × `ReduceScatter(grad)` |
+
+> 上面 byte/param 假设激活 / temporary buffer 不分片；实际还要叠 activation checkpointing（阶段 7 详讲）。
+
+两条直觉：
+
+- **ZeRO-1 / 2 通信几乎免费**——总通信量与 DDP 同数量级，只是 `AllReduce` 换成 `ReduceScatter`；
+- **ZeRO-3 通信次数 ∝ 层数**——LLaMA-70B 80 层 → 每 step `80 × AllGather + 80 × ReduceScatter`，**跨节点 IB 上是性能杀手**（这是 §2.2.8.3 `HYBRID_SHARD` 出现的原因）。
+
+#### 2.2.8.2 FSDP1 vs FSDP2：API 与性能差异
+
+FSDP 是 PyTorch 官方实现的 ZeRO-3。**目前两套并存**：
+
+| 维度 | FSDP1 | FSDP2 |
+|---|---|---|
+| **API 入口** | `from torch.distributed.fsdp import FullyShardedDataParallel`，**类包装** | `from torch.distributed.fsdp import fully_shard`，**函数式原地改 module** |
+| **参数分片单位** | **Flat parameter**：把多个 `nn.Parameter` 拍平成一个大张量切分 | **Per-parameter**：每个 `nn.Parameter` 独立切分 |
+| **与 TP / PP / CP 组合** | 困难——flat param 与 TP 切轴冲突 | 顺滑——per-param 直接与 `DTensor` 共存 |
+| **mixed precision 配置** | `MixedPrecision(param_dtype=..., reduce_dtype=...)` | `MixedPrecisionPolicy` 显式配 |
+| **checkpoint** | 必须切 `SHARDED_STATE_DICT` 才有分片 ckpt | `torch.distributed.checkpoint` 原生支持 |
+| **性能** | Reshard / AllGather 串行较多 | **重叠更彻底**，~10–20% 加速 |
+| **PyTorch 版本** | ≥ 1.11，稳定 | ≥ 2.4，**新项目首选** |
+| **维护状态** | Legacy，仍 bug-fix | 主推方向 |
+
+最小调用对比：
+
+```python
+# ============ FSDP1：包装类 ============
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP1
+from torch.distributed.fsdp import ShardingStrategy, MixedPrecision
+
+model = FSDP1(
+    model,
+    sharding_strategy=ShardingStrategy.FULL_SHARD,
+    mixed_precision=MixedPrecision(param_dtype=torch.bfloat16,
+                                   reduce_dtype=torch.float32),
+)
+
+# ============ FSDP2：函数式原地改 ============
+from torch.distributed.fsdp import fully_shard, MixedPrecisionPolicy
+
+mp_policy = MixedPrecisionPolicy(param_dtype=torch.bfloat16,
+                                 reduce_dtype=torch.float32)
+for layer in model.layers:
+    fully_shard(layer, mp_policy=mp_policy)        # 每层独立 shard
+fully_shard(model, mp_policy=mp_policy)            # 整体 shard
+```
+
+**新项目无脑 FSDP2**——尤其是要和 TP / PP 组合时。FSDP1 仅用于维护老项目。
+
+#### 2.2.8.3 ShardingStrategy：`FULL_SHARD` vs `HYBRID_SHARD`
+
+`ShardingStrategy` 4 个枚举的工程含义：
+
+| 枚举 | 等价于 | 分片范围 | 跨节点通信 | 适用 |
+|---|---|---|---|---|
+| `FULL_SHARD` | ZeRO-3 | 全 DP world | **高**（每层 AllGather + ReduceScatter 跨网） | 单节点 / 节点内 NVLink 充足 |
+| `SHARD_GRAD_OP` | ZeRO-2 | 同上但不切参数 | 中（只 grad 跨网） | 通信吃紧但显存够 |
+| `HYBRID_SHARD` | ZeRO-3 + DP 混合 | **节点内 FULL_SHARD + 节点间 DP 复制** | **低**（节点间只 `AllReduce(grad)`） | **多节点训练的实战首选** |
+| `_HYBRID_SHARD_ZERO2` | ZeRO-2 混合 | 节点内 ZeRO-2 + 节点间 DP | 更低 | 极致带宽节省 |
+
+**`HYBRID_SHARD` 的核心思想**：节点内 NVLink 900 GB/s 双向，跑 `FULL_SHARD` 的密集 AllGather 没问题；节点间 IB 50 GB/s 单链路，每层都跨网 AllGather 撑不住。**节点内分片省显存、节点间复制走 DDP 风格通信**——这是 8 节点以上 H100 训练的标准姿势。
+
+```python
+# FSDP2 + HYBRID_SHARD 示例
+from torch.distributed.device_mesh import init_device_mesh
+
+mesh = init_device_mesh(
+    "cuda", (num_nodes, gpus_per_node),
+    mesh_dim_names=("replicate", "shard"),
+)
+for layer in model.layers:
+    fully_shard(layer, mesh=mesh)        # 自动按 mesh 维度做 hybrid
+```
+
+#### 2.2.8.4 工程要点（5 条）
+
+1. **混合精度三个 dtype**：`param_dtype`（forward 用，通常 BF16）、`reduce_dtype`（梯度 reduce 用，**通常 FP32** 防数值漂移）、`buffer_dtype`。BF16 训练 `reduce_dtype=FP32` 是默认且必要——回阶段 0 §0.2.4 的 BF16 与 FP32 同指数范围讨论。
+2. **与 activation checkpointing 组合**：FSDP 省的是参数 / 梯度 / 优化器；激活的显存得靠 checkpointing。两者正交，**生产配置必须同时开**。
+3. **checkpoint 格式**：FSDP2 默认走 `torch.distributed.checkpoint`，每张卡保存自己负责的 shard + metadata，恢复时支持改 world size。FSDP1 必须切 `SHARDED_STATE_DICT`，否则会先 AllGather 整个模型到 rank 0（70B 直接 OOM）。
+4. **与 TP / PP / CP 组合**：FSDP2 + DTensor 是 TorchTitan、Llama-3 训练栈的标准组合。FSDP 切 DP 维度、TP 切 hidden 维度、PP 切层、CP 切 sequence——**四维独立、自由组合**。详见阶段 7 训练框架章节。
+5. **小模型不要上 FSDP**：< 13B 单卡装得下时，DDP 或 ZeRO-1 已足够；FSDP 的 per-layer AllGather 开销盖过显存收益。
+
+> 推理几乎不用 FSDP（参数本来就能复制到每卡，每层 AllGather 是浪费）；**FSDP 是训练栈的事，推理走 TP / PP**。阶段 6 推理引擎不会再回到 FSDP。
+
+---
+
 ## 2.3 开源模型 Attention / FFN / MoE 的层级通信剖析
 
 本节用 4 个有代表性的开源模型，把"一层 forward 一次"的通信序列写清楚。

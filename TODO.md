@@ -33,17 +33,17 @@
 
 ## 阶段 2｜并行策略系统化
 
-> 已有：[chapters/02-parallelism.md](chapters/02-parallelism.md) 2.0–2.4 节覆盖了 DP/TP/SP/PP/EP/CP 六种并行的通信模式与多维编排。剩余 ZeRO/FSDP 与 3D parallelism 实战待单独成节。
+> 已就位（教材写作部分）：[chapters/02-parallelism.md](chapters/02-parallelism.md) 2.0–2.4 节覆盖 DP/TP/SP/PP/EP/CP 六种并行与多维编排；2.2.8 节深入 ZeRO 1/2/3、FSDP1/FSDP2、`HYBRID_SHARD`。剩余 "3D parallelism 实战" 是硬件 hands-on 任务（需 2 节点 H100），归入待办，**不阻塞章节定稿**。
 
 - [x] **DP（数据并行）**：`DDP` 梯度桶、`gradient_as_bucket_view`；与 ZeRO 的关系（02 §2.2.1）
-- [ ] **ZeRO 1/2/3 与 FSDP**：参数/梯度/优化器状态分片；`FULL_SHARD` vs `HYBRID_SHARD`；`torch.distributed.fsdp` 与 FSDP2 (`fully_shard`) 的差异
+- [x] **ZeRO 1/2/3 与 FSDP**：参数/梯度/优化器状态分片；`FULL_SHARD` vs `HYBRID_SHARD`；`torch.distributed.fsdp` 与 FSDP2 (`fully_shard`) 的差异（02 §2.2.8）
 - [x] **TP（张量并行）**：Megatron 列并行 + 行并行的配对；`g`/`f` 算子的 AllReduce 位置（02 §2.2.2，参见 `svg/02-tp-forward.svg`）
 - [x] **SP（序列并行）**：与 TP 配合，省 LN/Dropout 的激活显存（02 §2.2.3）
 - [x] **PP（流水并行）**：GPipe、1F1B、Interleaved 1F1B、Zero Bubble、DualPipe（DeepSeek）（02 §2.2.4，参见 `svg/03-pp-1f1b-schedule.svg`）
 - [x] **EP（专家并行）**：All-to-All 通信模式、Dispatch/Combine、Token Drop（02 §2.2.5，参见 `svg/04-ep-moe-all2all.svg`）
 - [x] **CP（上下文/序列并行）**：Ring Attention、Striped Attention、Ulysses（02 §2.2.6，参见 `svg/05-cp-ring-attention.svg`）
 - [x] **多维并行编排**：TP×PP×DP×EP×CP 组合，rank 拓扑映射（02 §2.4，参见 `svg/07-multi-dim-parallel-topology.svg`）
-- [ ] **3D parallelism 实战**：在 2 节点 ×8 GPU 上跑通 Megatron-LM 训练 LLaMA-7B
+- [ ] **3D parallelism 实战**：在 2 节点 ×8 GPU 上跑通 Megatron-LM 训练 LLaMA-7B（hands-on，待硬件就绪；与 capstone P2 推理实战互补）
 
 ---
 
