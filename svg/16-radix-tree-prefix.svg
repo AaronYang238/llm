@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#546e7a"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="600" fill="#212121">RadixAttention：用基数树共享前缀 KV（3 个请求共享 system prompt）</text>
+
+  <!-- ============ LEFT: three requests ============ -->
+  <text x="40" y="62" font-size="13" font-weight="600" fill="#37474f">三个请求的 token 序列</text>
+
+  <g transform="translate(40, 74)" font-size="11">
+    <text x="0" y="14" fill="#37474f">R1:</text>
+    <rect x="30" y="2" width="150" height="20" fill="#e53935" stroke="#b71c1c"/>
+    <text x="105" y="17" text-anchor="middle" fill="white">[系统提示词]</text>
+    <rect x="182" y="2" width="95" height="20" fill="#1e88e5" stroke="#0d47a1"/>
+    <text x="229" y="17" text-anchor="middle" fill="white">天气如何</text>
+
+    <text x="0" y="44" fill="#37474f">R2:</text>
+    <rect x="30" y="32" width="150" height="20" fill="#e53935" stroke="#b71c1c"/>
+    <text x="105" y="47" text-anchor="middle" fill="white">[系统提示词]</text>
+    <rect x="182" y="32" width="95" height="20" fill="#43a047" stroke="#1b5e20"/>
+    <text x="229" y="47" text-anchor="middle" fill="white">讲个笑话</text>
+
+    <text x="0" y="74" fill="#37474f">R3:</text>
+    <rect x="30" y="62" width="150" height="20" fill="#e53935" stroke="#b71c1c"/>
+    <text x="105" y="77" text-anchor="middle" fill="white">[系统提示词]</text>
+    <rect x="182" y="62" width="60" height="20" fill="#43a047" stroke="#1b5e20"/>
+    <text x="212" y="77" text-anchor="middle" fill="white">讲个</text>
+    <rect x="244" y="62" width="80" height="20" fill="#fbc02d" stroke="#f57f17"/>
+    <text x="284" y="77" text-anchor="middle" fill="#212121">谜语吧</text>
+  </g>
+
+  <text x="40" y="180" font-size="11" fill="#546e7a">R1/R2/R3 共享系统提示词；R2/R3 还共享"讲个"</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="196" x2="920" y2="196" stroke="#cfd8dc" stroke-width="1"/>
+
+  <!-- ============ Radix tree ============ -->
+  <text x="40" y="224" font-size="13" font-weight="600" fill="#37474f">Radix Tree（边 = 一段 token 的 KV，路径 = 一条请求的前缀）</text>
+
+  <!-- root -->
+  <circle cx="120" cy="320" r="16" fill="#90a4ae" stroke="#546e7a" stroke-width="1.5"/>
+  <text x="120" y="324" text-anchor="middle" font-size="10" fill="white">root</text>
+
+  <!-- edge: system prompt (shared by all) -->
+  <line x1="136" y1="320" x2="290" y2="320" stroke="#e53935" stroke-width="8" marker-end="url(#arr)"/>
+  <text x="213" y="308" text-anchor="middle" font-size="11" fill="#b71c1c" font-weight="600">[系统提示词] KV</text>
+  <text x="213" y="338" text-anchor="middle" font-size="9" fill="#c62828">3 个请求共享（算 1 次）</text>
+
+  <!-- node A (after system prompt) -->
+  <circle cx="310" cy="320" r="16" fill="#455a64" stroke="#37474f" stroke-width="1.5"/>
+  <text x="310" y="324" text-anchor="middle" font-size="9" fill="white">n1</text>
+
+  <!-- branch 1: R1 "天气如何" -->
+  <line x1="324" y1="312" x2="470" y2="250" stroke="#1e88e5" stroke-width="5" marker-end="url(#arr)"/>
+  <text x="400" y="262" text-anchor="middle" font-size="10" fill="#0d47a1" transform="rotate(-20 400 262)">"天气如何" KV</text>
+  <circle cx="486" cy="244" r="14" fill="#1e88e5" stroke="#0d47a1"/>
+  <text x="486" y="248" text-anchor="middle" font-size="9" fill="white">R1</text>
+
+  <!-- branch 2: "讲个" shared by R2,R3 -->
+  <line x1="324" y1="328" x2="470" y2="380" stroke="#43a047" stroke-width="6" marker-end="url(#arr)"/>
+  <text x="392" y="372" text-anchor="middle" font-size="10" fill="#1b5e20" transform="rotate(20 392 372)">"讲个" KV</text>
+  <text x="400" y="400" text-anchor="middle" font-size="9" fill="#2e7d32">R2/R3 共享</text>
+
+  <!-- node n2 (after 讲个) -->
+  <circle cx="486" cy="386" r="16" fill="#455a64" stroke="#37474f" stroke-width="1.5"/>
+  <text x="486" y="390" text-anchor="middle" font-size="9" fill="white">n2</text>
+
+  <!-- R2 "笑话" -->
+  <line x1="502" y1="378" x2="630" y2="330" stroke="#43a047" stroke-width="4" marker-end="url(#arr)"/>
+  <text x="566" y="340" text-anchor="middle" font-size="10" fill="#1b5e20" transform="rotate(-18 566 340)">"笑话" KV</text>
+  <circle cx="646" cy="324" r="14" fill="#43a047" stroke="#1b5e20"/>
+  <text x="646" y="328" text-anchor="middle" font-size="9" fill="white">R2</text>
+
+  <!-- R3 "谜语吧" -->
+  <line x1="502" y1="394" x2="630" y2="440" stroke="#fbc02d" stroke-width="4" marker-end="url(#arr)"/>
+  <text x="566" y="438" text-anchor="middle" font-size="10" fill="#f57f17" transform="rotate(18 566 438)">"谜语吧" KV</text>
+  <circle cx="646" cy="446" r="14" fill="#fbc02d" stroke="#f57f17"/>
+  <text x="646" y="450" text-anchor="middle" font-size="9" fill="#212121">R3</text>
+
+  <!-- ============ RIGHT: savings panel ============ -->
+  <g transform="translate(710, 230)">
+    <rect x="0" y="0" width="210" height="200" fill="#eceff1" stroke="#90a4ae" rx="6"/>
+    <text x="105" y="24" text-anchor="middle" font-size="12" font-weight="600" fill="#37474f">前缀共享的收益</text>
+
+    <text x="14" y="50" font-size="11" fill="#37474f">无共享：</text>
+    <text x="14" y="68" font-size="10" fill="#546e7a">3 × [系统提示词] 全部重算</text>
+
+    <text x="14" y="94" font-size="11" fill="#2e7d32" font-weight="600">RadixAttention：</text>
+    <text x="14" y="112" font-size="10" fill="#546e7a">[系统提示词] 只算 1 次</text>
+    <text x="14" y="128" font-size="10" fill="#546e7a">"讲个" 只算 1 次</text>
+
+    <text x="14" y="156" font-size="11" fill="#2e7d32" font-weight="600">长 system prompt 场景：</text>
+    <text x="14" y="174" font-size="10" fill="#546e7a">prefill 算量 / TTFT 降</text>
+    <text x="14" y="188" font-size="10" fill="#546e7a">50–90%（命中率越高越省）</text>
+  </g>
+
+  <!-- LRU eviction note -->
+  <text x="40" y="492" font-size="11" fill="#546e7a">叶子节点按 LRU 淘汰：显存吃紧时先回收最久未访问的分支（被引用的节点不淘汰）</text>
+
+  <!-- Legend -->
+  <g transform="translate(40, 508)">
+    <rect x="0" y="0" width="13" height="13" fill="#e53935"/>
+    <text x="19" y="11" font-size="10" fill="#37474f">共享前缀（全部请求）</text>
+    <rect x="170" y="0" width="13" height="13" fill="#43a047"/>
+    <text x="189" y="11" font-size="10" fill="#37474f">部分共享（R2/R3）</text>
+    <rect x="320" y="0" width="13" height="13" fill="#1e88e5"/>
+    <text x="339" y="11" font-size="10" fill="#37474f">R1 独占</text>
+    <rect x="420" y="0" width="13" height="13" fill="#fbc02d"/>
+    <text x="439" y="11" font-size="10" fill="#37474f">R3 独占</text>
+    <circle cx="540" cy="7" r="7" fill="#455a64"/>
+    <text x="554" y="11" font-size="10" fill="#37474f">树内部节点（分叉点）</text>
+  </g>
+</svg>

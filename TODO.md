@@ -75,15 +75,17 @@
 
 ---
 
-## 阶段 5｜KV Cache、调度器与显存管理
+## 阶段 5｜KV Cache、调度器与显存管理 ✓
 
-- [ ] **KV Cache 布局**：layer-major vs token-major、`[B, H, S, D]` vs paged block
-- [ ] **Continuous Batching**：Orca 论文 → vLLM 的 scheduler
-- [ ] **Chunked Prefill**：长 prompt 的分块、prefill/decode 混跑
-- [ ] **Prefix Cache / RadixAttention**：SGLang 的前缀树共享
-- [ ] **PD 分离（Disaggregated Prefill/Decode）**：vLLM v1、Mooncake、DistServe
-- [ ] **KV 量化**：FP8/INT8/INT4 KV、per-channel vs per-token scale
-- [ ] **KV offload**：CPU / NVMe / 远端节点；LMCache
+> 已就位：[chapters/05-kv-cache-scheduler.md](chapters/05-kv-cache-scheduler.md)，主图 [svg/14-kv-layout.svg](svg/14-kv-layout.svg)（连续 vs 分页布局）+ [svg/15-continuous-batching.svg](svg/15-continuous-batching.svg)（static vs continuous batching）+ [svg/16-radix-tree-prefix.svg](svg/16-radix-tree-prefix.svg)（RadixAttention 前缀树）。
+
+- [x] **KV Cache 布局**：layer-major vs token-major、`[B, H, S, D]` vs paged block（05 §5.2，主图 `svg/14-kv-layout.svg`）
+- [x] **Continuous Batching**：Orca 论文 → vLLM 的 scheduler（05 §5.3，主图 `svg/15-continuous-batching.svg`）
+- [x] **Chunked Prefill**：长 prompt 的分块、prefill/decode 混跑（05 §5.4）
+- [x] **Prefix Cache / RadixAttention**：SGLang 的前缀树共享（05 §5.5，主图 `svg/16-radix-tree-prefix.svg`）
+- [x] **PD 分离（Disaggregated Prefill/Decode）**：vLLM v1、Mooncake、DistServe（05 §5.6，调度侧；KV 传输通信侧见 03 §3.5）
+- [x] **KV 量化**：FP8/INT8/INT4 KV、per-channel vs per-token scale（05 §5.7；量化算法 GPTQ/AWQ 等见阶段 8）
+- [x] **KV offload**：CPU / NVMe / 远端节点；LMCache（05 §5.8）
 
 ---
 
