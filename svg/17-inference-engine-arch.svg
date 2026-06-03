@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 580" width="960" height="580" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#455a64"/>
+    </marker>
+    <marker id="arr-b" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#1565c0"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="600" fill="#212121">推理引擎通用骨架：一个请求从进到出的执行 loop</text>
+
+  <!-- ===== Request in / out ===== -->
+  <rect x="30" y="60" width="110" height="44" rx="6" fill="#90a4ae" stroke="#546e7a"/>
+  <text x="85" y="80" text-anchor="middle" font-size="11" fill="white">HTTP 请求</text>
+  <text x="85" y="96" text-anchor="middle" font-size="10" fill="white">(prompt)</text>
+
+  <rect x="30" y="490" width="110" height="44" rx="6" fill="#43a047" stroke="#1b5e20"/>
+  <text x="85" y="510" text-anchor="middle" font-size="11" fill="white">token 流</text>
+  <text x="85" y="526" text-anchor="middle" font-size="10" fill="white">(SSE/stream)</text>
+
+  <!-- ===== API layer ===== -->
+  <rect x="180" y="56" width="180" height="52" rx="6" fill="#1e88e5" stroke="#0d47a1"/>
+  <text x="270" y="78" text-anchor="middle" font-size="12" fill="white" font-weight="600">API Server</text>
+  <text x="270" y="95" text-anchor="middle" font-size="10" fill="white">OpenAI 兼容 / tokenize</text>
+
+  <!-- ===== Engine box (the loop) ===== -->
+  <rect x="180" y="130" width="600" height="330" rx="8" fill="#f5f5f5" stroke="#1565c0" stroke-width="2"/>
+  <text x="200" y="152" font-size="13" font-weight="600" fill="#1565c0">Engine（每 step 循环一次 — iteration-level loop）</text>
+
+  <!-- Scheduler -->
+  <rect x="210" y="170" width="200" height="84" rx="6" fill="#fbc02d" stroke="#f57f17"/>
+  <text x="310" y="190" text-anchor="middle" font-size="12" fill="#212121" font-weight="600">① Scheduler</text>
+  <text x="310" y="208" text-anchor="middle" font-size="10" fill="#37474f">选这 step 跑哪些 req</text>
+  <text x="310" y="223" text-anchor="middle" font-size="10" fill="#37474f">admission / preempt</text>
+  <text x="310" y="240" text-anchor="middle" font-size="10" fill="#546e7a">(阶段 5 §5.3–5.4)</text>
+
+  <!-- KV cache manager -->
+  <rect x="450" y="170" width="200" height="84" rx="6" fill="#fbc02d" stroke="#f57f17"/>
+  <text x="550" y="190" text-anchor="middle" font-size="12" fill="#212121" font-weight="600">② KVCache Manager</text>
+  <text x="550" y="208" text-anchor="middle" font-size="10" fill="#37474f">block 池 / 分配释放</text>
+  <text x="550" y="223" text-anchor="middle" font-size="10" fill="#37474f">prefix cache</text>
+  <text x="550" y="240" text-anchor="middle" font-size="10" fill="#546e7a">(阶段 5 §5.2/5.5)</text>
+
+  <!-- Executor -->
+  <rect x="210" y="280" width="440" height="48" rx="6" fill="#1e88e5" stroke="#0d47a1"/>
+  <text x="430" y="300" text-anchor="middle" font-size="12" fill="white" font-weight="600">③ Executor（协调多 Worker，广播调度结果 / 收集输出）</text>
+  <text x="430" y="316" text-anchor="middle" font-size="10" fill="white">单卡 = 1 Worker；多卡 = TP/PP/EP 分片</text>
+
+  <!-- Workers -->
+  <rect x="210" y="348" width="135" height="96" rx="6" fill="#e3f2fd" stroke="#1565c0"/>
+  <text x="277" y="368" text-anchor="middle" font-size="11" fill="#0d47a1" font-weight="600">Worker 0</text>
+  <text x="277" y="386" text-anchor="middle" font-size="9" fill="#37474f">ModelRunner</text>
+  <text x="277" y="400" text-anchor="middle" font-size="9" fill="#37474f">+ KV 分片</text>
+  <text x="277" y="416" text-anchor="middle" font-size="9" fill="#37474f">+ attention</text>
+  <text x="277" y="432" text-anchor="middle" font-size="9" fill="#546e7a">(阶段 4 kernel)</text>
+
+  <rect x="357" y="348" width="135" height="96" rx="6" fill="#e3f2fd" stroke="#1565c0"/>
+  <text x="424" y="368" text-anchor="middle" font-size="11" fill="#0d47a1" font-weight="600">Worker 1</text>
+  <text x="424" y="386" text-anchor="middle" font-size="9" fill="#37474f">ModelRunner</text>
+  <text x="424" y="400" text-anchor="middle" font-size="9" fill="#37474f">+ KV 分片</text>
+  <text x="424" y="416" text-anchor="middle" font-size="9" fill="#37474f">+ GEMM</text>
+  <text x="424" y="432" text-anchor="middle" font-size="9" fill="#546e7a">(阶段 2 TP)</text>
+
+  <rect x="504" y="348" width="135" height="96" rx="6" fill="#e3f2fd" stroke="#1565c0"/>
+  <text x="571" y="368" text-anchor="middle" font-size="11" fill="#0d47a1" font-weight="600">Worker N</text>
+  <text x="571" y="386" text-anchor="middle" font-size="9" fill="#37474f">...</text>
+  <text x="571" y="404" text-anchor="middle" font-size="9" fill="#37474f">NCCL 互联</text>
+  <text x="571" y="420" text-anchor="middle" font-size="9" fill="#546e7a">(阶段 3 通信)</text>
+
+  <!-- Sampler -->
+  <rect x="680" y="280" width="80" height="164" rx="6" fill="#43a047" stroke="#1b5e20"/>
+  <text x="720" y="356" text-anchor="middle" font-size="11" fill="white" font-weight="600">④</text>
+  <text x="720" y="374" text-anchor="middle" font-size="10" fill="white">Sampler</text>
+  <text x="720" y="392" text-anchor="middle" font-size="9" fill="white">logits</text>
+  <text x="720" y="406" text-anchor="middle" font-size="9" fill="white">→ token</text>
+  <text x="720" y="424" text-anchor="middle" font-size="9" fill="#c8e6c9">(§1.2.5)</text>
+
+  <!-- internal arrows -->
+  <line x1="410" y1="212" x2="448" y2="212" stroke="#1565c0" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <line x1="310" y1="254" x2="310" y2="278" stroke="#1565c0" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <line x1="550" y1="254" x2="550" y2="278" stroke="#1565c0" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <line x1="430" y1="328" x2="430" y2="346" stroke="#1565c0" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <line x1="652" y1="362" x2="678" y2="362" stroke="#1565c0" stroke-width="1.5" marker-end="url(#arr-b)"/>
+
+  <!-- loop-back arrow (sampler -> scheduler) -->
+  <path d="M 720,278 Q 720,140 410,150" stroke="#e53935" stroke-width="1.8" fill="none" stroke-dasharray="5 3" marker-end="url(#arr)"/>
+  <text x="600" y="138" text-anchor="middle" font-size="10" fill="#c62828">新 token 写回 KV，下一 step 继续（continuous batching）</text>
+
+  <!-- request flow arrows -->
+  <line x1="140" y1="82" x2="178" y2="82" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="270" y1="108" x2="270" y2="128" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M 720,446 Q 720,470 145,510" stroke="#43a047" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+  <!-- ===== differentiation axes (bottom) ===== -->
+  <rect x="180" y="478" width="600" height="86" rx="6" fill="#eceff1" stroke="#90a4ae"/>
+  <text x="200" y="498" font-size="12" font-weight="600" fill="#37474f">各引擎的差异化轴（骨架相同，差在这几处）：</text>
+  <text x="200" y="518" font-size="10" fill="#37474f">• Scheduler 策略：chunked prefill / PD 分离 / DP attention</text>
+  <text x="200" y="534" font-size="10" fill="#37474f">• KV 管理：hash prefix cache (vLLM) vs RadixAttention (SGLang)</text>
+  <text x="200" y="550" font-size="10" fill="#37474f">• Kernel 后端：FlashAttn / FlashInfer / TensorRT plugin / Turbomind</text>
+  <text x="510" y="518" font-size="10" fill="#37474f">• 并行支持：TP/PP/EP/DP 组合</text>
+  <text x="510" y="534" font-size="10" fill="#37474f">• 模型接入：Registry 机制</text>
+  <text x="510" y="550" font-size="10" fill="#37474f">• 量化 / 投机解码 / 多模态</text>
+
+  <!-- Legend -->
+  <g transform="translate(810, 140)">
+    <text x="0" y="0" font-size="11" font-weight="600" fill="#37474f">图例</text>
+    <rect x="0" y="12" width="13" height="13" fill="#fbc02d"/>
+    <text x="19" y="23" font-size="10" fill="#37474f">调度 /</text>
+    <text x="19" y="35" font-size="10" fill="#37474f">KV 管理</text>
+    <rect x="0" y="46" width="13" height="13" fill="#1e88e5"/>
+    <text x="19" y="57" font-size="10" fill="#37474f">控制 /</text>
+    <text x="19" y="69" font-size="10" fill="#37474f">执行协调</text>
+    <rect x="0" y="80" width="13" height="13" fill="#e3f2fd" stroke="#1565c0"/>
+    <text x="19" y="91" font-size="10" fill="#37474f">Worker</text>
+    <text x="19" y="103" font-size="10" fill="#37474f">(GPU)</text>
+    <rect x="0" y="114" width="13" height="13" fill="#43a047"/>
+    <text x="19" y="125" font-size="10" fill="#37474f">采样 /</text>
+    <text x="19" y="137" font-size="10" fill="#37474f">输出</text>
+    <line x1="0" y1="156" x2="16" y2="156" stroke="#e53935" stroke-width="1.8" stroke-dasharray="4 2"/>
+    <text x="19" y="160" font-size="10" fill="#37474f">loop 回边</text>
+  </g>
+</svg>

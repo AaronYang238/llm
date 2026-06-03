@@ -89,23 +89,23 @@
 
 ---
 
-## 阶段 6｜推理引擎深读
+## 阶段 6｜推理引擎深读 ✓
 
-> 选两家深读源码，其它对照阅读。
+> 已就位：[chapters/06-inference-engines.md](chapters/06-inference-engines.md)，主图 [svg/17-inference-engine-arch.svg](svg/17-inference-engine-arch.svg)（推理引擎通用骨架 loop + 六条差异轴）。选 vLLM/SGLang 深读源码，其它对照阅读。
 
-- [ ] **vLLM**：
-  - [ ] 架构：`LLMEngine` / `Scheduler` / `BlockManager` / `ModelRunner` / `Worker`
-  - [ ] v1 重构：单进程 + executor、TP/PP/EP 配置
-  - [ ] 自定义模型接入：`registry`、`linear`、`column_parallel_linear`
-  - [ ] Speculative decoding、structured output（xgrammar/outlines）
-- [ ] **SGLang**：
-  - [ ] `Runtime` / `TokenizerManager` / `Scheduler` / `TpModelWorker`
-  - [ ] RadixAttention 与 prefix sharing 的实现
-  - [ ] DeepSeek-V3 全套优化（DP attention、EP、MTP）
-- [ ] **TensorRT-LLM**：plugin、in-flight batching、FP8 recipe
-- [ ] **LMDeploy / Turbomind**：与 vLLM 在 kernel 上的差异
-- [ ] **llama.cpp / MLX / Ollama**：本地推理路径，量化生态
-- [ ] **对比矩阵**：吞吐 / 首 token 延迟 / 长 context / MoE 支持 / PD 分离支持 / 多模态
+- [x] **vLLM**：（06 §6.3）
+  - [x] 架构：`LLMEngine` / `Scheduler` / `BlockManager` / `ModelRunner` / `Worker`（06 §6.3.1）
+  - [x] v1 重构：单进程 + executor、TP/PP/EP 配置（06 §6.3.2）
+  - [x] 自定义模型接入：`registry`、`linear`、`column_parallel_linear`（06 §6.3.3）
+  - [x] Speculative decoding、structured output（xgrammar/outlines）（06 §6.3.4，算法细节见阶段 8/10）
+- [x] **SGLang**：（06 §6.4）
+  - [x] `Runtime` / `TokenizerManager` / `Scheduler` / `TpModelWorker`（06 §6.4.1）
+  - [x] RadixAttention 与 prefix sharing 的实现（06 §6.4.2，复用 `svg/16`）
+  - [x] DeepSeek-V3 全套优化（DP attention、EP、MTP）（06 §6.4.3）
+- [x] **TensorRT-LLM**：plugin、in-flight batching、FP8 recipe（06 §6.5）
+- [x] **LMDeploy / Turbomind**：与 vLLM 在 kernel 上的差异（06 §6.6）
+- [x] **llama.cpp / MLX / Ollama**：本地推理路径，量化生态（06 §6.7）
+- [x] **对比矩阵**：吞吐 / 首 token 延迟 / 长 context / MoE 支持 / PD 分离支持 / 多模态（06 §6.8）
 
 ---
 
