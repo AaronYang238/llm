@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#455a64"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="600" fill="#212121">投机解码：draft 猜 k 个 token，target 一次 forward 并行验证</text>
+
+  <!-- ===== Baseline: autoregressive ===== -->
+  <text x="40" y="62" font-size="13" font-weight="600" fill="#c62828">(A) 普通自回归：每个 token 一次 target forward（慢）</text>
+
+  <g transform="translate(40, 74)">
+    <rect x="60" y="0" width="70" height="34" rx="4" fill="#1e88e5" stroke="#0d47a1"/>
+    <text x="95" y="21" text-anchor="middle" font-size="11" fill="white">fwd → t₁</text>
+    <rect x="145" y="0" width="70" height="34" rx="4" fill="#1e88e5" stroke="#0d47a1"/>
+    <text x="180" y="21" text-anchor="middle" font-size="11" fill="white">fwd → t₂</text>
+    <rect x="230" y="0" width="70" height="34" rx="4" fill="#1e88e5" stroke="#0d47a1"/>
+    <text x="265" y="21" text-anchor="middle" font-size="11" fill="white">fwd → t₃</text>
+    <rect x="315" y="0" width="70" height="34" rx="4" fill="#1e88e5" stroke="#0d47a1"/>
+    <text x="350" y="21" text-anchor="middle" font-size="11" fill="white">fwd → t₄</text>
+    <line x1="130" y1="17" x2="143" y2="17" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="215" y1="17" x2="228" y2="17" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="300" y1="17" x2="313" y2="17" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+    <text x="430" y="21" font-size="11" fill="#c62828">4 个 token = 4 次 target forward</text>
+  </g>
+
+  <line x1="40" y1="130" x2="920" y2="130" stroke="#cfd8dc" stroke-width="1"/>
+
+  <!-- ===== Speculative ===== -->
+  <text x="40" y="158" font-size="13" font-weight="600" fill="#2e7d32">(B) 投机解码：draft 连猜 k 个 + target 一次并行验证（快）</text>
+
+  <!-- Step 1: draft proposes -->
+  <text x="40" y="186" font-size="12" font-weight="600" fill="#e65100">① draft（小模型）连续猜 k=4 个 token（便宜）</text>
+  <g transform="translate(40, 194)">
+    <rect x="60" y="0" width="56" height="30" rx="4" fill="#ffe0b2" stroke="#f57f17"/>
+    <text x="88" y="20" text-anchor="middle" font-size="10" fill="#e65100">d→t̂₁</text>
+    <rect x="124" y="0" width="56" height="30" rx="4" fill="#ffe0b2" stroke="#f57f17"/>
+    <text x="152" y="20" text-anchor="middle" font-size="10" fill="#e65100">d→t̂₂</text>
+    <rect x="188" y="0" width="56" height="30" rx="4" fill="#ffe0b2" stroke="#f57f17"/>
+    <text x="216" y="20" text-anchor="middle" font-size="10" fill="#e65100">d→t̂₃</text>
+    <rect x="252" y="0" width="56" height="30" rx="4" fill="#ffe0b2" stroke="#f57f17"/>
+    <text x="280" y="20" text-anchor="middle" font-size="10" fill="#e65100">d→t̂₄</text>
+    <line x1="116" y1="15" x2="123" y2="15" stroke="#f57f17" stroke-width="1.2" marker-end="url(#arr)"/>
+    <line x1="180" y1="15" x2="187" y2="15" stroke="#f57f17" stroke-width="1.2" marker-end="url(#arr)"/>
+    <line x1="244" y1="15" x2="251" y2="15" stroke="#f57f17" stroke-width="1.2" marker-end="url(#arr)"/>
+    <text x="340" y="20" font-size="10" fill="#546e7a">draft 小、快，4 次猜测开销远低于 target</text>
+  </g>
+
+  <!-- Step 2: target verifies in one forward -->
+  <text x="40" y="256" font-size="12" font-weight="600" fill="#1565c0">② target（大模型）一次 forward 并行验证全部 4 个候选</text>
+  <g transform="translate(40, 264)">
+    <rect x="60" y="0" width="248" height="34" rx="4" fill="#1e88e5" stroke="#0d47a1"/>
+    <text x="184" y="21" text-anchor="middle" font-size="11" fill="white">target forward（一次，并行算 4 个位置的 logits）</text>
+    <text x="340" y="21" font-size="10" fill="#546e7a">关键：1 次 target forward 验证 4 个 token</text>
+  </g>
+
+  <!-- Step 3: accept/reject -->
+  <text x="40" y="326" font-size="12" font-weight="600" fill="#2e7d32">③ 逐个比对：接受匹配前缀，第一个不匹配处回滚并用 target 的真值</text>
+  <g transform="translate(40, 334)">
+    <rect x="60" y="0" width="56" height="30" rx="4" fill="#43a047" stroke="#1b5e20"/>
+    <text x="88" y="20" text-anchor="middle" font-size="10" fill="white">t̂₁ ✓</text>
+    <rect x="124" y="0" width="56" height="30" rx="4" fill="#43a047" stroke="#1b5e20"/>
+    <text x="152" y="20" text-anchor="middle" font-size="10" fill="white">t̂₂ ✓</text>
+    <rect x="188" y="0" width="56" height="30" rx="4" fill="#43a047" stroke="#1b5e20"/>
+    <text x="216" y="20" text-anchor="middle" font-size="10" fill="white">t̂₃ ✓</text>
+    <rect x="252" y="0" width="56" height="30" rx="4" fill="#e53935" stroke="#b71c1c"/>
+    <text x="280" y="20" text-anchor="middle" font-size="10" fill="white">t̂₄ ✗</text>
+    <rect x="316" y="0" width="70" height="30" rx="4" fill="#1e88e5" stroke="#0d47a1"/>
+    <text x="351" y="20" text-anchor="middle" font-size="10" fill="white">t₄(真值)</text>
+    <text x="410" y="20" font-size="10" fill="#37474f">接受 3 个 + target 真值 1 个 = 这轮产出 4 token</text>
+  </g>
+
+  <text x="40" y="400" font-size="11" fill="#2e7d32">→ 1 次 target forward 产出 4 个 token（vs 普通的 4 次）。加速比 ≈ 平均接受长度。</text>
+  <text x="40" y="418" font-size="11" fill="#c62828">→ 但若 draft 猜得差（接受率低），target 验证白跑 + draft 开销，反而变慢。</text>
+
+  <!-- ===== Draft sources comparison ===== -->
+  <line x1="40" y1="436" x2="920" y2="436" stroke="#cfd8dc" stroke-width="1"/>
+  <text x="40" y="460" font-size="13" font-weight="600" fill="#1565c0">draft 从哪来？四种方案</text>
+
+  <g transform="translate(40, 472)">
+    <rect x="0" y="0" width="218" height="74" rx="6" fill="#e3f2fd" stroke="#1565c0"/>
+    <text x="109" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#0d47a1">draft model</text>
+    <text x="109" y="38" text-anchor="middle" font-size="9" fill="#37474f">独立小模型（如 1B 配 70B）</text>
+    <text x="109" y="54" text-anchor="middle" font-size="9" fill="#37474f">通用，但要额外模型 + 显存</text>
+
+    <rect x="230" y="0" width="218" height="74" rx="6" fill="#e3f2fd" stroke="#1565c0"/>
+    <text x="339" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#0d47a1">Medusa</text>
+    <text x="339" y="38" text-anchor="middle" font-size="9" fill="#37474f">在主模型上加多个预测头</text>
+    <text x="339" y="54" text-anchor="middle" font-size="9" fill="#37474f">无需独立 draft，并行出多 token</text>
+
+    <rect x="460" y="0" width="218" height="74" rx="6" fill="#e3f2fd" stroke="#1565c0"/>
+    <text x="569" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#0d47a1">EAGLE</text>
+    <text x="569" y="38" text-anchor="middle" font-size="9" fill="#37474f">在特征层做自回归 draft</text>
+    <text x="569" y="54" text-anchor="middle" font-size="9" fill="#37474f">接受率高，当前 SOTA 之一</text>
+
+    <rect x="690" y="0" width="218" height="74" rx="6" fill="#e3f2fd" stroke="#1565c0"/>
+    <text x="799" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#0d47a1">MTP</text>
+    <text x="799" y="38" text-anchor="middle" font-size="9" fill="#37474f">DeepSeek-V3 训练时内建</text>
+    <text x="799" y="54" text-anchor="middle" font-size="9" fill="#37474f">多 token 预测头，原生支持</text>
+  </g>
+</svg>
