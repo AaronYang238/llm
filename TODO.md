@@ -136,13 +136,15 @@
 
 ---
 
-## 阶段 9｜长上下文与 MoE 专题
+## 阶段 9｜长上下文与 MoE 专题 ✓
 
-- [ ] **位置外推**：YaRN、LongRoPE、Position Interpolation
-- [ ] **长上下文 attention**：Ring / Striped / Ulysses / DistFlashAttn
-- [ ] **DeepSeek 体系**：MLA + DeepSeekMoE + DualPipe + Multi-Token Prediction（参见 `svg/06-deepseek-v3-topology.svg`）
-- [ ] **MoE 推理**：expert offload、Hot/Cold expert、推理时的 EP+DP+TP 组合
-- [ ] **Mixture-of-Depths / 早退**：选读
+> 已就位（类型 C 案例章）：[chapters/09-long-context-moe.md](chapters/09-long-context-moe.md)，主图 [svg/21-deepseek-v3-fullstack.svg](svg/21-deepseek-v3-fullstack.svg)（DeepSeek-V3 全栈技术地图）+ 复用 [svg/05](svg/05-cp-ring-attention.svg)/[svg/06](svg/06-deepseek-v3-topology.svg)。以 DeepSeek-V3 为核心案例串起长上下文 + 大 MoE 两条线。
+
+- [x] **位置外推**：YaRN、LongRoPE、Position Interpolation（09 §9.3；RoPE 基础见 1 §1.2.3）
+- [x] **长上下文 attention**：Ring / Striped / Ulysses / DistFlashAttn（09 §9.4，复用 `svg/05`；CP 基础见 2 §2.2.6）
+- [x] **DeepSeek 体系**：MLA + DeepSeekMoE + DualPipe + Multi-Token Prediction（09 §9.5–9.7，全栈地图 `svg/21-deepseek-v3-fullstack.svg` + 部署拓扑 `svg/06-deepseek-v3-topology.svg`）
+- [x] **MoE 推理**：expert offload、Hot/Cold expert、推理时的 EP+DP+TP 组合（09 §9.8，复用 `svg/06`）
+- [x] **Mixture-of-Depths / 早退**：选读（09 §9.11，作为"深度维度稀疏"补充）
 
 ---
 

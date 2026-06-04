@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" width="960" height="620" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#455a64"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="600" fill="#212121">DeepSeek-V3 全栈技术地图：一个 SOTA 模型从结构到部署的协同设计</text>
+  <text x="480" y="48" text-anchor="middle" font-size="11" fill="#546e7a">671B 总参数 / 37B 激活 · 256 专家选 8 · 128K 上下文 · FP8 训练</text>
+
+  <!-- ===== 一层数据流（顶部，贯穿主线）===== -->
+  <text x="40" y="80" font-size="12" font-weight="600" fill="#1565c0">一层 forward 数据流（结构主线）</text>
+  <g transform="translate(40, 88)">
+    <rect x="0" y="0" width="120" height="40" rx="5" fill="#1e88e5" stroke="#0d47a1"/>
+    <text x="60" y="18" text-anchor="middle" font-size="11" fill="white">MLA Attention</text>
+    <text x="60" y="33" text-anchor="middle" font-size="9" fill="#bbdefb">低秩 KV + 解耦 RoPE</text>
+
+    <line x1="120" y1="20" x2="158" y2="20" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <rect x="160" y="0" width="130" height="40" rx="5" fill="#fbc02d" stroke="#f57f17"/>
+    <text x="225" y="18" text-anchor="middle" font-size="11" fill="#212121">Router (top-8/256)</text>
+    <text x="225" y="33" text-anchor="middle" font-size="9" fill="#5d4037">loss-free balance</text>
+
+    <line x1="290" y1="20" x2="328" y2="20" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <rect x="330" y="0" width="150" height="40" rx="5" fill="#43a047" stroke="#1b5e20"/>
+    <text x="405" y="18" text-anchor="middle" font-size="11" fill="white">DeepSeekMoE FFN</text>
+    <text x="405" y="33" text-anchor="middle" font-size="9" fill="#c8e6c9">8 routed + 1 shared</text>
+
+    <line x1="480" y1="20" x2="518" y2="20" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <rect x="520" y="0" width="120" height="40" rx="5" fill="#90a4ae" stroke="#546e7a"/>
+    <text x="580" y="24" text-anchor="middle" font-size="11" fill="white">Residual → 下一层</text>
+
+    <text x="690" y="16" font-size="10" fill="#546e7a">前 3 层 Dense FFN，</text>
+    <text x="690" y="30" font-size="10" fill="#546e7a">之后才是 MoE</text>
+  </g>
+
+  <!-- ===== 四层栈 ===== -->
+  <!-- Layer: 结构 -->
+  <rect x="40" y="150" width="880" height="96" rx="8" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="58" y="172" font-size="13" font-weight="600" fill="#0d47a1">① 结构 Architecture</text>
+  <g transform="translate(58, 182)">
+    <rect x="0" y="0" width="200" height="50" rx="5" fill="#bbdefb" stroke="#1565c0"/>
+    <text x="100" y="20" text-anchor="middle" font-size="11" fill="#0d47a1" font-weight="600">MLA（§9.5）</text>
+    <text x="100" y="36" text-anchor="middle" font-size="9" fill="#37474f">KV 压到 ~1/30，长 ctx 前提</text>
+    <text x="100" y="47" text-anchor="middle" font-size="8" fill="#546e7a">铺垫：阶段 1 §1.2.2 / 阶段 4 §4.5</text>
+
+    <rect x="215" y="0" width="230" height="50" rx="5" fill="#c8e6c9" stroke="#2e7d32"/>
+    <text x="330" y="20" text-anchor="middle" font-size="11" fill="#1b5e20" font-weight="600">DeepSeekMoE（§9.6）</text>
+    <text x="330" y="36" text-anchor="middle" font-size="9" fill="#37474f">细粒度 256 专家 + 1 共享 + loss-free</text>
+    <text x="330" y="47" text-anchor="middle" font-size="8" fill="#546e7a">铺垫：阶段 1 §1.2.4 / 阶段 2 §2.2.5</text>
+
+    <rect x="460" y="0" width="180" height="50" rx="5" fill="#fff9c4" stroke="#fbc02d"/>
+    <text x="550" y="20" text-anchor="middle" font-size="11" fill="#5d4037" font-weight="600">YaRN 外推（§9.3）</text>
+    <text x="550" y="36" text-anchor="middle" font-size="9" fill="#37474f">4K → 128K 上下文</text>
+    <text x="550" y="47" text-anchor="middle" font-size="8" fill="#546e7a">铺垫：阶段 1 §1.2.3</text>
+
+    <rect x="655" y="0" width="190" height="50" rx="5" fill="#ffe0b2" stroke="#f57f17"/>
+    <text x="750" y="20" text-anchor="middle" font-size="11" fill="#e65100" font-weight="600">decoupled RoPE（§9.5）</text>
+    <text x="750" y="36" text-anchor="middle" font-size="9" fill="#37474f">RoPE 走单独小维度旁路</text>
+    <text x="750" y="47" text-anchor="middle" font-size="8" fill="#546e7a">阶段 4 §4.5.2</text>
+  </g>
+
+  <!-- Layer: 训练 -->
+  <rect x="40" y="256" width="880" height="96" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="58" y="278" font-size="13" font-weight="600" fill="#1b5e20">② 训练 Training</text>
+  <g transform="translate(58, 288)">
+    <rect x="0" y="0" width="200" height="50" rx="5" fill="#c8e6c9" stroke="#2e7d32"/>
+    <text x="100" y="20" text-anchor="middle" font-size="11" fill="#1b5e20" font-weight="600">DualPipe（§9.7）</text>
+    <text x="100" y="36" text-anchor="middle" font-size="9" fill="#37474f">双向流水，bubble ≈ 0</text>
+    <text x="100" y="47" text-anchor="middle" font-size="8" fill="#546e7a">铺垫：阶段 2 §2.2.4</text>
+
+    <rect x="215" y="0" width="200" height="50" rx="5" fill="#bbdefb" stroke="#1565c0"/>
+    <text x="315" y="20" text-anchor="middle" font-size="11" fill="#0d47a1" font-weight="600">MTP（§9.7）</text>
+    <text x="315" y="36" text-anchor="middle" font-size="9" fill="#37474f">多 token 预测目标</text>
+    <text x="315" y="47" text-anchor="middle" font-size="8" fill="#546e7a">推理变投机 §8.7 / §6.4.3</text>
+
+    <rect x="430" y="0" width="200" height="50" rx="5" fill="#ffe0b2" stroke="#f57f17"/>
+    <text x="530" y="20" text-anchor="middle" font-size="11" fill="#e65100" font-weight="600">FP8 训练（§9.9）</text>
+    <text x="530" y="36" text-anchor="middle" font-size="9" fill="#37474f">block-wise scale，算力翻倍</text>
+    <text x="530" y="47" text-anchor="middle" font-size="8" fill="#546e7a">铺垫：阶段 8 §8.4</text>
+
+    <rect x="645" y="0" width="200" height="50" rx="5" fill="#fff9c4" stroke="#fbc02d"/>
+    <text x="745" y="20" text-anchor="middle" font-size="11" fill="#5d4037" font-weight="600">EP + DeepEP（§9.6）</text>
+    <text x="745" y="36" text-anchor="middle" font-size="9" fill="#37474f">All-to-All dispatch/combine</text>
+    <text x="745" y="47" text-anchor="middle" font-size="8" fill="#546e7a">铺垫：阶段 3 §3.4</text>
+  </g>
+
+  <!-- Layer: 推理 -->
+  <rect x="40" y="362" width="880" height="96" rx="8" fill="#fff3e0" stroke="#f57f17" stroke-width="1.5"/>
+  <text x="58" y="384" font-size="13" font-weight="600" fill="#e65100">③ 推理 Inference</text>
+  <g transform="translate(58, 394)">
+    <rect x="0" y="0" width="200" height="50" rx="5" fill="#ffe0b2" stroke="#f57f17"/>
+    <text x="100" y="20" text-anchor="middle" font-size="11" fill="#e65100" font-weight="600">DP Attention（§9.8）</text>
+    <text x="100" y="36" text-anchor="middle" font-size="9" fill="#37474f">MLA KV 太小，不切 TP</text>
+    <text x="100" y="47" text-anchor="middle" font-size="8" fill="#546e7a">铺垫：阶段 2 §2.3.4</text>
+
+    <rect x="215" y="0" width="200" height="50" rx="5" fill="#c8e6c9" stroke="#2e7d32"/>
+    <text x="315" y="20" text-anchor="middle" font-size="11" fill="#1b5e20" font-weight="600">EP MoE（§9.8）</text>
+    <text x="315" y="36" text-anchor="middle" font-size="9" fill="#37474f">专家分散 + low-latency 模式</text>
+    <text x="315" y="47" text-anchor="middle" font-size="8" fill="#546e7a">铺垫：阶段 3 §3.4.3</text>
+
+    <rect x="430" y="0" width="200" height="50" rx="5" fill="#bbdefb" stroke="#1565c0"/>
+    <text x="530" y="20" text-anchor="middle" font-size="11" fill="#0d47a1" font-weight="600">FlashMLA（§9.5）</text>
+    <text x="530" y="36" text-anchor="middle" font-size="9" fill="#37474f">Hopper 低秩 KV kernel</text>
+    <text x="530" y="47" text-anchor="middle" font-size="8" fill="#546e7a">铺垫：阶段 4 §4.5</text>
+
+    <rect x="645" y="0" width="200" height="50" rx="5" fill="#fff9c4" stroke="#fbc02d"/>
+    <text x="745" y="20" text-anchor="middle" font-size="11" fill="#5d4037" font-weight="600">expert offload（§9.8）</text>
+    <text x="745" y="36" text-anchor="middle" font-size="9" fill="#37474f">Hot/Cold 专家分层放置</text>
+    <text x="745" y="47" text-anchor="middle" font-size="8" fill="#546e7a">本章新增</text>
+  </g>
+
+  <!-- Layer: 长上下文 -->
+  <rect x="40" y="468" width="880" height="92" rx="8" fill="#f3e5f5" stroke="#8e24aa" stroke-width="1.5"/>
+  <text x="58" y="490" font-size="13" font-weight="600" fill="#6a1b9a">④ 长上下文支撑（横跨训练与推理）</text>
+  <g transform="translate(58, 500)">
+    <rect x="0" y="0" width="270" height="46" rx="5" fill="#e1bee7" stroke="#8e24aa"/>
+    <text x="135" y="20" text-anchor="middle" font-size="11" fill="#6a1b9a" font-weight="600">位置外推 YaRN / LongRoPE（§9.3）</text>
+    <text x="135" y="36" text-anchor="middle" font-size="9" fill="#37474f">让短训练泛化到长推理</text>
+
+    <rect x="285" y="0" width="270" height="46" rx="5" fill="#e1bee7" stroke="#8e24aa"/>
+    <text x="420" y="20" text-anchor="middle" font-size="11" fill="#6a1b9a" font-weight="600">长序列 attention Ring / Ulysses（§9.4）</text>
+    <text x="420" y="36" text-anchor="middle" font-size="9" fill="#37474f">序列并行，单卡装不下时切</text>
+
+    <rect x="570" y="0" width="275" height="46" rx="5" fill="#e1bee7" stroke="#8e24aa"/>
+    <text x="707" y="20" text-anchor="middle" font-size="11" fill="#6a1b9a" font-weight="600">MLA 是长上下文的结构前提</text>
+    <text x="707" y="36" text-anchor="middle" font-size="9" fill="#37474f">KV 压缩让 128K 显存可控（§9.5）</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(40, 575)">
+    <text x="0" y="11" font-size="10" fill="#546e7a">每个技术点标注了在 DeepSeek-V3 中的角色 + 前面哪一阶段已铺垫；本章 §9.5–9.8 逐项拆解它们怎么协同。</text>
+  </g>
+</svg>
