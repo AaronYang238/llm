@@ -790,6 +790,200 @@ NVIDIA 节点内拓扑（典型 HGX H100 8 卡）：
 
 把 rank 映射到 GPU 时按 **(DP, PP, CP, TP, EP)** 由外到内排，让通信最重的 TP/EP 落到同一台机的 NVLink 域内。NCCL 的 `NCCL_TOPO_FILE` 与 `CUDA_VISIBLE_DEVICES` 是控制这个映射的关键。
 
+### 2.4.4 实战：2×8 GPU 跑通 Megatron-LM 训 LLaMA-7B
+
+把前面的理论落到一次真实的训练启动上。**目标**：2 节点 × 8 卡 = 16 GPU 上用 Megatron-LM 训 LLaMA-7B，把 TP/PP/DP 三维一起用起来。
+
+> 说明：本节硬件未就位，**rank 拓扑模拟器是真实可跑的（纯 Python，无需 GPU/torch）**；启动命令是真实配置；性能数字是**依据公开资料的量级估算，非实测**，标注硬件后待校准。
+
+#### (1) 配置选型
+
+LLaMA-7B（BF16 权重 14 GB）单卡放得下，**不需要大 TP**。要演示 3D 并行，选让三维都 > 1 的最小组合：
+
+```
+TP=2  ×  PP=2  ×  DP=4  =  16
+```
+
+为什么这么分（回 2.4.1 的通信特征表）：
+
+| 维度 | 取值 | 落在哪 | 理由 |
+|---|---|---|---|
+| **TP=2** | 节点内 NVLink | 每层 AllReduce 激活，最重 → 必须 intra-node |
+| **DP=4** | 节点内 | 每 step 一次梯度 AllReduce，节点内 NVLink 也快 |
+| **PP=2** | 跨节点 IB | stage 间 SendRecv 通信量小、可与计算重叠 → 容忍跨节点 |
+
+这正是"通信最重的维度放最快链路"的落地（2.4.3）。
+
+#### (2) rank 拓扑模拟器（可跑）
+
+配并行前，先用纯 Python 算清 16 个 rank 怎么映射到 3D mesh、各通信组是否落在该落的链路——**配错 rank 映射是 3D 并行最常见的翻车点**，提前模拟比上了硬件再 debug 便宜得多。
+
+```python
+# rank_sim.py —— 3D 并行 rank 拓扑模拟器（纯 Python，无需 GPU/torch）
+from __future__ import annotations
+import sys
+from dataclasses import dataclass
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")   # Windows 控制台强制 UTF-8
+
+
+@dataclass
+class Layout:
+    tp: int
+    pp: int
+    dp: int
+    gpus_per_node: int
+
+    @property
+    def world(self) -> int:
+        return self.tp * self.pp * self.dp
+
+
+def coords(rank: int, L: Layout) -> tuple[int, int, int]:
+    """Megatron 默认排布：tp 最内、dp 居中、pp 最外。"""
+    tp_i = rank % L.tp
+    dp_i = (rank // L.tp) % L.dp
+    pp_i = rank // (L.tp * L.dp)
+    return tp_i, pp_i, dp_i
+
+
+def group(rank: int, L: Layout, kind: str) -> list[int]:
+    tp_i, pp_i, dp_i = coords(rank, L)
+    out = []
+    for r in range(L.world):
+        t, p, d = coords(r, L)
+        if kind == "tp" and (p, d) == (pp_i, dp_i):
+            out.append(r)
+        elif kind == "pp" and (t, d) == (tp_i, dp_i):
+            out.append(r)
+    return out
+
+
+def node_of(rank: int, L: Layout) -> int:
+    return rank // L.gpus_per_node
+
+
+def report(L: Layout) -> None:
+    print(f"配置: TP={L.tp} × PP={L.pp} × DP={L.dp} = world {L.world}; "
+          f"{L.world // L.gpus_per_node} 节点 × {L.gpus_per_node} GPU\n")
+    print(f"{'rank':>4} {'node':>4} {'tp':>3} {'pp':>3} {'dp':>3}")
+    for r in range(L.world):
+        t, p, d = coords(r, L)
+        print(f"{r:>4} {node_of(r, L):>4} {t:>3} {p:>3} {d:>3}")
+
+    print("\nTP 组（必须 intra-node）:")
+    seen, ok = set(), True
+    for r in range(L.world):
+        g = tuple(group(r, L, "tp"))
+        if g in seen:
+            continue
+        seen.add(g)
+        nodes = {node_of(x, L) for x in g}
+        flag = "OK" if len(nodes) == 1 else "CROSS-NODE!!"
+        ok &= len(nodes) == 1
+        print(f"  {list(g)}  -> node {sorted(nodes)}  [{flag}]")
+
+    print("\n校验:", "TP 全部 intra-node，拓扑合法 [PASS]" if ok
+          else "存在 TP 跨节点，会严重掉速 [FAIL]")
+
+
+if __name__ == "__main__":
+    report(Layout(tp=2, pp=2, dp=4, gpus_per_node=8))
+```
+
+运行 `python rank_sim.py` 的**真实输出**（截取）：
+
+```text
+配置: TP=2 × PP=2 × DP=4 = world 16; 2 节点 × 8 GPU
+
+rank node  tp  pp  dp
+   0    0   0   0   0
+   1    0   1   0   0
+   2    0   0   0   1
+   ...
+   8    1   0   1   0
+   9    1   1   1   0
+   ...
+
+TP 组（必须 intra-node）:
+  [0, 1]  -> node [0]  [OK]
+  [2, 3]  -> node [0]  [OK]
+  ...
+  [14, 15]  -> node [1]  [OK]
+
+校验: TP 全部 intra-node，拓扑合法 [PASS]
+```
+
+把第一行改成 `report(Layout(tp=8, pp=1, dp=1, gpus_per_node=4))`，模拟器会算出 TP 组 `[0..7]` 横跨 node [0,1] 并打出 `[FAIL]`——这就是"TP 跨节点导致训练慢几倍"的根因（FAQ 也会提），在没上硬件前就能拦住。
+
+#### (3) 真实启动命令
+
+Megatron-LM 的 3D 并行就是设三个 size，rank 映射由 `parallel_state` 自动算（对应阶段 7 §7.4.2）：
+
+```bash
+# 每个节点都跑，--node-rank 分别为 0 / 1
+torchrun --nnodes=2 --nproc_per_node=8 \
+  --node-rank=$NODE_RANK --master-addr=$MASTER_ADDR --master-port=6000 \
+  pretrain_gpt.py \
+  --tensor-model-parallel-size 2 \
+  --pipeline-model-parallel-size 2 \
+  --num-layers 32 --hidden-size 4096 --num-attention-heads 32 \
+  --seq-length 4096 --max-position-embeddings 4096 \
+  --micro-batch-size 1 --global-batch-size 256 \
+  --use-distributed-optimizer --sequence-parallel --bf16 \
+  --use-flash-attn
+# DP=4 不用显式设：world(16) / (TP2 × PP2) = 4，Megatron 自动推
+```
+
+几个呼应前文的点：
+
+- `--sequence-parallel` 开 SP（2.2.3），与 TP 配套省激活显存；
+- `--use-distributed-optimizer` 是 ZeRO-1 风格优化器分片（2.2.8）；
+- `--global-batch-size 256` / `--micro-batch-size 1` → 梯度累积 = 256/(1×DP4) = 64 个 micro-batch，喂满 PP 流水减小 bubble（2.2.4）。
+
+#### (4) 一个 step 的通信序列（落到这套 3D 配置）
+
+```text
+Forward（PP stage 0，node 0）
+  每层: TP AllReduce ×2（attn + ffn，NVLink，~节点内）
+  stage 边界: SendRecv 激活 → PP stage 1（跨节点 IB）
+Forward（PP stage 1，node 1）→ loss
+
+Backward（反向穿过两个 stage）
+  stage 边界: SendRecv 梯度（跨节点 IB）
+  每层: TP AllReduce ×2（NVLink）
+
+Gradient Sync
+  DP AllReduce 梯度（DP=4，节点内 NVLink）   ← 与 distributed optimizer 的 ReduceScatter 合并
+
+Optimizer Step
+  distributed optimizer 本地更新自己那 1/4 分片 + AllGather 参数
+```
+
+总图见 [svg/07-multi-dim-parallel-topology.svg](../svg/07-multi-dim-parallel-topology.svg)——本配置正是它的 (DP, PP, TP) = (4, 2, 2) 实例。
+
+#### (5) 预期指标（模拟估算，非实测）
+
+> 硬件假设：2×8 H100 80GB SXM、节点内 NVLink、节点间 IB NDR 400G。以下为**依据公开资料的量级估算**，标注以待真机校准——按 CLAUDE.md 体例，不实测的数字一律标明。
+
+| 指标 | 量级估算 | 说明 |
+|---|---|---|
+| 单卡显存占用 | ~40–55 GB | 权重分片 + 优化器(ZeRO-1) + 激活(开 SP + checkpointing) |
+| MFU | ~45–55% | 7B 在 3D 并行下偏小，PP bubble 与跨节点 SendRecv 拉低上限 |
+| PP bubble 占比 | ~5–10% | 64 micro-batch 下 1F1B bubble ≈ (PP-1)/micro-batch |
+| 跨节点流量/step | PP SendRecv 激活，远小于 TP/DP 的节点内流量 | 所以 PP 容忍跨节点 |
+
+调优方向（呼应阶段 11）：MFU 偏低先 `nsys` 看是 PP bubble 还是跨节点 SendRecv 阻塞；前者增大梯度累积 micro-batch 数，后者确认 IB GDR、`NCCL_IB_HCA` 配置（阶段 3 §3.3）。
+
+#### (6) 3D 并行常见坑
+
+1. **TP 跨节点**：最致命。务必用 (2) 的模拟器确认 TP 组 intra-node；上了硬件再发现就浪费机时。
+2. **global-batch 不能被 (micro-batch × DP) 整除**：Megatron 直接报错，先用 (2) 的 world 算清 DP。
+3. **PP 切分点让各 stage 层数不均**：stage 计算不均会放大 bubble，LLaMA 32 层 / PP2 = 每 stage 16 层，刚好均匀。
+4. **忘开 `--sequence-parallel`**：激活显存省不下来，长 seq 直接 OOM。
+5. **多机 NCCL 起不来**：回阶段 3 §3.3.4 的症状→旋钮表排查（IB/拓扑/`NCCL_DEBUG`），不是 Megatron 的问题。
+
 ---
 
 ## 2.5 推理 vs 训练：通信特征差异

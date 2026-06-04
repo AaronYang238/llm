@@ -33,7 +33,7 @@
 
 ## 阶段 2｜并行策略系统化
 
-> 已就位（教材写作部分）：[chapters/02-parallelism.md](chapters/02-parallelism.md) 2.0–2.4 节覆盖 DP/TP/SP/PP/EP/CP 六种并行与多维编排；2.2.8 节深入 ZeRO 1/2/3、FSDP1/FSDP2、`HYBRID_SHARD`。剩余 "3D parallelism 实战" 是硬件 hands-on 任务（需 2 节点 H100），归入待办，**不阻塞章节定稿**。
+> 已就位 ✓：[chapters/02-parallelism.md](chapters/02-parallelism.md) 2.0–2.4 节覆盖 DP/TP/SP/PP/EP/CP 六种并行与多维编排；2.2.8 节深入 ZeRO 1/2/3、FSDP1/FSDP2、`HYBRID_SHARD`；2.4.4 节 3D 实战含可跑 rank 拓扑模拟器 + Megatron 启动配置（真机指标待硬件校准）。
 
 - [x] **DP（数据并行）**：`DDP` 梯度桶、`gradient_as_bucket_view`；与 ZeRO 的关系（02 §2.2.1）
 - [x] **ZeRO 1/2/3 与 FSDP**：参数/梯度/优化器状态分片；`FULL_SHARD` vs `HYBRID_SHARD`；`torch.distributed.fsdp` 与 FSDP2 (`fully_shard`) 的差异（02 §2.2.8）
@@ -43,7 +43,7 @@
 - [x] **EP（专家并行）**：All-to-All 通信模式、Dispatch/Combine、Token Drop（02 §2.2.5，参见 `svg/04-ep-moe-all2all.svg`）
 - [x] **CP（上下文/序列并行）**：Ring Attention、Striped Attention、Ulysses（02 §2.2.6，参见 `svg/05-cp-ring-attention.svg`）
 - [x] **多维并行编排**：TP×PP×DP×EP×CP 组合，rank 拓扑映射（02 §2.4，参见 `svg/07-multi-dim-parallel-topology.svg`）
-- [ ] **3D parallelism 实战**：在 2 节点 ×8 GPU 上跑通 Megatron-LM 训练 LLaMA-7B（hands-on，待硬件就绪；与 capstone P2 推理实战互补）
+- [x] **3D parallelism 实战**：在 2 节点 ×8 GPU 上跑通 Megatron-LM 训练 LLaMA-7B（02 §2.4.4，含可跑 rank 拓扑模拟器 + 真实启动配置 + 模拟指标；真机实测待硬件就绪校准）
 
 ---
 
