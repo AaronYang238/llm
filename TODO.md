@@ -109,15 +109,17 @@
 
 ---
 
-## 阶段 7｜训练框架深读
+## 阶段 7｜训练框架深读 ✓
 
-- [ ] **PyTorch 分布式**：`torch.distributed`、`DTensor`、`DeviceMesh`、`pipeline_parallel`
+> 已就位：[chapters/07-training-frameworks.md](chapters/07-training-frameworks.md)，主图 [svg/18-training-framework-arch.svg](svg/18-training-framework-arch.svg)（training step loop + DeviceMesh 多维并行 + 八条差异轴）。深读 Megatron-Core/DeepSpeed，PyTorch 原生底座先讲，其它对照阅读。
+
+- [x] **PyTorch 分布式**：`torch.distributed`、`DTensor`、`DeviceMesh`、`pipeline_parallel`（07 §7.3，主图 `svg/18-training-framework-arch.svg`）
 - [x] **FSDP2 (`fully_shard`)**：与 FSDP1 的 API/性能差异（已由 02 §2.2.8.2 完整覆盖；本阶段聚焦 PyTorch distributed 整体、DTensor、与 TP/PP/CP 的组合而不再单独讲 FSDP2 自身）
-- [ ] **Megatron-LM / Megatron-Core**：TP+PP+DP+EP+CP 的官方实现
-- [ ] **DeepSpeed**：ZeRO-3、ZeRO-Infinity、MoE、Ulysses
-- [ ] **TorchTitan**：原生 PyTorch 写的训练范例
-- [ ] **Colossal-AI / Pax (JAX) / MaxText**：作为对照阅读
-- [ ] **Checkpoint 格式**：`safetensors`、分布式 ckpt、`torch.distributed.checkpoint`
+- [x] **Megatron-LM / Megatron-Core**：TP+PP+DP+EP+CP 的官方实现（07 §7.4）
+- [x] **DeepSpeed**：ZeRO-3、ZeRO-Infinity、MoE、Ulysses（07 §7.5）
+- [x] **TorchTitan**：原生 PyTorch 写的训练范例（07 §7.6）
+- [x] **Colossal-AI / Pax (JAX) / MaxText**：作为对照阅读（07 §7.7）
+- [x] **Checkpoint 格式**：`safetensors`、分布式 ckpt、`torch.distributed.checkpoint`（07 §7.8）
 
 ---
 

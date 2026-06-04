@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#455a64"/>
+    </marker>
+    <marker id="arr-b" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#1565c0"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="600" fill="#212121">训练框架共同骨架：一个 training step 在多维并行 mesh 上的流转</text>
+
+  <!-- ===== LEFT: training step loop ===== -->
+  <text x="40" y="62" font-size="13" font-weight="600" fill="#1565c0">每个 training step 的四个阶段</text>
+
+  <!-- forward -->
+  <rect x="40" y="74" width="360" height="50" rx="6" fill="#1e88e5" stroke="#0d47a1"/>
+  <text x="60" y="95" font-size="12" fill="white" font-weight="600">① Forward</text>
+  <text x="60" y="113" font-size="10" fill="white">激活按 TP/SP/CP 切分；PP 跨 stage 传 micro-batch</text>
+
+  <!-- backward -->
+  <rect x="40" y="134" width="360" height="50" rx="6" fill="#1e88e5" stroke="#0d47a1"/>
+  <text x="60" y="155" font-size="12" fill="white" font-weight="600">② Backward</text>
+  <text x="60" y="173" font-size="10" fill="white">梯度按 DP/ZeRO 切分；激活重算(checkpointing)</text>
+
+  <!-- grad sync -->
+  <rect x="40" y="194" width="360" height="50" rx="6" fill="#fbc02d" stroke="#f57f17"/>
+  <text x="60" y="215" font-size="12" fill="#212121" font-weight="600">③ Gradient Sync</text>
+  <text x="60" y="233" font-size="10" fill="#37474f">DP: AllReduce / ZeRO: ReduceScatter (阶段 3)</text>
+
+  <!-- optimizer -->
+  <rect x="40" y="254" width="360" height="50" rx="6" fill="#43a047" stroke="#1b5e20"/>
+  <text x="60" y="275" font-size="12" fill="white" font-weight="600">④ Optimizer Step</text>
+  <text x="60" y="293" font-size="10" fill="white">优化器状态按 ZeRO 切分；更新主权重(FP32)</text>
+
+  <!-- loop back -->
+  <path d="M 40,279 Q 18,180 38,99" stroke="#e53935" stroke-width="1.8" fill="none" stroke-dasharray="5 3" marker-end="url(#arr)"/>
+  <text x="14" y="190" font-size="9" fill="#c62828" transform="rotate(-90 14 190)">下一个 step</text>
+
+  <!-- arrows between -->
+  <line x1="220" y1="124" x2="220" y2="132" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="220" y1="184" x2="220" y2="192" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="220" y1="244" x2="220" y2="252" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- maps to stage 2 -->
+  <text x="40" y="332" font-size="10" fill="#546e7a">每一步的切分/通信 = 阶段 2 的并行策略 + 阶段 3 的集合通信</text>
+
+  <!-- ===== RIGHT: DeviceMesh ===== -->
+  <text x="450" y="62" font-size="13" font-weight="600" fill="#1565c0">DeviceMesh：把 GPU 组织成多维网格（示例 16 卡 = DP2 × PP2 × TP4）</text>
+
+  <!-- mesh grid: 4 columns (TP) x 4 rows arranged as 2 PP-groups of 2 DP-rows -->
+  <g transform="translate(470, 84)">
+    <!-- PP stage 0 label -->
+    <text x="-8" y="40" font-size="10" fill="#546e7a" transform="rotate(-90 -8 40)">PP stage 0</text>
+    <text x="-8" y="150" font-size="10" fill="#546e7a" transform="rotate(-90 -8 150)">PP stage 1</text>
+
+    <!-- TP labels -->
+    <text x="55" y="-6" font-size="10" fill="#546e7a">TP0</text>
+    <text x="155" y="-6" font-size="10" fill="#546e7a">TP1</text>
+    <text x="255" y="-6" font-size="10" fill="#546e7a">TP2</text>
+    <text x="355" y="-6" font-size="10" fill="#546e7a">TP3</text>
+
+    <!-- Row 1: PP0 DP0 -->
+    <g>
+      <rect x="30" y="6"  width="60" height="40" rx="4" fill="#e3f2fd" stroke="#1565c0"/>
+      <text x="60" y="24" text-anchor="middle" font-size="9" fill="#0d47a1">GPU0</text>
+      <text x="60" y="38" text-anchor="middle" font-size="8" fill="#546e7a">DP0</text>
+      <rect x="130" y="6"  width="60" height="40" rx="4" fill="#e3f2fd" stroke="#1565c0"/>
+      <text x="160" y="24" text-anchor="middle" font-size="9" fill="#0d47a1">GPU1</text>
+      <rect x="230" y="6"  width="60" height="40" rx="4" fill="#e3f2fd" stroke="#1565c0"/>
+      <text x="260" y="24" text-anchor="middle" font-size="9" fill="#0d47a1">GPU2</text>
+      <rect x="330" y="6"  width="60" height="40" rx="4" fill="#e3f2fd" stroke="#1565c0"/>
+      <text x="360" y="24" text-anchor="middle" font-size="9" fill="#0d47a1">GPU3</text>
+      <!-- TP link -->
+      <line x1="90" y1="26" x2="130" y2="26" stroke="#e53935" stroke-width="2"/>
+      <line x1="190" y1="26" x2="230" y2="26" stroke="#e53935" stroke-width="2"/>
+      <line x1="290" y1="26" x2="330" y2="26" stroke="#e53935" stroke-width="2"/>
+    </g>
+
+    <!-- Row 2: PP0 DP1 -->
+    <g>
+      <rect x="30" y="56"  width="60" height="40" rx="4" fill="#e3f2fd" stroke="#1565c0"/>
+      <text x="60" y="74" text-anchor="middle" font-size="9" fill="#0d47a1">GPU4</text>
+      <text x="60" y="88" text-anchor="middle" font-size="8" fill="#546e7a">DP1</text>
+      <rect x="130" y="56"  width="60" height="40" rx="4" fill="#e3f2fd" stroke="#1565c0"/>
+      <text x="160" y="74" text-anchor="middle" font-size="9" fill="#0d47a1">GPU5</text>
+      <rect x="230" y="56"  width="60" height="40" rx="4" fill="#e3f2fd" stroke="#1565c0"/>
+      <text x="260" y="74" text-anchor="middle" font-size="9" fill="#0d47a1">GPU6</text>
+      <rect x="330" y="56"  width="60" height="40" rx="4" fill="#e3f2fd" stroke="#1565c0"/>
+      <text x="360" y="74" text-anchor="middle" font-size="9" fill="#0d47a1">GPU7</text>
+      <line x1="90" y1="76" x2="130" y2="76" stroke="#e53935" stroke-width="2"/>
+      <line x1="190" y1="76" x2="230" y2="76" stroke="#e53935" stroke-width="2"/>
+      <line x1="290" y1="76" x2="330" y2="76" stroke="#e53935" stroke-width="2"/>
+      <!-- DP link (vertical) -->
+      <line x1="60" y1="46" x2="60" y2="56" stroke="#43a047" stroke-width="2"/>
+    </g>
+
+    <!-- Row 3: PP1 DP0 -->
+    <g>
+      <rect x="30" y="116"  width="60" height="40" rx="4" fill="#fff3e0" stroke="#f57f17"/>
+      <text x="60" y="134" text-anchor="middle" font-size="9" fill="#e65100">GPU8</text>
+      <text x="60" y="148" text-anchor="middle" font-size="8" fill="#546e7a">DP0</text>
+      <rect x="130" y="116"  width="60" height="40" rx="4" fill="#fff3e0" stroke="#f57f17"/>
+      <text x="160" y="134" text-anchor="middle" font-size="9" fill="#e65100">GPU9</text>
+      <rect x="230" y="116"  width="60" height="40" rx="4" fill="#fff3e0" stroke="#f57f17"/>
+      <text x="260" y="134" text-anchor="middle" font-size="9" fill="#e65100">GPU10</text>
+      <rect x="330" y="116"  width="60" height="40" rx="4" fill="#fff3e0" stroke="#f57f17"/>
+      <text x="360" y="134" text-anchor="middle" font-size="9" fill="#e65100">GPU11</text>
+      <line x1="90" y1="136" x2="130" y2="136" stroke="#e53935" stroke-width="2"/>
+      <line x1="190" y1="136" x2="230" y2="136" stroke="#e53935" stroke-width="2"/>
+      <line x1="290" y1="136" x2="330" y2="136" stroke="#e53935" stroke-width="2"/>
+      <!-- PP link (vertical, from row1 to row3) -->
+      <line x1="160" y1="96" x2="160" y2="116" stroke="#1565c0" stroke-width="2" stroke-dasharray="3 2"/>
+    </g>
+
+    <!-- Row 4: PP1 DP1 -->
+    <g>
+      <rect x="30" y="166"  width="60" height="40" rx="4" fill="#fff3e0" stroke="#f57f17"/>
+      <text x="60" y="184" text-anchor="middle" font-size="9" fill="#e65100">GPU12</text>
+      <text x="60" y="198" text-anchor="middle" font-size="8" fill="#546e7a">DP1</text>
+      <rect x="130" y="166"  width="60" height="40" rx="4" fill="#fff3e0" stroke="#f57f17"/>
+      <text x="160" y="184" text-anchor="middle" font-size="9" fill="#e65100">GPU13</text>
+      <rect x="230" y="166"  width="60" height="40" rx="4" fill="#fff3e0" stroke="#f57f17"/>
+      <text x="260" y="184" text-anchor="middle" font-size="9" fill="#e65100">GPU14</text>
+      <rect x="330" y="166"  width="60" height="40" rx="4" fill="#fff3e0" stroke="#f57f17"/>
+      <text x="360" y="184" text-anchor="middle" font-size="9" fill="#e65100">GPU15</text>
+      <line x1="90" y1="186" x2="130" y2="186" stroke="#e53935" stroke-width="2"/>
+      <line x1="190" y1="186" x2="230" y2="186" stroke="#e53935" stroke-width="2"/>
+      <line x1="290" y1="186" x2="330" y2="186" stroke="#e53935" stroke-width="2"/>
+      <line x1="60" y1="156" x2="60" y2="166" stroke="#43a047" stroke-width="2"/>
+    </g>
+  </g>
+
+  <!-- mesh legend -->
+  <g transform="translate(470, 300)">
+    <line x1="0" y1="6" x2="24" y2="6" stroke="#e53935" stroke-width="2"/>
+    <text x="30" y="10" font-size="10" fill="#37474f">TP 组(节点内 NVLink，AllReduce 激活)</text>
+    <line x1="240" y1="6" x2="264" y2="6" stroke="#43a047" stroke-width="2"/>
+    <text x="270" y="10" font-size="10" fill="#37474f">DP 组(AllReduce 梯度)</text>
+    <line x1="0" y1="24" x2="24" y2="24" stroke="#1565c0" stroke-width="2" stroke-dasharray="3 2"/>
+    <text x="30" y="28" font-size="10" fill="#37474f">PP 组(SendRecv，跨节点)</text>
+    <text x="240" y="28" font-size="10" fill="#546e7a">DTensor placement 描述每张量怎么切</text>
+  </g>
+
+  <!-- ===== BOTTOM: differentiation axes ===== -->
+  <line x1="40" y1="350" x2="920" y2="350" stroke="#cfd8dc" stroke-width="1"/>
+  <text x="40" y="376" font-size="13" font-weight="600" fill="#37474f">各训练框架的差异化轴（骨架相同，差在这几处）</text>
+
+  <rect x="40" y="388" width="430" height="180" rx="6" fill="#eceff1" stroke="#90a4ae"/>
+  <text x="60" y="410" font-size="11" font-weight="600" fill="#37474f">① 分片抽象</text>
+  <text x="60" y="428" font-size="10" fill="#37474f">DTensor (PyTorch/TorchTitan) vs 自定义 (Megatron/DeepSpeed)</text>
+  <text x="60" y="450" font-size="11" font-weight="600" fill="#37474f">② 并行完整度</text>
+  <text x="60" y="468" font-size="10" fill="#37474f">Megatron: TP+PP+DP+EP+CP 五维 / DeepSpeed: ZeRO 为主</text>
+  <text x="60" y="490" font-size="11" font-weight="600" fill="#37474f">③ 显存优化</text>
+  <text x="60" y="508" font-size="10" fill="#37474f">ZeRO 1/2/3/Infinity / activation checkpointing</text>
+  <text x="60" y="530" font-size="11" font-weight="600" fill="#37474f">④ 通信-计算 overlap</text>
+  <text x="60" y="548" font-size="10" fill="#37474f">async-TP / 梯度桶 / 流水 bubble 优化(阶段 4 §4.8)</text>
+
+  <rect x="490" y="388" width="430" height="180" rx="6" fill="#eceff1" stroke="#90a4ae"/>
+  <text x="510" y="410" font-size="11" font-weight="600" fill="#37474f">⑤ checkpoint 格式</text>
+  <text x="510" y="428" font-size="10" fill="#37474f">分布式 DCP / safetensors / 可 reshard(§7.8)</text>
+  <text x="510" y="450" font-size="11" font-weight="600" fill="#37474f">⑥ MoE 支持</text>
+  <text x="510" y="468" font-size="10" fill="#37474f">EP + token dispatch(DeepEP) / 负载均衡</text>
+  <text x="510" y="490" font-size="11" font-weight="600" fill="#37474f">⑦ 易用性 / 生态</text>
+  <text x="510" y="508" font-size="10" fill="#37474f">配置复杂度 / 文档 / HF 集成 / 社区</text>
+  <text x="510" y="530" font-size="11" font-weight="600" fill="#37474f">⑧ 后端</text>
+  <text x="510" y="548" font-size="10" fill="#37474f">PyTorch / JAX(Pax/MaxText) / 国产卡适配</text>
+</svg>
