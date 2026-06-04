@@ -148,14 +148,16 @@
 
 ---
 
-## 阶段 10｜生产化服务与多模态
+## 阶段 10｜生产化服务与多模态 ✓
 
-- [ ] **OpenAI 兼容 API**：`/v1/chat/completions`、`/v1/responses`、tool use、JSON schema
-- [ ] **结构化输出**：xgrammar、outlines、lm-format-enforcer
-- [ ] **多 LoRA serving**：vLLM `--enable-lora`、SGLang `--lora-paths`
-- [ ] **多模态推理**：Qwen-VL、LLaVA、InternVL 的图像/视频 token 路径
-- [ ] **路由与网关**：Envoy AI Gateway、LiteLLM、vLLM Production Stack
-- [ ] **可观测性**：metrics、tracing、SLO（TTFT、TPOT、E2E）
+> 已就位（A + D 混合类型）：[chapters/10-serving-multimodal.md](chapters/10-serving-multimodal.md)，主图 [svg/22-multimodal-token-path.svg](svg/22-multimodal-token-path.svg)（图像→token 路径）。前半 A 类（API/结构化输出/多 LoRA/多模态 §10.2–10.5），后半 D 类 cookbook（网关/可观测性 §10.6–10.7）。
+
+- [x] **OpenAI 兼容 API**：`/v1/chat/completions`、`/v1/responses`、tool use、JSON schema（10 §10.2）
+- [x] **结构化输出**：xgrammar、outlines、lm-format-enforcer（10 §10.3；logits mask 原理见 1 §1.2.5，引擎位置见 6 §6.3.4）
+- [x] **多 LoRA serving**：vLLM `--enable-lora`、SGLang `--lora-paths`（10 §10.4）
+- [x] **多模态推理**：Qwen-VL、LLaVA、InternVL 的图像/视频 token 路径（10 §10.5，主图 `svg/22-multimodal-token-path.svg`）
+- [x] **路由与网关**：Envoy AI Gateway、LiteLLM、vLLM Production Stack（10 §10.6，D 类 cookbook）
+- [x] **可观测性**：metrics、tracing、SLO（TTFT、TPOT、E2E）（10 §10.7，D 类 cookbook；指标定义见 5 §5.1）
 
 ---
 
