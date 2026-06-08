@@ -161,13 +161,15 @@
 
 ---
 
-## 阶段 11｜性能分析与调优工具（持续）
+## 阶段 11｜性能分析与调优工具（持续）✓
 
-- [ ] **Profiler**：`torch.profiler`、Nsight Systems (`nsys`)、Nsight Compute (`ncu`)
-- [ ] **通信 trace**：`NCCL_DEBUG=TRACE`、`TORCH_NCCL_TRACE_BUFFER_SIZE`
-- [ ] **Roofline 分析**：算子是 compute-bound 还是 memory-bound？
-- [ ] **常见瓶颈定位**：HBM 带宽 / NVLink 带宽 / PCIe / IB 拥塞 / kernel launch overhead
-- [ ] **CUDA Graph**：减少 launch overhead，注意与变长 batch 的兼容
+> 已就位（纯 D 类 cookbook）：[chapters/11-profiling.md](chapters/11-profiling.md)，全章"任务→命令→输出→判读→下一步"。把前面各阶段的调优散点收拢成系统方法论：nvidia-smi → Roofline → profiler/nsys → ncu/NCCL trace → 阶段旋钮的五步下钻。
+
+- [x] **Profiler**：`torch.profiler`、Nsight Systems (`nsys`)、Nsight Compute (`ncu`)（11 §11.3/11.4/11.5）
+- [x] **通信 trace**：`NCCL_DEBUG=TRACE`、`TORCH_NCCL_TRACE_BUFFER_SIZE`（11 §11.6；NCCL 调优旋钮见 3 §3.3）
+- [x] **Roofline 分析**：算子是 compute-bound 还是 memory-bound？（11 §11.2；Roofline 基础见 0 §0.2.2）
+- [x] **常见瓶颈定位**：HBM 带宽 / NVLink 带宽 / PCIe / IB 拥塞 / kernel launch overhead（11 §11.8，端到端排障实战 + 瓶颈速查表）
+- [x] **CUDA Graph**：减少 launch overhead，注意与变长 batch 的兼容（11 §11.7；基础见 0 §0.3，引擎集成见 4 §4.4.3/6 §6.3.2）
 
 ---
 
