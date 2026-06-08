@@ -66,7 +66,7 @@ kernel 层 →  某个 kernel 写得差、没用 Tensor Core（阶段 4）
 | **Nsight Systems (`nsys`)** | 系统时间线 | kernel + 通信 + CPU | `nsys profile python x.py` |
 | **Nsight Compute (`ncu`)** | 单个 kernel | 指令/访存级 | `ncu --set full -k kernel_name` |
 | **NCCL trace** | 通信 | collective 级 | `NCCL_DEBUG=TRACE`（阶段 3 §3.3.1） |
-| **`nccl-tests`** | 通信微基准 | busbw 曲线 | `all_reduce_perf`（阶段 3 §3.7） |
+| **`nccl-tests`** | 通信微基准 | busbw 曲线 | `all_reduce_perf`（阶段 3 §3.10） |
 | **Prometheus metrics** | 服务 | 聚合指标 | 引擎 `/metrics`（阶段 10 §10.7） |
 
 选工具的决策逻辑：
@@ -753,6 +753,6 @@ result = static_out.clone()
 - **Horace He《Making Deep Learning Go Brrrr From First Principles》** — compute / memory / overhead 三类 bound 的分类法，本章的方法论源头。
 - **PyTorch NCCL Flight Recorder 文档 / 博客** — §11.6.3 多卡 hang 排障的官方手段。
 - **vLLM / SGLang 的 benchmark 与 profiling 文档** — 把本章工具用到真实引擎上的实操指引。
-- **`nccl-tests` README** — 通信微基准的标尺（阶段 3 §3.7 也引），§11.6 对照理论 busbw 的依据。
+- **`nccl-tests` README** — 通信微基准的标尺（阶段 3 §3.10 也引），§11.6 对照理论 busbw 的依据。
 
 ---
