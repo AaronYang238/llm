@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" width="960" height="620" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#455a64"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="600" fill="#212121">现代 LLM 的"标准骨架 + 差异旋钮"：同一模板，不同选择</text>
+
+  <!-- ===== 标准骨架（左侧竖向流程）===== -->
+  <text x="40" y="60" font-size="13" font-weight="600" fill="#1565c0">标准骨架（LLaMA 模板，阶段 1 §1.2.1）</text>
+
+  <g transform="translate(60, 74)">
+    <rect x="0" y="0" width="200" height="34" rx="5" fill="#90a4ae" stroke="#546e7a"/>
+    <text x="100" y="22" text-anchor="middle" font-size="11" fill="white">Embedding</text>
+    <line x1="100" y1="34" x2="100" y2="46" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- decoder block -->
+    <rect x="-10" y="48" width="220" height="290" rx="6" fill="#f5f5f5" stroke="#1565c0" stroke-dasharray="4 3"/>
+    <text x="100" y="64" text-anchor="middle" font-size="10" fill="#1565c0">N × Decoder Block</text>
+
+    <rect x="10" y="74" width="180" height="30" rx="4" fill="#fff9c4" stroke="#fbc02d"/>
+    <text x="100" y="93" text-anchor="middle" font-size="10" fill="#5d4037">RMSNorm（旋钮④归一化）</text>
+    <line x1="100" y1="104" x2="100" y2="112" stroke="#455a64" stroke-width="1.2" marker-end="url(#arr)"/>
+
+    <rect x="10" y="114" width="180" height="40" rx="4" fill="#bbdefb" stroke="#1565c0"/>
+    <text x="100" y="131" text-anchor="middle" font-size="10" fill="#0d47a1">Attention</text>
+    <text x="100" y="147" text-anchor="middle" font-size="9" fill="#37474f">（旋钮①+③：GQA/MLA、RoPE）</text>
+    <line x1="100" y1="154" x2="100" y2="162" stroke="#455a64" stroke-width="1.2" marker-end="url(#arr)"/>
+
+    <rect x="10" y="164" width="180" height="30" rx="4" fill="#fff9c4" stroke="#fbc02d"/>
+    <text x="100" y="183" text-anchor="middle" font-size="10" fill="#5d4037">RMSNorm</text>
+    <line x1="100" y1="194" x2="100" y2="202" stroke="#455a64" stroke-width="1.2" marker-end="url(#arr)"/>
+
+    <rect x="10" y="204" width="180" height="40" rx="4" fill="#c8e6c9" stroke="#2e7d32"/>
+    <text x="100" y="221" text-anchor="middle" font-size="10" fill="#1b5e20">FFN</text>
+    <text x="100" y="237" text-anchor="middle" font-size="9" fill="#37474f">（旋钮②：SwiGLU / MoE）</text>
+
+    <text x="100" y="262" text-anchor="middle" font-size="9" fill="#546e7a">（pre-norm + 残差，阶段 1）</text>
+
+    <rect x="10" y="270" width="180" height="26" rx="4" fill="#eceff1" stroke="#90a4ae"/>
+    <text x="100" y="287" text-anchor="middle" font-size="9" fill="#546e7a">Residual</text>
+
+    <line x1="100" y1="338" x2="100" y2="350" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+    <rect x="0" y="352" width="200" height="34" rx="5" fill="#90a4ae" stroke="#546e7a"/>
+    <text x="100" y="374" text-anchor="middle" font-size="11" fill="white">RMSNorm → LM Head</text>
+    <text x="100" y="404" text-anchor="middle" font-size="9" fill="#546e7a">（旋钮⑤词表：大小 / tie embedding）</text>
+  </g>
+
+  <!-- ===== 六个旋钮的取值（右侧）===== -->
+  <text x="320" y="60" font-size="13" font-weight="600" fill="#1565c0">六个差异旋钮的取值空间</text>
+
+  <g transform="translate(320, 74)" font-size="10">
+    <!-- ① Attention -->
+    <rect x="0" y="0" width="600" height="48" rx="5" fill="#e3f2fd" stroke="#1565c0"/>
+    <text x="10" y="18" font-size="11" font-weight="600" fill="#0d47a1">① Attention</text>
+    <text x="10" y="34" fill="#37474f">MHA → MQA → GQA（主流）→ MLA（DeepSeek）；可选 sliding window（Mistral）、QK-norm</text>
+
+    <!-- ② FFN -->
+    <rect x="0" y="56" width="600" height="48" rx="5" fill="#e8f5e9" stroke="#2e7d32"/>
+    <text x="10" y="74" font-size="11" font-weight="600" fill="#1b5e20">② FFN</text>
+    <text x="10" y="90" fill="#37474f">Dense SwiGLU（多数）｜ MoE（Mixtral 8×、Qwen-MoE 128、DeepSeek 256+共享）</text>
+
+    <!-- ③ 位置编码 -->
+    <rect x="0" y="112" width="600" height="48" rx="5" fill="#fff3e0" stroke="#f57f17"/>
+    <text x="10" y="130" font-size="11" font-weight="600" fill="#e65100">③ 位置编码</text>
+    <text x="10" y="146" fill="#37474f">RoPE（几乎全部）；base 调整 + YaRN / NTK 外推到长上下文（阶段 9 §9.3）</text>
+
+    <!-- ④ 归一化 -->
+    <rect x="0" y="168" width="600" height="48" rx="5" fill="#fff9c4" stroke="#fbc02d"/>
+    <text x="10" y="186" font-size="11" font-weight="600" fill="#5d4037">④ 归一化</text>
+    <text x="10" y="202" fill="#37474f">RMSNorm（主流）；pre-norm（多数）/ sandwich（Gemma）；QK-norm（部分新模型）</text>
+
+    <!-- ⑤ 词表 -->
+    <rect x="0" y="224" width="600" height="48" rx="5" fill="#f3e5f5" stroke="#8e24aa"/>
+    <text x="10" y="242" font-size="11" font-weight="600" fill="#6a1b9a">⑤ 词表 / Embedding</text>
+    <text x="10" y="258" fill="#37474f">大小 32K→150K+；tie embedding（Qwen/Gemma tie，LLaMA 不 tie）</text>
+
+    <!-- ⑥ 长上下文 -->
+    <rect x="0" y="280" width="600" height="48" rx="5" fill="#e0f7fa" stroke="#00838f"/>
+    <text x="10" y="298" font-size="11" font-weight="600" fill="#006064">⑥ 长上下文</text>
+    <text x="10" y="314" fill="#37474f">训练长度 + 外推策略（YaRN/LongRoPE）；4K → 128K → 1M（阶段 9）</text>
+  </g>
+
+  <!-- ===== 底部：模型在旋钮上的分叉 ===== -->
+  <line x1="40" y1="430" x2="920" y2="430" stroke="#cfd8dc" stroke-width="1"/>
+  <text x="40" y="454" font-size="13" font-weight="600" fill="#1565c0">主要模型系列的"取向"（详见各节）</text>
+
+  <g transform="translate(40, 466)" font-size="10">
+    <rect x="0" y="0" width="290" height="64" rx="5" fill="#e3f2fd" stroke="#1565c0"/>
+    <text x="10" y="18" font-size="11" font-weight="600" fill="#0d47a1">LLaMA（§12.2）</text>
+    <text x="10" y="34" fill="#37474f">定义"标准模板"；L4 转 MoE</text>
+    <text x="10" y="50" fill="#546e7a">最广生态、最多衍生模型</text>
+
+    <rect x="300" y="0" width="290" height="64" rx="5" fill="#e8f5e9" stroke="#2e7d32"/>
+    <text x="310" y="18" font-size="11" font-weight="600" fill="#1b5e20">Qwen（§12.3）/ Mistral（§12.4）</text>
+    <text x="310" y="34" fill="#37474f">Qwen：tie embed、长 ctx、MoE</text>
+    <text x="310" y="50" fill="#546e7a">Mistral：sliding window、稀疏 MoE</text>
+
+    <rect x="600" y="0" width="290" height="64" rx="5" fill="#fff3e0" stroke="#f57f17"/>
+    <text x="610" y="18" font-size="11" font-weight="600" fill="#e65100">DeepSeek（§12.5）</text>
+    <text x="610" y="34" fill="#37474f">MLA + 细粒度 MoE，改动最大</text>
+    <text x="610" y="50" fill="#546e7a">架构创新最激进（阶段 9）</text>
+  </g>
+
+  <text x="40" y="556" font-size="11" fill="#546e7a">核心认知：差异收敛在 6 个旋钮上。拿到新模型，扫一眼这 6 项就懂它"在标准模板上改了什么"。</text>
+
+  <!-- Legend -->
+  <g transform="translate(40, 576)">
+    <rect x="0" y="0" width="13" height="13" fill="#bbdefb"/>
+    <text x="19" y="11" font-size="10" fill="#37474f">Attention</text>
+    <rect x="100" y="0" width="13" height="13" fill="#c8e6c9"/>
+    <text x="119" y="11" font-size="10" fill="#37474f">FFN</text>
+    <rect x="180" y="0" width="13" height="13" fill="#fff3e0" stroke="#f57f17"/>
+    <text x="199" y="11" font-size="10" fill="#37474f">位置编码</text>
+    <rect x="280" y="0" width="13" height="13" fill="#fff9c4" stroke="#fbc02d"/>
+    <text x="299" y="11" font-size="10" fill="#37474f">归一化</text>
+    <rect x="370" y="0" width="13" height="13" fill="#f3e5f5" stroke="#8e24aa"/>
+    <text x="389" y="11" font-size="10" fill="#37474f">词表</text>
+    <rect x="450" y="0" width="13" height="13" fill="#e0f7fa" stroke="#00838f"/>
+    <text x="469" y="11" font-size="10" fill="#37474f">长上下文</text>
+  </g>
+</svg>

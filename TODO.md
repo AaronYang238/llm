@@ -173,14 +173,16 @@
 
 ---
 
-## 阶段 12｜代表模型架构（选读，对照源码）
+## 阶段 12｜代表模型架构（选读，对照源码）✓
 
-- [ ] **LLaMA 1/2/3/4**：GQA、Tokenizer、MoE（L4 Scout/Maverick）
-- [ ] **Qwen 2 / 2.5 / 3**：tied embedding、长上下文、MoE（Qwen3-MoE）
-- [ ] **Mixtral / Mistral**：sliding window、稀疏 MoE
-- [ ] **DeepSeek V2 / V3 / R1**：MLA、DeepSeekMoE、MTP、推理优化
-- [ ] **GLM / Yi / Gemma / Phi**：架构差异点
-- [ ] **多模态**：Qwen-VL、InternVL、LLaVA-NeXT、视频模型的 token 化
+> 已就位（类型 B 横向对比章）：[chapters/12-model-architectures.md](chapters/12-model-architectures.md)，主图 [svg/23-llm-architecture-knobs.svg](svg/23-llm-architecture-knobs.svg)（标准骨架 + 六个旋钮）。§12.1 立"六旋钮 + config 速读"框架，§12.2–12.7 每个模型按这个框架填取值，§12.8 横向对比矩阵 + §12.9 排错心法收尾。**全书最后一个内容章节，至此 12 个阶段全部就位。**
+
+- [x] **LLaMA 1/2/3/4**：GQA、Tokenizer、MoE（L4 Scout/Maverick）（12 §12.2，主图 `svg/23-llm-architecture-knobs.svg`）
+- [x] **Qwen 2 / 2.5 / 3**：tied embedding、长上下文、MoE（Qwen3-MoE）（12 §12.3）
+- [x] **Mixtral / Mistral**：sliding window、稀疏 MoE（12 §12.4）
+- [x] **DeepSeek V2 / V3 / R1**：MLA、DeepSeekMoE、MTP、推理优化（12 §12.5；架构原理详见阶段 9）
+- [x] **GLM / Yi / Gemma / Phi**：架构差异点（12 §12.6）
+- [x] **多模态**：Qwen-VL、InternVL、LLaVA-NeXT、视频模型的 token 化（12 §12.7；token 路径机制见 10 §10.5）
 
 ---
 
