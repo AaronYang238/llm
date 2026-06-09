@@ -117,7 +117,7 @@ Embedding → N × [RMSNorm → Attention → RMSNorm → FFN → Residual] → 
 
 | 类 | 看什么旋钮 |
 |---|---|
-| `XxxAttention` | ① attention（GQA 的 repeat_kv、sliding window 的 mask、QK-norm） |
+| `XxxAttention` | ① attention（GQA 的 repeat\_kv、sliding window 的 mask、QK-norm） |
 | `XxxMLP` / `XxxSparseMoeBlock` | ② FFN（SwiGLU 还是 MoE） |
 | `XxxRotaryEmbedding` | ③ 位置编码（RoPE base、YaRN scaling） |
 
@@ -172,14 +172,14 @@ Embedding → N × [RMSNorm → Attention → RMSNorm → FFN → Residual] → 
 }
 ```
 
-一眼读出：GQA（8 KV head）、Dense SwiGLU（无 num_experts）、大词表、大 RoPE base、不 tie embedding——典型的 LLaMA-3 标准配置。
+一眼读出：GQA（8 KV head）、Dense SwiGLU（无 num\_experts）、大词表、大 RoPE base、不 tie embedding——典型的 LLaMA-3 标准配置。
 
 ### 12.2.3 源码定位
 
 | 路径 | 看什么 |
 |---|---|
 | `transformers/models/llama/modeling_llama.py` | **所有模型对照的基准**（§12.1.3） |
-| `LlamaAttention.repeat_kv` | GQA 的 KV head 复制（阶段 1 §1.2.2 的 repeat_interleave） |
+| `LlamaAttention.repeat_kv` | GQA 的 KV head 复制（阶段 1 §1.2.2 的 repeat\_interleave） |
 | `LlamaRotaryEmbedding` | RoPE，3.1 的 YaRN scaling 在这里 |
 | `LlamaMLP` | SwiGLU（gate/up/down proj） |
 | vLLM `model_executor/models/llama.py` | TP-aware 版本（阶段 1 §1.3、阶段 6 §6.3.3） |
@@ -216,7 +216,7 @@ Qwen 共享 LLaMA 的标准骨架（RMSNorm + RoPE + GQA + SwiGLU），差异集
 | **⑥ 长上下文** | 3.1 才 128K | **更早全系长 ctx** | Qwen2.5 普遍 128K，部分 1M |
 | **② MoE** | L4 才 MoE | **Qwen2-MoE 就有** | 更早布局稀疏化 |
 
-**tie embedding（⑤）**：Qwen 的小模型（0.5B/1.5B）把 embedding 和 lm_head 共享权重（`tie_word_embeddings=true`）。词表大（150K）时，一份词表权重就占不少——小模型尤其在意，tie 省一半词表参数。LLaMA 一贯不 tie（§12.2.4），这是两系一个明显区别（回阶段 1 §1.6 第 5 条：加载权重时认错会乱码）。
+**tie embedding（⑤）**：Qwen 的小模型（0.5B/1.5B）把 embedding 和 lm\_head 共享权重（`tie_word_embeddings=true`）。词表大（150K）时，一份词表权重就占不少——小模型尤其在意，tie 省一半词表参数。LLaMA 一贯不 tie（§12.2.4），这是两系一个明显区别（回阶段 1 §1.6 第 5 条：加载权重时认错会乱码）。
 
 **QKV bias（①）**：Qwen2 的 attention 的 Q/K/V 投影带 bias（`attention_bias=true`），LLaMA 系一律无 bias。这是个历史/经验选择，对推理引擎接入有影响——移植时别漏了 bias。
 
@@ -419,7 +419,7 @@ DeepSeek-V3（关键字段，比标准模型多很多 MLA/MoE 专属字段）：
 | `transformers/models/deepseek_v3/modeling_deepseek_v3.py` | MLA + MoE 完整实现 |
 | `DeepseekV3Attention` | MLA：低秩降维 + 升维 + decoupled RoPE（§9.5、§4.5） |
 | `DeepseekV3MoE` | 256 专家 + 共享专家 + 分组路由（§9.6） |
-| `DeepseekV3TopkRouter` | loss-free balance（noaux_tc，§9.6.3） |
+| `DeepseekV3TopkRouter` | loss-free balance（noaux\_tc，§9.6.3） |
 | vLLM `model_executor/models/deepseek_v3.py` + MLA backend | DP attention + FlashMLA（§9.8、§4.5） |
 
 **diff 读法对 DeepSeek 失效**——它和 LLaMA 差异太大（MLA 重写了整个 attention），不能简单 diff。建议直接对照阶段 9 的拆解读它的 `modeling_deepseek_v3.py`，是把阶段 9 理论落到代码的最佳材料。

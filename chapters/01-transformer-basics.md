@@ -32,22 +32,22 @@
 
 | 缩写 | 全称 | 一句话 |
 |---|---|---|
-| D / hidden | hidden_size | token embedding 维度 |
-| H | num_heads | Q head 数 |
-| H_kv | num_kv_heads | KV head 数（MHA 时 H_kv=H；GQA 时 H_kv<H） |
-| d | head_dim | 单 head 维度，通常 D / H |
-| d_ff | ffn_dim | FFN 中间层维度，LLaMA 约 2.67×D |
-| S | seq_len | 序列长度 |
+| D / hidden | hidden\_size | token embedding 维度 |
+| H | num\_heads | Q head 数 |
+| H\_kv | num\_kv\_heads | KV head 数（MHA 时 H\_kv=H；GQA 时 H\_kv<H） |
+| d | head\_dim | 单 head 维度，通常 D / H |
+| d\_ff | ffn\_dim | FFN 中间层维度，LLaMA 约 2.67×D |
+| S | seq\_len | 序列长度 |
 | B | batch | batch size |
 | V | vocab | 词表大小 |
 | MHA | Multi-Head Attention | 标准多头 |
-| MQA | Multi-Query Attention | 所有 Q head 共享 1 个 KV head（H_kv=1） |
+| MQA | Multi-Query Attention | 所有 Q head 共享 1 个 KV head（H\_kv=1） |
 | GQA | Grouped-Query Attention | g 个 Q head 共享一个 KV head |
 | MLA | Multi-head Latent Attention | DeepSeek，KV 压缩到低秩潜空间 |
 | RoPE | Rotary Position Embedding | 旋转位置编码 |
 | YaRN | Yet another RoPE extensioN | 长上下文外推 |
 | RMSNorm | Root Mean Square Norm | LayerNorm 简化版，省去均值 |
-| SwiGLU | Swish-Gated Linear Unit | 门控 FFN：SiLU(W_gate x) ⊙ (W_up x) |
+| SwiGLU | Swish-Gated Linear Unit | 门控 FFN：SiLU(W\_gate x) ⊙ (W\_up x) |
 | LM head | Language Modeling Head | 最后一层 Linear，hidden → vocab |
 | KV cache | Key/Value Cache | 历史 K/V 缓存，让 decode 复杂度从 O(S²) 降到 O(S) |
 
@@ -91,7 +91,7 @@ y = (SiLU(h @ W_gate) ⊙ (h @ W_up)) @ W_down        [B, S, D]
 
 ### 1.2.2 Attention 家族演进
 
-| 类型 | H_kv | KV cache 体积 | 代表模型 | 推理收益 |
+| 类型 | H\_kv | KV cache 体积 | 代表模型 | 推理收益 |
 |---|---|---|---|---|
 | MHA | H | 100% | GPT-3、LLaMA-1 | baseline |
 | MQA | 1 | 1/H | PaLM、Falcon | KV 极致省，质量略降 |
@@ -104,17 +104,17 @@ $$\text{KV bytes} = 2 \times L \times 2 \times B \times S \times H_{kv} \times d
 
 前 `2` 是 K+V，后 `2` 是 FP16 字节数。
 
-**例**：LLaMA-3-70B（L=80，D=8192，H=64，H_kv=8，d=128），B=1，S=8192：
+**例**：LLaMA-3-70B（L=80，D=8192，H=64，H\_kv=8，d=128），B=1，S=8192：
 
 ```
 KV = 2 × 80 × 2 × 1 × 8192 × 8 × 128  ≈  2.68 GB
 ```
 
-若按 MHA（H_kv=64），就是 **21.5 GB**，单卡都装不下大 batch。GQA 是 LLaMA-2 之后能做长 context + 大 batch 的关键工程改动。
+若按 MHA（H\_kv=64），就是 **21.5 GB**，单卡都装不下大 batch。GQA 是 LLaMA-2 之后能做长 context + 大 batch 的关键工程改动。
 
 ### 1.2.3 位置编码
 
-LLM 主流是 **RoPE**：把每个 head 的 d 维向量两两配对，按位置 m 旋转角度 m·θ_i，θ_i = base^(−2i/d)，base 通常取 10000。
+LLM 主流是 **RoPE**：把每个 head 的 d 维向量两两配对，按位置 m 旋转角度 m·θ\_i，θ\_i = base^(−2i/d)，base 通常取 10000。
 
 $$\text{RoPE}(x, m)_{2i,\,2i+1} =
 \begin{pmatrix} \cos(m\theta_i) & -\sin(m\theta_i) \\ \sin(m\theta_i) & \cos(m\theta_i) \end{pmatrix}
@@ -126,7 +126,7 @@ $$\text{RoPE}(x, m)_{2i,\,2i+1} =
 
 | 方法 | 思路 | 备注 |
 |---|---|---|
-| PI（Position Interpolation） | 把 m 缩成 m·(L_train/L_infer)，全维度统一压缩 | 简单粗暴，质量下降明显 |
+| PI（Position Interpolation） | 把 m 缩成 m·(L\_train/L\_infer)，全维度统一压缩 | 简单粗暴，质量下降明显 |
 | NTK-aware | 调 base，让高频维度少压、低频多压 | 社区常见 |
 | YaRN | 分频段不同策略，质量目前最好的开源方案 | LLaMA-3.1 / Qwen2.5 都用 |
 | LongRoPE | 每维独立搜索缩放系数 | Phi-3-128K 等 |
@@ -203,7 +203,7 @@ class LlamaAttention(nn.Module):
 1. **QKV 合并成一个 Linear**：少一次 launch、复用 input activation。是几乎所有推理引擎的标配。
 2. **`positions` 是显式参数**：vLLM 的 attention metadata 把 prefill / decode 的位置统一编码，不依赖 RNN 风格的隐含 state，方便 continuous batching。
 3. **`kv_cache` 是 PagedAttention 的 block table**：这里只看到接口，物理布局详见阶段 5。
-4. **TP rank 切分发生在 `QKVParallelLinear` 内部**：每张卡只持有自己负责的 head 子集；GQA 时 KV head 不能再切（已经只有 H_kv 个），所以 TP ≤ H_kv 是硬约束——详见阶段 2。
+4. **TP rank 切分发生在 `QKVParallelLinear` 内部**：每张卡只持有自己负责的 head 子集；GQA 时 KV head 不能再切（已经只有 H\_kv 个），所以 TP ≤ H\_kv 是硬约束——详见阶段 2。
 
 读 vLLM 时建议这条路径：`model_executor/models/llama.py` → `attention/layer.py` → `attention/backends/flash_attn.py`。
 

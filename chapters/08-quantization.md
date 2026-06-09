@@ -287,7 +287,7 @@ FP8 训练比推理难——反向、梯度、数值稳定都要处理。Hopper 
 2. **累加器保持 FP32**——FP8 只用于 GEMM 输入,累加在 FP32 做(回阶段 4 §4.7.4),这是数值稳定的关键;
 3. **主权重保持 BF16/FP32**——优化器更新在高精度做,只在 GEMM 时 cast 成 FP8;
 4. **动态 scale(delayed scaling)**——用历史几个 step 的 amax(最大绝对值)推算当前 scale,避免每步重算的开销;
-5. **敏感层保持高精度**——embedding、lm_head、norm 不量化。
+5. **敏感层保持高精度**——embedding、lm\_head、norm 不量化。
 
 代码层面用 TransformerEngine 几乎透明:
 
@@ -453,7 +453,7 @@ KIVI(2024)的核心发现,值得记牢:**Key 适合 per-channel 量化,Value 适
 
 KIVI 有个工程难点:**Key 的 per-channel 量化和 attention 的计算方向冲突**。
 
-回阶段 4 §4.2:attention 的 `QKᵀ` 沿 head_dim(channel)维归约。Key per-channel scale 意味着每个 channel 一个 scale——但 attention 要把所有 channel 加起来算 score。这要求反量化和 `QKᵀ` 必须**在 kernel 里协同**:每个 channel 先乘自己的 scale 再参与点积。
+回阶段 4 §4.2:attention 的 `QKᵀ` 沿 head\_dim(channel)维归约。Key per-channel scale 意味着每个 channel 一个 scale——但 attention 要把所有 channel 加起来算 score。这要求反量化和 `QKᵀ` 必须**在 kernel 里协同**:每个 channel 先乘自己的 scale 再参与点积。
 
 所以 KV INT8 量化离不开**专门的 attention kernel**:
 

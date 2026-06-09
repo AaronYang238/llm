@@ -197,7 +197,7 @@ Y = X @ W_dtensor
 
 **关键价值**:DTensor 把"什么时候该插 AllReduce / AllGather"从程序员手里接管过去——你只声明每个张量的 placement,框架自动推导通信。这正是 Megatron 当年要手写 `f`/`g` 算子(阶段 2 §2.2.2 的 AllReduce 位置)做的事,现在变成 placement 推导。
 
-### 7.3.3 FSDP2 与 pipeline_parallel
+### 7.3.3 FSDP2 与 pipeline\_parallel
 
 PyTorch 在 DTensor 之上提供了两个高层并行 API:
 
@@ -212,7 +212,7 @@ for layer in model.layers:
     fully_shard(layer, mesh=mesh)     # 每层参数变成 Shard 的 DTensor
 ```
 
-**pipeline_parallel(`torch.distributed.pipelining`)**——把模型按 stage 切分、自动做 1F1B 调度(阶段 2 §2.2.4):
+**pipeline\_parallel(`torch.distributed.pipelining`)**——把模型按 stage 切分、自动做 1F1B 调度(阶段 2 §2.2.4):
 
 ```python
 from torch.distributed.pipelining import pipeline, ScheduleGPipe

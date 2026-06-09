@@ -697,7 +697,7 @@ result = static_out.clone()
 5. **根因**：ACS 没关，NCCL 退化到 SHM，节点内通信带宽腰斩；
 6. **下一步**：关 ACS、装 `nvidia-peermem`（§3.3.4），重测 nccl-tests 确认 busbw 恢复（§3.7）。
 
-**教训**：多卡不扩展先看通信走没走对路（NCCL_DEBUG），对照 nccl-tests 理论值。
+**教训**：多卡不扩展先看通信走没走对路（NCCL\_DEBUG），对照 nccl-tests 理论值。
 
 ### 11.8.4 案例三：长 prompt 一来，TTFT 全线抖动
 

@@ -22,7 +22,7 @@
 - 8 卡 H100 训练吞吐只有理论 FLOPs 的 30%——`nsys` 一拉发现某两张卡跨 socket 走了 PCIe，不是 NVLink；
 - 同一份 FP8 权重换到 A100 上跑，吞吐和精度全对不上 H100 数据——A100 根本没有 FP8 Tensor Core；
 - 推理加上 FlashAttention 反而更慢——batch=1 时被 kernel launch overhead 吃掉了；
-- 估 KV cache 显存按 MHA 算半天，结果模型用的是 GQA，H_kv 已经砍到 8，算出来的数差 8 倍。
+- 估 KV cache 显存按 MHA 算半天，结果模型用的是 GQA，H\_kv 已经砍到 8，算出来的数差 8 倍。
 
 这些坑**根都在硬件**——HBM 带宽、SMEM 容量、NVLink 拓扑、kernel launch 成本、Tensor Core 精度支持。不把这些数字烙进脑子，后面讲并行策略、PagedAttention、FlashAttention-3 时都会变成猜谜。
 
@@ -53,7 +53,7 @@
 | NUMA | Non-Uniform Memory Access | CPU socket 间访存延迟非对称，跨 socket 走 QPI |
 | Roofline | — | 判定算子 compute-bound vs memory-bound 的图形模型 |
 
-> 公式记号约定（贯穿全书）：`B`=batch，`S`=seq，`D`=hidden_size，`H`=Q heads，`H_kv`=KV heads，`d`=head_dim，`L`=层数。
+> 公式记号约定（贯穿全书）：`B`=batch，`S`=seq，`D`=hidden\_size，`H`=Q heads，`H_kv`=KV heads，`d`=head\_dim，`L`=层数。
 
 ---
 
@@ -107,7 +107,7 @@ $$\text{性能上限} = \min(\text{峰值算力},\;\text{算术强度} \times \t
 
 | 算子 / 阶段 | 算术强度 | 类型 |
 |---|---|---|
-| Prefill 的大 GEMM（QKV、O_proj、FFN） | > 200 | compute-bound |
+| Prefill 的大 GEMM（QKV、O\_proj、FFN） | > 200 | compute-bound |
 | Decode 单 token 的 GEMV、RMSNorm、Softmax | < 10 | memory-bound |
 | KV cache 读 | ~2 | memory-bound（推理头号瓶颈） |
 | All-Reduce 跨节点 | — | 受 IB 带宽约束（通信-bound） |

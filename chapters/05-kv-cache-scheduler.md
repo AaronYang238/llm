@@ -86,7 +86,7 @@
 
 $$\text{KV bytes} = 2 \times L \times B \times S \times H_{kv} \times d \times \text{dtype\_bytes}$$
 
-前 `2` 是 K + V。代入 LLaMA-3-70B（L=80，H_kv=8，d=128，BF16）、B=32、S=8192：
+前 `2` 是 K + V。代入 LLaMA-3-70B（L=80，H\_kv=8，d=128，BF16）、B=32、S=8192：
 
 $$2 \times 80 \times 32 \times 8192 \times 8 \times 128 \times 2 \approx 86 \text{ GB}$$
 
@@ -119,7 +119,7 @@ PagedAttention 的解法搬自操作系统虚拟内存（SVG 下半部分）：
 
 | 收益 | 机制 |
 |---|---|
-| **内部碎片几乎消失** | 按需一次分一个 block，只有最后一个 block 有少量尾部浪费（< block_size 个 slot） |
+| **内部碎片几乎消失** | 按需一次分一个 block，只有最后一个 block 有少量尾部浪费（< block\_size 个 slot） |
 | **外部碎片消失** | 所有 block 等大，任意空 block 都能用，不需要连续 |
 | **block 可共享 / 换出** | block table 改个指针就能让多请求共享同一物理 block（prefix cache）、或把 block 换到 CPU（offload） |
 
@@ -421,7 +421,7 @@ prefix cache 不是免费的,几个工程权衡：
 调优观测点(呼应阶段 11 profiling):
 
 - 监控 **prefix cache 命中率**(vLLM `gpu_prefix_cache_hit_rate` 指标);
-- 命中率低且 TTFT 高 → 检查前缀是否真的重复、block_size 是否合适;
+- 命中率低且 TTFT 高 → 检查前缀是否真的重复、block\_size 是否合适;
 - 显存吃紧、batch 上不去 → 缓存占用过多,考虑调小缓存配额或缩短缓存 TTL。
 
 > 心智模型:**prefix cache = 把"KV 只跟 token 内容有关"这条性质变现。** 相同前缀算一次、存起来、人人复用。它把 prefill 的重复劳动消除掉——在前缀高度重复的真实负载里,这是比任何 kernel 优化都直接的 TTFT 杠杆。
