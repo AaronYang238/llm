@@ -112,6 +112,13 @@ $$\text{性能上限} = \min(\text{峰值算力},\;\text{算术强度} \times \t
 
 算术强度 = **FLOPs（运算次数）/ 从 HBM 搬运的字节数**。在 H100 BF16 上，ridge point ≈ 989 TFLOPS / 3.35 TB/s ≈ **295 FLOP/Byte**——算子算术强度低于这个值就是 memory-bound，再优化算法没用，得提复用率（融合算子、共用 input、加大 batch）。
 
+> **compute-bound 与 memory-bound（贯穿全书的瓶颈分类）**——一个算子慢，要么"算得不够快"、要么"数据喂不上"，瓶颈不同、优化方向相反：
+> - **compute-bound（算力受限）**：算术强度 **高于** ridge point，瓶颈是**算力**——Tensor Core 已满载，数据早备好在等。典型：prefill 的大 GEMM。优化方向是**提算力**（换更快 kernel、用 FP8、提 Tensor Core 利用率）。
+> - **memory-bound（带宽受限）**：算术强度 **低于** ridge point，瓶颈是**显存带宽**——算力大量闲置，时间全花在从 HBM 搬数据上。典型：decode 的单 token GEMV、读 KV cache。优化方向是**减少访存**（融合算子、量化减字节、加大 batch 提复用）。
+> - （还有第三类 **overhead-bound**：GPU 在等 CPU / kernel launch，算力和带宽都闲着；它不在 Roofline 上，靠 CUDA Graph 等治，详见阶段 11 §11.2。）
+>
+> 一句话：**先判定算子属于哪一类，再决定往哪个方向优化——判错方向，优化全白做**（给 memory-bound 算子换更快的计算 kernel 没用）。这是全书所有性能判断的第一步。
+
 实战分类：
 
 | 算子 / 阶段 | 算术强度 | 类型 |

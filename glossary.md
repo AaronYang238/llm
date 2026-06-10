@@ -160,7 +160,7 @@
 | **TTFT** | Time To First Token | 首 token 延迟，由 prefill 决定 | 阶段 5 §5.1、阶段 10 §10.7 |
 | **TPOT / ITL** | Time Per Output Token | 每输出 token 间隔，由 decode 决定 | 阶段 5 §5.1 |
 | **goodput** | — | 满足 SLO 前提下的有效吞吐（不是裸 throughput） | 阶段 5 §5.1 |
-| **compute / memory / overhead-bound** | — | 三类瓶颈，决定优化方向（提算力 / 减访存 / 减 launch） | 阶段 11 §11.2 |
+| **compute / memory / overhead-bound** | 算力 / 带宽 / 开销受限 | 三类瓶颈，决定优化方向（提算力 / 减访存 / 减 launch）；判错方向优化全白做 | 阶段 0 §0.2.2（定义）、阶段 11 §11.2（判读） |
 | **torch.profiler / nsys / ncu** | — | 找热点 / 看时序 / 挖单 kernel，由粗到细 | 阶段 11 §11.1 |
 | **flight recorder** | — | `TORCH_NCCL_TRACE_BUFFER_SIZE`，定位多卡 hang（collective mismatch） | 阶段 11 §11.6.3 |
 
