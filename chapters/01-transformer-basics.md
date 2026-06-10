@@ -11,6 +11,7 @@
 - [1.4 最小可运行示例：~150 行 LLaMA forward](#14-最小可运行示例150-行-llama-forward)
 - [1.5 性能与显存估算](#15-性能与显存估算)
 - [1.6 常见坑与 FAQ](#16-常见坑与-faq)
+- [自测](#自测)
 - [1.7 延伸阅读](#17-延伸阅读)
 
 ---
@@ -381,6 +382,28 @@ $$F_{\text{layer}} \approx 2 B S \cdot P_{\text{layer}} + \underbrace{4 B H S^2 
 7. **`temperature=0`**：不要除 0；T=0 时直接走 argmax。
 8. **TP 切分 + GQA**：TP 度必须 ≤ `num_kv_heads`，否则 KV head 无法均分。LLaMA-3-8B 的 `num_kv_heads=8`，TP=8 是上限。
 9. **`apply_rope` 在 FP16/BF16 下**：cos/sin 建议保持 FP32 缓存，乘的时候临时 cast，避免长序列高频项被吃掉精度。
+
+---
+
+## 自测
+
+1. **（口算）** LLaMA-3-70B（`L=80`、`H_kv=8`、`d=128`、BF16），`batch=1`、`seq=8192`，KV cache 约多大？如果改回 MHA（`H_kv=64`）又是多大？
+2. **（改错）** 一个新手实现 GQA 时写了 `k.repeat(1, 1, g, 1)` 来把 KV head 复制 `g` 倍。这有什么问题？正确该怎么写？
+3. **（config 判读）** 你拿到一个 `config.json`，`num_attention_heads=32`、`num_key_value_heads=32`。它用的是 MHA、GQA 还是 MQA？TP 最多能开到多少？
+4. **（概念）** 为什么 decode 一定要维护 KV cache？不维护会有什么后果（复杂度怎么变）？
+5. **（应用）** `temperature=0` 时采样该怎么处理？为什么不能直接套 `logits / temperature` 的公式？
+
+<br>
+
+**参考答案**
+
+1. KV $= 2 \times L \times 2 \times B \times S \times H_{kv} \times d \times 2\text{ bytes} = 2{\times}80{\times}2{\times}1{\times}8192{\times}8{\times}128{\times}2 ≈$ **2.68 GB**。MHA（`H_kv=64`）是它的 8 倍 ≈ **21.5 GB**。（§1.2.2）
+2. `repeat(1,1,g,1)` 会把 head 维**整体平铺**，打乱 head 顺序，等价于让 attention 学了错误的 Q↔KV 映射。正确用 `repeat_interleave(g, dim=2)`（每个 KV head 就地复制 `g` 次）。（§1.6 第 2 条）
+3. `num_key_value_heads == num_attention_heads` → **MHA**。TP 上限 = `num_key_value_heads` = **32**（GQA/MHA 下 KV head 不能再切，`TP ≤ H_kv` 是硬约束）。（§1.2.2、§1.6 第 8 条）
+4. 不维护 KV cache，decode 每生成一个 token 都要把**整个前缀重新 forward** 一遍，复杂度从 `O(S)` 升到 `O(S²)`，长序列直接慢到不可用。（§1.6 第 6 条）
+5. `temperature=0` 时直接走 **argmax（贪心）**，不要真的除 0。`logits / 0` 会数值爆炸。（§1.6 第 7 条）
+
+> 第 1、3 题是工程现场最常口算的两件事（估显存、定 TP 度）。能脱手算出来，阶段 2/5 会轻松很多。
 
 ---
 

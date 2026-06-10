@@ -13,6 +13,7 @@
 - [0.4 最小可运行示例：测一遍带宽](#04-最小可运行示例测一遍带宽)
 - [0.5 性能与调优](#05-性能与调优)
 - [0.6 常见坑与 FAQ](#06-常见坑与-faq)
+- [自测](#自测)
 - [0.7 延伸阅读](#07-延伸阅读)
 
 ---
@@ -312,6 +313,26 @@ $$\text{算术强度} = \frac{2 M K N}{2(M K + K N + M N)}$$
 6. **CUDA Graph capture 失败**：动态 shape、CPU sync、显式 `cudaMalloc` 都不能出现在 capture region 里。变长 batch 要用 padding 或 piecewise graph。
 7. **HBM 带宽比理论低 30%+**：先看 `nvidia-smi -q -d POWER` 是不是被 power cap 限频；ECC 开关只损失 ~10%。
 8. **`numactl` 绑核后吞吐反降**：多进程都绑到同一个 NUMA node 了，要按 GPU↔NUMA 拓扑分别绑。
+
+---
+
+## 自测
+
+1. **（口算）** H100 SXM 的 HBM 带宽约 3.35 TB/s，BF16 算力约 989 TFLOPS。它的 Roofline "拐点"（ridge point）算术强度约是多少 FLOP/Byte？低于这个值的算子属于哪一类 bound？
+2. **（判读）** `nvidia-smi topo -m` 显示两张常通信的卡之间是 `SYS`。这意味着什么？为什么要尽量避免把 TP 放在这种连接上？
+3. **（应用）** 你把一个 FP8 量化的模型部署到 A100 上，发现吞吐和精度都对不上 H100 的数据。最可能的原因是什么？
+4. **（口算）** decode 阶段单请求是 memory-bound 的 GEMV。为什么"把几十条请求拼成一个大 batch"能把它推向 compute-bound？（提示：算术强度怎么变）
+
+<br>
+
+**参考答案**
+
+1. ridge point ≈ 989 TFLOPS / 3.35 TB/s ≈ **295 FLOP/Byte**。算术强度**低于** 295 的算子是 **memory-bound**（带宽受限），高于的是 compute-bound。（§0.2.2、§0.5）
+2. `SYS` = 跨 socket / 走 QPI 的最慢连接。TP 每层都有高频 AllReduce、对带宽极敏感，放 `SYS` 上会让训练慢几倍——TP 必须放节点内 NVLink（`NV`）。（§0.5）
+3. A100 **没有 FP8 Tensor Core**（FP8 是 Hopper 起才有）。模型会回退到 BF16 执行，吞吐对不上 H100、数值路径也变了。（§0.2.4）
+4. 单请求 GEMV 算术强度 ≈ 1（每个权重读一次只算一次），memory-bound；拼成 batch=N 后，同一份权重被 N 条请求复用，**算术强度 → N**，越过 ridge point 进入 compute-bound。这就是 continuous batching 的物理本质。（§0.2.2，详见阶段 5）
+
+> 答得上 1、4 说明你抓住了本章最关键的 Roofline 直觉——它是全书所有性能判断的指南针。
 
 ---
 

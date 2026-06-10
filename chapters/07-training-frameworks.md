@@ -16,6 +16,7 @@
 - [7.9 横向对比矩阵](#79-横向对比矩阵)
 - [7.10 选型决策清单](#710-选型决策清单)
 - [7.11 常见坑与 FAQ](#711-常见坑与-faq)
+- [自测](#自测)
 - [7.12 延伸阅读](#712-延伸阅读)
 
 ---
@@ -656,6 +657,28 @@ DCP 是基于 DTensor 的(§7.3)——这也是各框架往 DTensor 收敛的一
 8. **MoE 训练负载不均**:expert 路由倾斜,部分 expert 过载。查负载均衡 loss / DeepSeek 的 loss-free balance(阶段 1 §1.2.4、阶段 9);EP 通信用 DeepEP(阶段 3 §3.4)。
 9. **DeepSpeed 和 Megatron 的 TP 冲突**:联合使用时,TP 由 Megatron 管、ZeRO-DP 由 DeepSpeed 管,别让两边都试图切同一维——用 Megatron-DeepSpeed 集成分支,不要自己拼。
 10. **多机训练 NCCL 超时/卡住**:通信层问题,回阶段 3 §3.3.4 的症状→旋钮表排查(IB/拓扑/`NCCL_DEBUG`),不是框架 bug。
+
+---
+
+## 自测
+
+1. **（概念）** 一句话说清 Megatron 和 DeepSeed 的路线区别——它们各"切"什么来让单卡装下大模型？
+2. **（概念）** DTensor 的 `placement`（`Shard`/`Replicate`/`Partial`）解决了过去手写并行的什么痛点？为什么各框架都在往它收敛？
+3. **（应用）** 你用 TP=8 存了一个 checkpoint，现在想用 TP=4 部署推理却加载失败。根因是什么？什么机制能解决？
+4. **（判读）** 一个 training step 里有四个阶段（forward/backward/grad sync/optimizer），每个阶段的切分和通信分别对应前面哪些阶段的知识？
+5. **（应用）** 你要从头训一个 671B MoE，追求极致 MFU；另一个团队只是微调一个 13B、想最快上手。各推荐什么框架？
+
+<br>
+
+**参考答案**
+
+1. **Megatron 切张量**（TP/PP：把每层权重切到多卡，要改模型代码）；**DeepSpeed 切状态**（ZeRO：把优化器/梯度/参数沿 DP 维切，不改模型代码、配一个 JSON）。（§7.5.1）
+2. 它把"什么时候插 AllReduce/AllGather、rank 怎么映射"从程序员手里接管——只声明张量怎么切，框架自动推导通信。收敛是为了**互操作**（统一的 checkpoint/工具生态）。（§7.3.2、§7.3.4）
+3. 朴素分片 ckpt **绑死并行配置**（每卡存自己的字节）。用 **分布式 checkpoint（DCP）**——它存"全局张量的哪一块"+ 元数据，加载时按新 mesh **reshard**，与并行配置解耦。（§7.8.3）
+4. forward 切激活（TP/SP/CP，阶段 2）；backward 切梯度 + 激活重算；grad sync 走 AllReduce/ReduceScatter（阶段 3）；optimizer 切优化器状态（ZeRO，阶段 2 §2.2.8）。（§7.2.1）
+5. 从头训 671B → **Megatron-Core**（五维并行最全、MFU 最高），或 Megatron-DeepSpeed 联合；微调 13B → **DeepSpeed**（一个 JSON、HF Trainer 原生、上手最快）。（§7.10）
+
+> 第 1、3 题是训练栈最容易混/最容易翻车的两点（路线分野、ckpt reshard）。
 
 ---
 

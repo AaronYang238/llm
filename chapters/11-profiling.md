@@ -14,6 +14,7 @@
 - [11.7 任务：判断该不该上 CUDA Graph](#117-任务判断该不该上-cuda-graph)
 - [11.8 端到端排障实战](#118-端到端排障实战)
 - [11.9 常见坑与 FAQ](#119-常见坑与-faq)
+- [自测](#自测)
 - [11.10 延伸阅读](#1110-延伸阅读)
 
 ---
@@ -741,6 +742,28 @@ result = static_out.clone()
 8. **多卡 hang 盲猜**：用 flight recorder（`TORCH_NCCL_TRACE_BUFFER_SIZE`）定位，尤其抓 collective mismatch（§11.6.3）。
 9. **nsys trace 太大打不开**：用 NVTX 圈定范围 + `--capture-range` 只抓关键段（§11.4.1）。
 10. **现成 kernel 还想 ncu 优化**：FlashAttention/cuBLAS 已近最优，ncu 挖了也改不动。ncu 是给自定义 kernel 用的（§11.5.5）。
+
+---
+
+## 自测
+
+1. **（概念）** 性能分析的第一原则是什么？为什么 torch.profiler / nsys / ncu 三个工具要"由粗到细"用、不能一上来就 ncu？
+2. **（判读）** `nvidia-smi dmon` 显示某算子 `sm%` 和 `mem%` **都很低**。它最可能是哪一类 bound？下一步该怎么治？
+3. **（应用）** 单卡 decode 吞吐只有预期一半。按本章的五步下钻，你会怎么一步步定位？最可能的两个根因是什么？
+4. **（概念）** CUDA Graph 治的是哪一类 bound？它有什么硬约束、导致变长 batch 不能直接录？引擎是怎么绕过的？
+5. **（判读）** 多卡只跑出 3 卡的速度，nsys 时间线上 AllReduce 占大块、计算停着等。这说明什么？该往哪查？
+
+<br>
+
+**参考答案**
+
+1. **先测量，再优化**（measure, don't guess）。一上来 ncu 太细、太慢、会淹没在细节里；正确路径是 torch.profiler 找热点 → nsys 看时序 → ncu 挖单点，由粗到细缩小范围。（§11.0、§11.1）
+2. **overhead-bound**——GPU 闲着在等（CPU/launch/同步）。下一步 nsys 看 launch 间隙，确认后上 **CUDA Graph** 消除 launch 开销。（§11.2.2/11.2.4）
+3. ① nvidia-smi 看到 sm/mem 都低 → overhead 嫌疑；② profiler 看到 `cudaLaunchKernel` 占比高、小 kernel 多 → 实锤 overhead-bound；③ nsys 看 kernel 间隙密。两个根因：**batch 太小**（没开 continuous batching）+ **没开 CUDA Graph**。（§11.8.2）
+4. 治 **launch overhead（overhead-bound）**。硬约束是固定 shape + 无 CPU 同步 + 无动态分配，所以变长 batch 不能直接录；引擎用 **piecewise graph / static-shape 元数据**（按 batch size 分段录、把变长塞进固定 shape 张量）绕过。（§11.7.1/11.7.2）
+5. **通信没和计算重叠**，通信成瓶颈。往两个方向查：是否走对了路（`NCCL_DEBUG=INFO` 看有没有 `via SHM`、对照 nccl-tests）+ 能不能 overlap（async-TP，阶段 4 §4.8）。（§11.4.2、§11.8.3）
+
+> 第 1、3 题是"排障方法论"的核心——能把"由现象到根因"的五步下钻说清，本章就到位了。
 
 ---
 

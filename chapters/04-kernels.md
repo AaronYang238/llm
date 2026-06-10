@@ -14,6 +14,7 @@
 - [4.7 CUTLASS / cuBLASLt：GEMM epilogue 融合 + FP8](#47-cutlass--cublaslt-gemm-epilogue-融合--fp8)
 - [4.8 All-Reduce 融合：async-TP / flux](#48-all-reduce-融合async-tp--flux)
 - [4.9 常见坑与 FAQ](#49-常见坑与-faq)
+- [自测](#自测)
 - [4.10 延伸阅读](#410-延伸阅读)
 
 ---
@@ -914,6 +915,28 @@ out = ag_gemm(x_local, weight)
 8. **FP8 推理精度跌 1pt+**：八成是 scale 粒度太粗（per-tensor）。换 per-channel weight + per-token activation；再不够上 block-wise（DeepSeek-V3 风格）。详见阶段 8。
 9. **async-TP 启用了但没看到加速**：可能 (a) TP 度 ≤ 2；(b) GEMM 太小，chunk 后算术强度跌破 ridge point；(c) NCCL 版本 < 2.18；(d) GEMM 与 NCCL 抢 SM，需要 `NCCL_NCHANNELS_PER_PEER` 调度。
 10. **CUDA Graph capture 失败**：动态 shape、CPU sync、显式 `cudaMalloc` 都不能出现在 capture region 内。变长 batch 用 padding（FlashInfer 风格元数据张量）或 piecewise graph（按 batch size 分段 capture）。
+
+---
+
+## 自测
+
+1. **（概念）** FlashAttention 和朴素 attention 算的是同一个数学结果，为什么能省那么多显存、快那么多？关键的两个算法点是什么？
+2. **（概念）** PagedAttention 改的是 attention 的"算法"还是"访存方式"？它用什么类比解决了 KV cache 的碎片问题？
+3. **（应用）** 你的模型是 DeepSeek-V3（用 MLA），直接用 FlashAttention-3 跑，速度对不上官方数字。为什么？该用什么 kernel？
+4. **（判读）** 你给一个 7B 模型上了 W4A16 量化，小 batch decode 确实快了，但大 batch prefill 反而比 FP16 还慢。为什么？
+5. **（概念）** FP8 GEMM 里，为什么"输入用 FP8、累加器却保持 FP32"？
+
+<br>
+
+**参考答案**
+
+1. 靠 **online softmax**（增量累加，不需 materialize 整行）+ **IO-aware tiling**（分块在 SMEM 内算，不把 `[S,S]` 的 `QKᵀ` 矩阵写回 HBM）。显存从 `O(S²)` 降到 `O(S)`，HBM 流量大降。（§4.2.2）
+2. 改的是**访存方式**（KV 布局），不是数学。它把操作系统的**虚拟内存分页**搬到 KV cache——固定大小 block + block table 间接映射，几乎消除内/外碎片。（§4.3）
+3. FA3 假设 QKV 同秩，不适配 MLA 的**低秩潜变量**。要用 **FlashMLA**（DeepSeek 专为 MLA + Hopper 写的 kernel）。（§4.5）
+4. 大 batch 是 compute-bound，4bit 权重要**反量化成 16bit 才能算**，反量化开销在大 batch 下盖过省下的带宽。小 batch（memory-bound）才受益。（§4.5 对应、§8.5.1）
+5. FP8 尾数位少、直接累加会丢精度/溢出；累加在 FP32 做能保证数值稳定，这是 FP8 训练/推理能用的前提。（§4.7.4）
+
+> 第 3、4 题是"算法 ↔ kernel ↔ batch"三者耦合的典型——选错 kernel 或选错量化方向都会让优化白做。
 
 ---
 

@@ -16,6 +16,7 @@
 - [5.9 最小可运行示例：一个分页 KV 管理器](#59-最小可运行示例一个分页-kv-管理器)
 - [5.10 性能与调优](#510-性能与调优)
 - [5.11 常见坑与 FAQ](#511-常见坑与-faq)
+- [自测](#自测)
 - [5.12 延伸阅读](#512-延伸阅读)
 
 ---
@@ -827,6 +828,28 @@ KV cache 和调度的调优,本质是在 §5.1 那三个指标(TTFT / TPOT / 吞
 8. **抢占(preemption)频繁导致吞吐骤降**:`gpu_memory_utilization` 太激进,decode 中途频繁缺 block。调低利用率留余量,或减小 `max_num_seqs`。
 9. **多轮对话第二轮没加速**:没开 prefix cache,或对话历史的 KV 已被 LRU 淘汰。长对话场景配合 §5.8 offload 保留历史 KV。
 10. **显存账算不平、莫名 OOM**:忘了激活峰值和临时 buffer(§5.2.5 公式里的减项)。`gpu_memory_utilization` 不是只留给 KV,还要覆盖激活——从 0.9 往下调试。
+
+---
+
+## 自测
+
+1. **（概念）** continuous batching 相比 static batching，把调度粒度从"一批请求"降到了什么？为什么这对 decode 特别有效？
+2. **（应用）** 线上偶发某些请求 TTFT p99 暴涨，和"有人发了超长 prompt"时间吻合。根因是什么？开哪个功能、调哪个旋钮能缓解？
+3. **（概念）** prefix cache 为什么能跨请求复用 KV？它依赖 KV 的什么性质？为什么 hash 必须包含完整前缀（不能只 hash 当前 block）？
+4. **（口算/应用）** 给定单卡可用显存 48.5 GB、单 token KV 占 40 KB，这张卡的 KV 池大约能放多少 token？这些 token 怎么在并发请求间分配？
+5. **（概念）** 省 KV 显存的"三件套"——量化、offload、PD 分离——分别是怎么省的？优先级怎么排？
+
+<br>
+
+**参考答案**
+
+1. 降到**一个 token step**（iteration-level scheduling）。decode 单请求是 memory-bound 的 GEMV，把多条拼成大 batch 后**算术强度上升、推向 compute-bound**，GPU 算力被喂饱。（§5.3）
+2. 长 prompt 的 prefill 独占 GPU、阻塞了后续请求的 decode。开 **chunked prefill**，把长 prefill 切块与 decode 混跑；调 `max_num_batched_tokens`（小→TPOT 稳、大→TTFT 低）。（§5.4）
+3. 因为 **KV 只跟 token 内容有关、与请求无关**——同样的前缀算出同样的 KV。hash 必须含完整前缀，是因为 RoPE 让 KV 与**绝对位置**绑定，同一个 token 在不同位置 KV 不同。（§5.5）
+4. 48.5 GB / 40 KB ≈ **127 万 token**。这是一个**全局 slot 池**，由调度器按需分配给所有并发请求（可以是 32 条 × 8K、也可以 256 条 × 5K）。（§5.2.5）
+5. **量化**让每份 KV 更小、**offload** 把冷 KV 搬到 CPU/NVMe、**PD 分离**把 KV 搬到别的 GPU。优先级：先量化（几乎无损）→ 再 offload（复用率高时）→ 规模大才上 PD 分离。（§5.7/5.8、§5.6）
+
+> 第 1、2 题是推理服务两个最大杠杆（吞吐靠 continuous batching、延迟稳定靠 chunked prefill）——面试和实战都高频。
 
 ---
 

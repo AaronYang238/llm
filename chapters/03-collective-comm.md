@@ -16,6 +16,7 @@
 - [3.9 下一步：通信库的发展方向](#39-下一步通信库的发展方向)
 - [3.10 最小可运行示例：nccl-tests 微基准](#310-最小可运行示例nccl-tests-微基准)
 - [3.11 常见坑与 FAQ](#311-常见坑与-faq)
+- [自测](#自测)
 - [3.12 延伸阅读](#312-延伸阅读)
 
 ---
@@ -915,6 +916,28 @@ mpirun -np 8 --bind-to none \
 8. **跨容器 / k8s NCCL 跑不通**：缺 IPC namespace 共享、`SYS_PTRACE` capability 没开、`/dev/infiniband` 没挂进去。三样缺一样都过不了 communicator 建立。
 9. **RoCE 上 NCCL 跑不动**：要设 `NCCL_IB_GID_INDEX=3`（IPv4 RoCEv2）、网络层 PFC 配对、ECN 启用。RoCE 比 IB 折腾，预算允许尽量上 IB。
 10. **`NCCL_ALGO=NVLS` 在 A100 上无效**：A100 的 NVSwitch 不支持 NVLS，**需要 Hopper + 第三代 NVSwitch**——别在 A100 集群里强行设这个变量。
+
+---
+
+## 自测
+
+1. **（概念）** 调 NCCL 时为什么只看 busbw、不看 algbw？Ring AllReduce 的 busbw 上限大约等于什么？
+2. **（判读）** `NCCL_DEBUG=INFO` 里某条链路显示 `via SHM` 而不是 `via P2P/IPC`。说明什么问题？怎么修？
+3. **（应用）** 跑 `nccl-tests`，发现小消息（< 64 KB）busbw 很低、大消息才爬上去。这正常吗？为什么？
+4. **（判读）** 多机训练突然卡住，几分钟后 NCCL watchdog 超时。你用什么工具定位？如果发现"部分 rank 完成了某个 collective、部分没到"，最可能是什么 bug？
+5. **（概念）** DeepEP 的 low-latency 模式能把 MoE all-to-all 延迟压到 ~8 μs，靠的是什么底层技术？
+
+<br>
+
+**参考答案**
+
+1. algbw 随节点数缩、会误导（看上去"越多卡越慢"）；busbw 经拓扑修正后跟节点数无关，反映**物理链路用得满不满**。Ring AllReduce 的 busbw 上限 ≈ **单条链路带宽 `BW_link`**。（§3.2.2）
+2. 节点内 **P2P 没启**，NCCL 退化到走 host 共享内存，带宽腰斩。查 ACS（PCIe Access Control Service）是否关、`nvidia-peermem` 内核模块是否装。（§3.3.1、§3.3.4）
+3. **正常**。小消息是 latency-bound（受固定启动开销主导），不是带宽-bound；busbw 通常在 ~1 MB 开始爬升、~256 MB 饱和。（§3.7.2）
+4. 用 **flight recorder**（`TORCH_NCCL_TRACE_BUFFER_SIZE` + dump）。"完成数不一致"是 **collective mismatch**——某些 rank 少调了一次集合通信（常见于条件分支里 if 不对称、某 rank 提前 return），其它 rank 永远等不到。（§3.6.3 / 对应阶段 11 §11.6.3）
+5. **IBGDA**（IB GPUDirect Async）——让 GPU kernel 内直接 post RDMA 请求（WQE），CPU 退出热路径。（§3.3.3、§3.4.3）
+
+> 第 2、4 题覆盖了多卡通信最常见的"慢"和"卡死"两类故障——这正是阶段 11 §11.6 的核心。
 
 ---
 
