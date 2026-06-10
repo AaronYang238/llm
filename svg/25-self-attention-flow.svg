@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" font-family="Inter, system-ui, sans-serif" font-size="13">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#455a64"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="26" text-anchor="middle" font-size="16" font-weight="600">Self-Attention：因果掩码下的“软字典查询”（单 head，4 token 示例）</text>
+  <text x="480" y="46" text-anchor="middle" font-size="12" fill="#546e7a">每个 token 用自己的 Query 匹配所有 token 的 Key，按匹配度加权聚合它们的 Value</text>
+
+  <!-- ① token -> Q/K/V -->
+  <text x="28" y="84" font-weight="600" fill="#1e88e5">① 每个 token → Q / K / V</text>
+  <rect x="28" y="96" width="206" height="34" rx="4" fill="#cfd8dc" stroke="#546e7a"/>
+  <text x="131" y="118" text-anchor="middle">token i 的向量 xᵢ ∈ [D]</text>
+  <line x1="131" y1="130" x2="131" y2="148" stroke="#455a64" marker-end="url(#arr)"/>
+  <text x="246" y="142" font-size="11" fill="#546e7a">×W_Q/W_K/W_V</text>
+
+  <rect x="28" y="150" width="206" height="32" rx="4" fill="#1e88e5" stroke="#0d47a1"/>
+  <text x="131" y="170" text-anchor="middle" fill="white">qᵢ 查询：我想找什么</text>
+  <rect x="28" y="188" width="206" height="32" rx="4" fill="#1e88e5" stroke="#0d47a1"/>
+  <text x="131" y="208" text-anchor="middle" fill="white">kᵢ 键：我能提供的索引</text>
+  <rect x="28" y="226" width="206" height="32" rx="4" fill="#1e88e5" stroke="#0d47a1"/>
+  <text x="131" y="246" text-anchor="middle" fill="white">vᵢ 值：我携带的信息</text>
+
+  <rect x="28" y="270" width="206" height="50" rx="4" fill="#fff8e1" stroke="#f9a825"/>
+  <text x="131" y="288" text-anchor="middle" font-size="11" fill="#bf360c">Q 每步新算；K/V 是历史，可缓存</text>
+  <text x="131" y="306" text-anchor="middle" font-size="11" fill="#bf360c">→ 这就是 KV cache 的由来（§1.2.2）</text>
+
+  <!-- bridge arrow to scores -->
+  <line x1="234" y1="204" x2="304" y2="240" stroke="#455a64" marker-end="url(#arr)"/>
+  <text x="262" y="218" font-size="11" fill="#546e7a">Q·Kᵀ</text>
+
+  <!-- ② scores matrix -->
+  <text x="396" y="150" text-anchor="middle" font-weight="600" fill="#1e88e5">② scores = Q·Kᵀ / √d ＋ 因果掩码</text>
+  <!-- col labels -->
+  <text x="339" y="178" text-anchor="middle" font-size="11" fill="#546e7a">k₁</text>
+  <text x="377" y="178" text-anchor="middle" font-size="11" fill="#546e7a">k₂</text>
+  <text x="415" y="178" text-anchor="middle" font-size="11" fill="#546e7a">k₃</text>
+  <text x="453" y="178" text-anchor="middle" font-size="11" fill="#546e7a">k₄</text>
+  <!-- row1 -->
+  <rect x="320" y="185" width="38" height="38" fill="#42a5f5" stroke="#1976d2"/><text x="339" y="209" text-anchor="middle" fill="white" font-size="12">2.1</text>
+  <rect x="358" y="185" width="38" height="38" fill="#eceff1" stroke="#b0bec5"/><text x="377" y="209" text-anchor="middle" fill="#90a4ae" font-size="12">−∞</text>
+  <rect x="396" y="185" width="38" height="38" fill="#eceff1" stroke="#b0bec5"/><text x="415" y="209" text-anchor="middle" fill="#90a4ae" font-size="12">−∞</text>
+  <rect x="434" y="185" width="38" height="38" fill="#eceff1" stroke="#b0bec5"/><text x="453" y="209" text-anchor="middle" fill="#90a4ae" font-size="12">−∞</text>
+  <!-- row2 -->
+  <rect x="320" y="223" width="38" height="38" fill="#42a5f5" stroke="#1976d2"/><text x="339" y="247" text-anchor="middle" fill="white" font-size="12">0.4</text>
+  <rect x="358" y="223" width="38" height="38" fill="#42a5f5" stroke="#1976d2"/><text x="377" y="247" text-anchor="middle" fill="white" font-size="12">2.3</text>
+  <rect x="396" y="223" width="38" height="38" fill="#eceff1" stroke="#b0bec5"/><text x="415" y="247" text-anchor="middle" fill="#90a4ae" font-size="12">−∞</text>
+  <rect x="434" y="223" width="38" height="38" fill="#eceff1" stroke="#b0bec5"/><text x="453" y="247" text-anchor="middle" fill="#90a4ae" font-size="12">−∞</text>
+  <!-- row3 -->
+  <rect x="320" y="261" width="38" height="38" fill="#42a5f5" stroke="#1976d2"/><text x="339" y="285" text-anchor="middle" fill="white" font-size="12">0.2</text>
+  <rect x="358" y="261" width="38" height="38" fill="#42a5f5" stroke="#1976d2"/><text x="377" y="285" text-anchor="middle" fill="white" font-size="12">1.1</text>
+  <rect x="396" y="261" width="38" height="38" fill="#42a5f5" stroke="#1976d2"/><text x="415" y="285" text-anchor="middle" fill="white" font-size="12">1.9</text>
+  <rect x="434" y="261" width="38" height="38" fill="#eceff1" stroke="#b0bec5"/><text x="453" y="285" text-anchor="middle" fill="#90a4ae" font-size="12">−∞</text>
+  <!-- row4 -->
+  <rect x="320" y="299" width="38" height="38" fill="#42a5f5" stroke="#1976d2"/><text x="339" y="323" text-anchor="middle" fill="white" font-size="12">0.1</text>
+  <rect x="358" y="299" width="38" height="38" fill="#42a5f5" stroke="#1976d2"/><text x="377" y="323" text-anchor="middle" fill="white" font-size="12">0.3</text>
+  <rect x="396" y="299" width="38" height="38" fill="#42a5f5" stroke="#1976d2"/><text x="415" y="323" text-anchor="middle" fill="white" font-size="12">0.8</text>
+  <rect x="434" y="299" width="38" height="38" fill="#42a5f5" stroke="#1976d2"/><text x="453" y="323" text-anchor="middle" fill="white" font-size="12">2.0</text>
+  <!-- row labels -->
+  <text x="312" y="209" text-anchor="end" font-size="11" fill="#546e7a">q₁</text>
+  <text x="312" y="247" text-anchor="end" font-size="11" fill="#546e7a">q₂</text>
+  <text x="312" y="285" text-anchor="end" font-size="11" fill="#546e7a">q₃</text>
+  <text x="312" y="323" text-anchor="end" font-size="11" fill="#546e7a">q₄</text>
+  <text x="396" y="356" text-anchor="middle" font-size="11" fill="#546e7a">上三角 j&gt;i 掩成 −∞：不能看未来</text>
+
+  <!-- arrow scores -> softmax -->
+  <line x1="478" y1="260" x2="612" y2="260" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="545" y="251" text-anchor="middle" font-size="11" fill="#546e7a">softmax(每行)</text>
+
+  <!-- ③ softmax weights -->
+  <text x="696" y="150" text-anchor="middle" font-weight="600" fill="#1e88e5">③ 注意力权重 A（每行和=1）</text>
+  <text x="639" y="178" text-anchor="middle" font-size="11" fill="#546e7a">k₁</text>
+  <text x="677" y="178" text-anchor="middle" font-size="11" fill="#546e7a">k₂</text>
+  <text x="715" y="178" text-anchor="middle" font-size="11" fill="#546e7a">k₃</text>
+  <text x="753" y="178" text-anchor="middle" font-size="11" fill="#546e7a">k₄</text>
+  <!-- row1 -->
+  <rect x="620" y="185" width="38" height="38" fill="#1e88e5" fill-opacity="1.0" stroke="#0d47a1"/><text x="639" y="209" text-anchor="middle" fill="white" font-size="11">1.00</text>
+  <rect x="658" y="185" width="38" height="38" fill="#ffffff" stroke="#cfd8dc"/>
+  <rect x="696" y="185" width="38" height="38" fill="#ffffff" stroke="#cfd8dc"/>
+  <rect x="734" y="185" width="38" height="38" fill="#ffffff" stroke="#cfd8dc"/>
+  <!-- row2 -->
+  <rect x="620" y="223" width="38" height="38" fill="#1e88e5" fill-opacity="0.34" stroke="#0d47a1"/><text x="639" y="247" text-anchor="middle" fill="#0d47a1" font-size="11">.30</text>
+  <rect x="658" y="223" width="38" height="38" fill="#1e88e5" fill-opacity="0.74" stroke="#0d47a1"/><text x="677" y="247" text-anchor="middle" fill="white" font-size="11">.70</text>
+  <rect x="696" y="223" width="38" height="38" fill="#ffffff" stroke="#cfd8dc"/>
+  <rect x="734" y="223" width="38" height="38" fill="#ffffff" stroke="#cfd8dc"/>
+  <!-- row3 -->
+  <rect x="620" y="261" width="38" height="38" fill="#1e88e5" fill-opacity="0.20" stroke="#0d47a1"/><text x="639" y="285" text-anchor="middle" fill="#0d47a1" font-size="11">.15</text>
+  <rect x="658" y="261" width="38" height="38" fill="#1e88e5" fill-opacity="0.34" stroke="#0d47a1"/><text x="677" y="285" text-anchor="middle" fill="#0d47a1" font-size="11">.30</text>
+  <rect x="696" y="261" width="38" height="38" fill="#1e88e5" fill-opacity="0.58" stroke="#0d47a1"/><text x="715" y="285" text-anchor="middle" fill="white" font-size="11">.55</text>
+  <rect x="734" y="261" width="38" height="38" fill="#ffffff" stroke="#cfd8dc"/>
+  <!-- row4 -->
+  <rect x="620" y="299" width="38" height="38" fill="#1e88e5" fill-opacity="0.16" stroke="#0d47a1"/><text x="639" y="323" text-anchor="middle" fill="#0d47a1" font-size="11">.08</text>
+  <rect x="658" y="299" width="38" height="38" fill="#1e88e5" fill-opacity="0.20" stroke="#0d47a1"/><text x="677" y="323" text-anchor="middle" fill="#0d47a1" font-size="11">.15</text>
+  <rect x="696" y="299" width="38" height="38" fill="#1e88e5" fill-opacity="0.30" stroke="#0d47a1"/><text x="715" y="323" text-anchor="middle" fill="#0d47a1" font-size="11">.25</text>
+  <rect x="734" y="299" width="38" height="38" fill="#1e88e5" fill-opacity="0.56" stroke="#0d47a1"/><text x="753" y="323" text-anchor="middle" fill="white" font-size="11">.52</text>
+  <text x="612" y="209" text-anchor="end" font-size="11" fill="#546e7a">q₁</text>
+  <text x="612" y="247" text-anchor="end" font-size="11" fill="#546e7a">q₂</text>
+  <text x="612" y="285" text-anchor="end" font-size="11" fill="#546e7a">q₃</text>
+  <text x="612" y="323" text-anchor="end" font-size="11" fill="#546e7a">q₄</text>
+
+  <!-- ④ output -->
+  <line x1="696" y1="339" x2="696" y2="392" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="760" y="372" font-size="11" fill="#546e7a">oᵢ = Σⱼ A[i,j]·vⱼ</text>
+  <text x="696" y="412" text-anchor="middle" font-weight="600" fill="#43a047">④ 输出：按权重聚合 Value</text>
+  <rect x="600" y="424" width="40" height="32" rx="4" fill="#43a047" stroke="#1b5e20"/><text x="620" y="444" text-anchor="middle" fill="white">o₁</text>
+  <rect x="648" y="424" width="40" height="32" rx="4" fill="#43a047" stroke="#1b5e20"/><text x="668" y="444" text-anchor="middle" fill="white">o₂</text>
+  <rect x="696" y="424" width="40" height="32" rx="4" fill="#43a047" stroke="#1b5e20"/><text x="716" y="444" text-anchor="middle" fill="white">o₃</text>
+  <rect x="744" y="424" width="40" height="32" rx="4" fill="#43a047" stroke="#1b5e20"/><text x="764" y="444" text-anchor="middle" fill="white">o₄</text>
+
+  <!-- intuition strip -->
+  <rect x="28" y="486" width="904" height="44" rx="6" fill="#fff8e1" stroke="#f9a825"/>
+  <text x="44" y="504" font-size="12" fill="#bf360c">直觉：句子 “The cat sat … it was tired” 里，“it” 的 query 与 “cat” 的 key 内积大 → softmax 后 “cat” 权重高</text>
+  <text x="44" y="521" font-size="12" fill="#bf360c">→ “it” 的输出里 “cat” 的 value 占主导 → 模型据此解析出指代。这就是 attention 捕捉长程依赖的本质。</text>
+
+  <!-- legend -->
+  <g transform="translate(28, 556)" font-size="12">
+    <rect x="0" y="0" width="14" height="14" fill="#1e88e5"/><text x="20" y="11">Q/K/V 与权重</text>
+    <rect x="130" y="0" width="14" height="14" fill="#42a5f5"/><text x="150" y="11">有效 score（下三角）</text>
+    <rect x="300" y="0" width="14" height="14" fill="#eceff1" stroke="#b0bec5"/><text x="320" y="11">因果掩码 −∞</text>
+    <rect x="440" y="0" width="14" height="14" fill="#43a047"/><text x="460" y="11">输出 oᵢ</text>
+    <rect x="540" y="0" width="14" height="14" fill="#fff8e1" stroke="#f9a825"/><text x="560" y="11">KV cache / 直觉提示</text>
+  </g>
+</svg>

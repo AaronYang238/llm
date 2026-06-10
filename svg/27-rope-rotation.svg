@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 490" font-family="Inter, system-ui, sans-serif" font-size="13">
+  <defs>
+    <marker id="arrb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1e88e5"/>
+    </marker>
+    <marker id="arrg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#43a047"/>
+    </marker>
+    <marker id="arrk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#455a64"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="26" text-anchor="middle" font-size="16" font-weight="600">RoPE：把"位置"编码成"旋转角度"，让内积只依赖相对距离</text>
+  <text x="480" y="46" text-anchor="middle" font-size="12" fill="#546e7a">向量两两配对成 2D，按位置 m 旋转 m·θᵢ；attention 内积因此只看相对位移 (m−n)</text>
+
+  <!-- ===== Panel A: rotation by position ===== -->
+  <rect x="30" y="58" width="440" height="262" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="250" y="80" text-anchor="middle" font-weight="600" fill="#1e88e5">① 位置 = 旋转向量</text>
+  <!-- axes -->
+  <line x1="135" y1="210" x2="370" y2="210" stroke="#b0bec5"/>
+  <line x1="235" y1="110" x2="235" y2="292" stroke="#b0bec5"/>
+  <!-- m=0 base (gray dashed) -->
+  <line x1="235" y1="210" x2="335" y2="210" stroke="#90a4ae" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrk)"/>
+  <text x="344" y="214" font-size="11" fill="#90a4ae">m=0</text>
+  <!-- m=1 -->
+  <line x1="235" y1="210" x2="326" y2="168" stroke="#1e88e5" stroke-width="2" marker-end="url(#arrb)"/>
+  <text x="332" y="164" font-size="11" fill="#1e88e5">m=1</text>
+  <!-- m=2 -->
+  <line x1="235" y1="210" x2="299" y2="133" stroke="#1e88e5" stroke-width="2" marker-end="url(#arrb)"/>
+  <text x="302" y="128" font-size="11" fill="#1e88e5">m=2</text>
+  <!-- m=3 -->
+  <line x1="235" y1="210" x2="261" y2="113" stroke="#1e88e5" stroke-width="2" marker-end="url(#arrb)"/>
+  <text x="258" y="108" font-size="11" fill="#1e88e5">m=3</text>
+  <!-- theta arc near origin -->
+  <path d="M 295 210 A 60 60 0 0 0 288 182" fill="none" stroke="#f57f17" stroke-width="1.5"/>
+  <text x="305" y="190" font-size="12" fill="#f57f17">θᵢ</text>
+  <text x="250" y="308" text-anchor="middle" font-size="11.5" fill="#546e7a">位置每 +1，多转一个固定角度 θᵢ（旋转角 = m·θᵢ）</text>
+
+  <!-- ===== Panel B: relative property ===== -->
+  <rect x="490" y="58" width="440" height="262" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="710" y="80" text-anchor="middle" font-weight="600" fill="#1e88e5">② 内积只依赖相对距离 (m−n)</text>
+  <line x1="560" y1="210" x2="800" y2="210" stroke="#b0bec5"/>
+  <line x1="660" y1="110" x2="660" y2="292" stroke="#b0bec5"/>
+  <!-- k at position n (green) angle 20 -->
+  <line x1="660" y1="210" x2="754" y2="176" stroke="#43a047" stroke-width="2.5" marker-end="url(#arrg)"/>
+  <text x="760" y="176" font-size="11" fill="#43a047">k 在位置 n</text>
+  <!-- q at position m (blue) angle 70 -->
+  <line x1="660" y1="210" x2="694" y2="116" stroke="#1e88e5" stroke-width="2.5" marker-end="url(#arrb)"/>
+  <text x="700" y="110" font-size="11" fill="#1e88e5">q 在位置 m</text>
+  <!-- angle between arc -->
+  <path d="M 740 184 A 85 85 0 0 0 706 130" fill="none" stroke="#e53935" stroke-width="1.5"/>
+  <text x="724" y="150" font-size="12" fill="#e53935">(m−n)·θᵢ</text>
+  <text x="710" y="300" text-anchor="middle" font-size="11.5" fill="#546e7a">夹角 = (m−n)·θᵢ，与绝对位置无关</text>
+  <text x="710" y="316" text-anchor="middle" font-size="11.5" fill="#bf360c">→ (m,n)=(5,3) 与 (8,6) 给出完全相同的注意力分数</text>
+
+  <!-- ===== Panel C: multi-frequency ===== -->
+  <rect x="30" y="336" width="900" height="146" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="480" y="358" text-anchor="middle" font-weight="600" fill="#1e88e5">③ d/2 个频率：一组快慢不同的“指针”（θᵢ = base^(−2i/d)）</text>
+  <text x="480" y="376" text-anchor="middle" font-size="11.5" fill="#546e7a">同一位置 m，高频维度转得快（区分相邻 token），低频维度转得慢（编码远距离）</text>
+
+  <!-- 6 dials -->
+  <g>
+    <circle cx="110" cy="418" r="24" fill="#e3f2fd" stroke="#1e88e5"/><line x1="110" y1="418" x2="89" y2="406" stroke="#1e88e5" stroke-width="2"/>
+    <text x="110" y="462" text-anchor="middle" font-size="11">θ₀ 高频</text>
+    <circle cx="250" cy="418" r="24" fill="#e3f2fd" stroke="#1e88e5"/><line x1="250" y1="418" x2="234" y2="398" stroke="#1e88e5" stroke-width="2"/>
+    <text x="250" y="462" text-anchor="middle" font-size="11">θ₁</text>
+    <circle cx="390" cy="418" r="24" fill="#e3f2fd" stroke="#1e88e5"/><line x1="390" y1="418" x2="396" y2="395" stroke="#1e88e5" stroke-width="2"/>
+    <text x="390" y="462" text-anchor="middle" font-size="11">θ₂</text>
+    <circle cx="530" cy="418" r="24" fill="#e3f2fd" stroke="#1e88e5"/><line x1="530" y1="418" x2="547" y2="402" stroke="#1e88e5" stroke-width="2"/>
+    <text x="530" y="462" text-anchor="middle" font-size="11">θ₃</text>
+    <circle cx="670" cy="418" r="24" fill="#e3f2fd" stroke="#1e88e5"/><line x1="670" y1="418" x2="690" y2="410" stroke="#1e88e5" stroke-width="2"/>
+    <text x="670" y="462" text-anchor="middle" font-size="11">θ₄</text>
+    <circle cx="810" cy="418" r="24" fill="#e3f2fd" stroke="#1e88e5"/><line x1="810" y1="418" x2="832" y2="415" stroke="#1e88e5" stroke-width="2"/>
+    <text x="810" y="462" text-anchor="middle" font-size="11">θ_{d/2−1} 低频</text>
+  </g>
+  <text x="120" y="400" font-size="11" fill="#e53935">转得快</text>
+  <text x="772" y="400" font-size="11" fill="#43a047">转得慢</text>
+</svg>

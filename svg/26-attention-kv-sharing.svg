@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 430" font-family="Inter, system-ui, sans-serif" font-size="13">
+  <defs>
+    <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#90a4ae"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="26" text-anchor="middle" font-size="16" font-weight="600">Attention 家族：把 KV cache 越压越小（统一用 8 个 Q head 示例）</text>
+  <text x="480" y="46" text-anchor="middle" font-size="12" fill="#546e7a">上排 = Q head（每步都新算）；下排 = K/V head（要缓存）。让 Q 共享 KV，就省 KV cache</text>
+
+  <!-- ===== Panel 1: MHA ===== -->
+  <rect x="20" y="60" width="215" height="232" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="127" y="82" text-anchor="middle" font-weight="600" fill="#1e88e5">MHA</text>
+  <!-- Q heads -->
+  <rect x="32"  y="98" width="20" height="24" fill="#1e88e5"/><rect x="57"  y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="82"  y="98" width="20" height="24" fill="#1e88e5"/><rect x="107" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="132" y="98" width="20" height="24" fill="#1e88e5"/><rect x="157" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="182" y="98" width="20" height="24" fill="#1e88e5"/><rect x="207" y="98" width="20" height="24" fill="#1e88e5"/>
+  <!-- lines 1:1 -->
+  <line x1="42"  y1="122" x2="42"  y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="67"  y1="122" x2="67"  y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="92"  y1="122" x2="92"  y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="117" y1="122" x2="117" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="142" y1="122" x2="142" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="167" y1="122" x2="167" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="192" y1="122" x2="192" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="217" y1="122" x2="217" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <!-- KV heads 8 -->
+  <rect x="32"  y="184" width="20" height="24" fill="#43a047"/><rect x="57"  y="184" width="20" height="24" fill="#43a047"/>
+  <rect x="82"  y="184" width="20" height="24" fill="#43a047"/><rect x="107" y="184" width="20" height="24" fill="#43a047"/>
+  <rect x="132" y="184" width="20" height="24" fill="#43a047"/><rect x="157" y="184" width="20" height="24" fill="#43a047"/>
+  <rect x="182" y="184" width="20" height="24" fill="#43a047"/><rect x="207" y="184" width="20" height="24" fill="#43a047"/>
+  <text x="127" y="240" text-anchor="middle" font-size="12" font-weight="600">H_kv = 8</text>
+  <text x="127" y="262" text-anchor="middle" font-size="11" fill="#546e7a">KV 体积 100%（基线）</text>
+  <text x="127" y="280" text-anchor="middle" font-size="11" fill="#546e7a">LLaMA-1、GPT-3</text>
+
+  <!-- ===== Panel 2: GQA ===== -->
+  <rect x="255" y="60" width="215" height="232" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="362" y="82" text-anchor="middle" font-weight="600" fill="#1e88e5">GQA（每 4 Q 共享 1 KV）</text>
+  <rect x="267" y="98" width="20" height="24" fill="#1e88e5"/><rect x="292" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="317" y="98" width="20" height="24" fill="#1e88e5"/><rect x="342" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="367" y="98" width="20" height="24" fill="#1e88e5"/><rect x="392" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="417" y="98" width="20" height="24" fill="#1e88e5"/><rect x="442" y="98" width="20" height="24" fill="#1e88e5"/>
+  <!-- group1 lines -> KV0 center 314 -->
+  <line x1="277" y1="122" x2="314" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="302" y1="122" x2="314" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="327" y1="122" x2="314" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="352" y1="122" x2="314" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <!-- group2 lines -> KV1 center 414 -->
+  <line x1="377" y1="122" x2="414" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="402" y1="122" x2="414" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="427" y1="122" x2="414" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="452" y1="122" x2="414" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <!-- KV 2 boxes -->
+  <rect x="289" y="184" width="50" height="24" fill="#43a047"/>
+  <rect x="389" y="184" width="50" height="24" fill="#43a047"/>
+  <text x="362" y="240" text-anchor="middle" font-size="12" font-weight="600">H_kv = 2</text>
+  <text x="362" y="262" text-anchor="middle" font-size="11" fill="#546e7a">KV 体积 25%，质量≈无损</text>
+  <text x="362" y="280" text-anchor="middle" font-size="11" fill="#546e7a">LLaMA-2/3、Qwen、Mistral</text>
+
+  <!-- ===== Panel 3: MQA ===== -->
+  <rect x="490" y="60" width="215" height="232" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="597" y="82" text-anchor="middle" font-weight="600" fill="#1e88e5">MQA（全部共享 1 KV）</text>
+  <rect x="502" y="98" width="20" height="24" fill="#1e88e5"/><rect x="527" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="552" y="98" width="20" height="24" fill="#1e88e5"/><rect x="577" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="602" y="98" width="20" height="24" fill="#1e88e5"/><rect x="627" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="652" y="98" width="20" height="24" fill="#1e88e5"/><rect x="677" y="98" width="20" height="24" fill="#1e88e5"/>
+  <!-- lines -> KV center 597 -->
+  <line x1="512" y1="122" x2="597" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="537" y1="122" x2="597" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="562" y1="122" x2="597" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="587" y1="122" x2="597" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="612" y1="122" x2="597" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="637" y1="122" x2="597" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="662" y1="122" x2="597" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <line x1="687" y1="122" x2="597" y2="182" stroke="#90a4ae" marker-end="url(#arr2)"/>
+  <rect x="572" y="184" width="50" height="24" fill="#43a047"/>
+  <text x="597" y="240" text-anchor="middle" font-size="12" font-weight="600">H_kv = 1</text>
+  <text x="597" y="262" text-anchor="middle" font-size="11" fill="#546e7a">KV 体积 12.5%，质量略降</text>
+  <text x="597" y="280" text-anchor="middle" font-size="11" fill="#546e7a">PaLM、Falcon</text>
+
+  <!-- ===== Panel 4: MLA ===== -->
+  <rect x="725" y="60" width="215" height="232" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="832" y="82" text-anchor="middle" font-weight="600" fill="#1e88e5">MLA（压成低秩潜向量）</text>
+  <rect x="737" y="98" width="20" height="24" fill="#1e88e5"/><rect x="762" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="787" y="98" width="20" height="24" fill="#1e88e5"/><rect x="812" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="837" y="98" width="20" height="24" fill="#1e88e5"/><rect x="862" y="98" width="20" height="24" fill="#1e88e5"/>
+  <rect x="887" y="98" width="20" height="24" fill="#1e88e5"/><rect x="912" y="98" width="20" height="24" fill="#1e88e5"/>
+  <!-- dashed lines -> latent center 832 -->
+  <line x1="747" y1="122" x2="832" y2="182" stroke="#bcaaa4" stroke-dasharray="3 2"/>
+  <line x1="772" y1="122" x2="832" y2="182" stroke="#bcaaa4" stroke-dasharray="3 2"/>
+  <line x1="797" y1="122" x2="832" y2="182" stroke="#bcaaa4" stroke-dasharray="3 2"/>
+  <line x1="822" y1="122" x2="832" y2="182" stroke="#bcaaa4" stroke-dasharray="3 2"/>
+  <line x1="847" y1="122" x2="832" y2="182" stroke="#bcaaa4" stroke-dasharray="3 2"/>
+  <line x1="872" y1="122" x2="832" y2="182" stroke="#bcaaa4" stroke-dasharray="3 2"/>
+  <line x1="897" y1="122" x2="832" y2="182" stroke="#bcaaa4" stroke-dasharray="3 2"/>
+  <line x1="922" y1="122" x2="832" y2="182" stroke="#bcaaa4" stroke-dasharray="3 2"/>
+  <rect x="787" y="184" width="90" height="24" rx="3" fill="#e53935"/>
+  <text x="832" y="201" text-anchor="middle" fill="white" font-size="11">c_KV 低秩</text>
+  <text x="832" y="240" text-anchor="middle" font-size="12" font-weight="600">潜向量（~512 维）</text>
+  <text x="832" y="262" text-anchor="middle" font-size="11" fill="#546e7a">KV ~1/30，需 FlashMLA</text>
+  <text x="832" y="280" text-anchor="middle" font-size="11" fill="#546e7a">DeepSeek V2/V3/R1</text>
+
+  <!-- takeaway strip -->
+  <rect x="20" y="312" width="920" height="40" rx="6" fill="#e3f2fd" stroke="#1e88e5"/>
+  <text x="480" y="337" text-anchor="middle" font-size="12.5" fill="#0d47a1">主线：H_kv 从 8 → 2 → 1 → 低秩潜向量，KV cache 一路压小；GQA 是“省得多又几乎不掉质量”的甜点，MLA 把压缩做到极致但需专用 kernel</text>
+
+  <!-- legend -->
+  <g transform="translate(20, 372)" font-size="12">
+    <rect x="0" y="0" width="14" height="14" fill="#1e88e5"/><text x="20" y="11">Q head（不缓存）</text>
+    <rect x="160" y="0" width="14" height="14" fill="#43a047"/><text x="180" y="11">K/V head（要缓存）</text>
+    <rect x="340" y="0" width="14" height="14" fill="#e53935"/><text x="360" y="11">MLA 低秩潜向量</text>
+    <line x1="520" y1="7" x2="556" y2="7" stroke="#90a4ae" marker-end="url(#arr2)"/><text x="564" y="11">Q→KV 共享映射</text>
+  </g>
+</svg>
