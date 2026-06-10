@@ -228,7 +228,7 @@ pip install transformers        # HuggingFace：加载模型、跑推理，CPU/G
 
 ### P.4.1 用 transformers 跑（CPU 也行）
 
-把下面存成 `first_run.py`：
+把下面存成 `first_run.py`（懒得抄？可跑版在 [`examples/P_first_run.py`](../examples/P_first_run.py)）：
 
 ```python
 # first_run.py —— 你的第一个大模型推理（CPU 可跑）

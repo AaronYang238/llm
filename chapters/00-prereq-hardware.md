@@ -202,7 +202,7 @@ PyTorch 等价物：
 
 ## 0.4 最小可运行示例：测一遍带宽
 
-下面这段 PyTorch 脚本 5 分钟出结果，用真实数字把手上这台机器的硬件参考系校准一遍。三项指标分别对应 0.2 节的三条性能线：**HBM 带宽**、**NVLink P2P 带宽**、**kernel launch overhead**。
+下面这段 PyTorch 脚本 5 分钟出结果，用真实数字把手上这台机器的硬件参考系校准一遍（可跑版：[`examples/00_bandwidth_probe.py`](../examples/00_bandwidth_probe.py)）。三项指标分别对应 0.2 节的三条性能线：**HBM 带宽**、**NVLink P2P 带宽**、**kernel launch overhead**。
 
 ```python
 # bandwidth_probe.py — H100 / A100 / MI300X 都能跑

@@ -212,7 +212,7 @@ class LlamaAttention(nn.Module):
 
 ## 1.4 最小可运行示例：~150 行 LLaMA forward
 
-下面这段代码是一个**单卡、纯 PyTorch、无外部依赖**的 LLaMA forward。形状全部标注，可直接 `python llama_mini.py` 跑通。
+下面这段代码是一个**单卡、纯 PyTorch、无外部依赖**的 LLaMA forward。形状全部标注，可直接 `python llama_mini.py` 跑通（可跑版：[`examples/01_llama_mini.py`](../examples/01_llama_mini.py)）。
 
 ```python
 # llama_mini.py — 单卡 prefill 演示（不含 KV cache 管理，专注架构）

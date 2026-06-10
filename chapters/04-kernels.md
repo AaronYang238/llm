@@ -533,7 +533,7 @@ Triton 的甜点：**90% CUDA 的性能，10% CUDA 的代码量**——尤其适
 
 ### 4.6.3 实战：fused `add + RMSNorm`
 
-完整可跑代码（~80 行，单文件 `fused_norm.py`）：
+完整可跑代码（~80 行，单文件 `fused_norm.py`；可跑版：[`examples/04_fused_rmsnorm_triton.py`](../examples/04_fused_rmsnorm_triton.py)）：
 
 ```python
 import torch

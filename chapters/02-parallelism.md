@@ -817,7 +817,7 @@ TP=2  ×  PP=2  ×  DP=4  =  16
 
 #### (2) rank 拓扑模拟器（可跑）
 
-配并行前，先用纯 Python 算清 16 个 rank 怎么映射到 3D mesh、各通信组是否落在该落的链路——**配错 rank 映射是 3D 并行最常见的翻车点**，提前模拟比上了硬件再 debug 便宜得多。
+配并行前，先用纯 Python 算清 16 个 rank 怎么映射到 3D mesh、各通信组是否落在该落的链路——**配错 rank 映射是 3D 并行最常见的翻车点**，提前模拟比上了硬件再 debug 便宜得多（可跑版：[`examples/02_rank_sim.py`](../examples/02_rank_sim.py)，无需 GPU）。
 
 ```python
 # rank_sim.py —— 3D 并行 rank 拓扑模拟器（纯 Python，无需 GPU/torch）

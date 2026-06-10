@@ -21,10 +21,13 @@
 
 ```
 .
-├── chapters/   # 13 章正文，命名 NN-kebab-slug.md，NN 与阶段号对应
-├── svg/        # 23 张矢量插图，编号与章节对应
+├── chapters/   # 14 章正文（前置篇 + 阶段 0–12），命名 NN-kebab-slug.md
+├── svg/        # 24 张矢量插图，编号与章节对应
+├── examples/   # 书里代码的"可跑版"——clone 即跑，不用从 markdown 手抄
 └── README.md   # 本文件：总目录 + 完成状态 + 各章导航
 ```
+
+> **想动手？** 看 [`examples/`](examples/)——前置篇的第一个推理、阶段 1 的手写 LLaMA、阶段 2 的 rank 拓扑模拟器、阶段 4 的 Triton kernel 等都在那里，其中 `02_rank_sim.py` 和 `P_first_run.py` **不挑硬件、立刻能跑**。
 
 ## 进度总览
 

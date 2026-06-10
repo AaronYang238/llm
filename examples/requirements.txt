@@ -1,0 +1,15 @@
+# 按需安装——不是每个脚本都要全部依赖。
+# 见 README.md 的"需要 GPU？"列。
+
+# 02_rank_sim.py          : 无依赖（纯标准库 Python ≥ 3.10）
+
+# P_first_run.py          : transformers + torch（CPU 即可）
+transformers>=4.45
+torch>=2.1
+
+# 00_bandwidth_probe.py / 01_llama_mini.py : 仅 torch（00 需 NVIDIA GPU）
+#   torch 已在上面
+
+# 04_fused_rmsnorm_triton.py : torch + triton（需 NVIDIA GPU）
+#   triton 在 Linux + NVIDIA 上随 torch 附带；如缺：
+# triton>=2.1
