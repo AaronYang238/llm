@@ -30,6 +30,7 @@
 
 | 阶段 | 主题 | 章节 | 状态 |
 |---|---|---|---|
+| **前置** | **上车准备：基础概念 + 环境搭建**（写给小白，老手可跳过） | `0-onboarding` | ✓ |
 | 0 | 先修与硬件基础 | `00-prereq-hardware` | ✓ |
 | 1 | Transformer 与单卡推理 | `01-transformer-basics` | ✓ |
 | 2 | 并行策略系统化 | `02-parallelism` | ✓ |
@@ -47,6 +48,18 @@
 **正文 12 个阶段（13 章 + 23 图）全部定稿。** Capstone 动手项目（P1–P7）与推荐阅读清单持续推进。
 
 下面按阶段列出每章的**对应文件、主图、覆盖的知识点**（带小节定位，可当详细目录查）。
+
+---
+
+## 前置篇｜上车准备：基础概念 + 环境搭建 ✓
+
+> 写给真·小白（已会 vLLM/HuggingFace 的可跳过）：[chapters/0-onboarding.md](chapters/0-onboarding.md)，主图 [svg/24-llm-request-lifecycle.svg](svg/24-llm-request-lifecycle.svg)（一次对话的生命周期）。
+
+- [x] **30 分钟深度学习地基**：模型/参数、token/embedding、训练 vs 推理、**prefill/decode**、KV cache、一张"大图"（P.1）
+- [x] **Python / 数学最小集**：会看张量形状 + 知道"主要计算是矩阵乘" + "模型按概率选词"就够（P.2）
+- [x] **环境搭建**：CPU/GPU/云/Colab 怎么选、装 PyTorch + transformers、验证 `torch.cuda.is_available()`（P.3）
+- [x] **跑通第一个推理**：~25 行 transformers 脚本（CPU 可跑）+ vLLM 起服务（GPU）（P.4）
+- [x] **小白最短主线**：路径 A（最快会用）/ B（完整精读）/ C（带问题查）+ FAQ（P.5–P.6）
 
 ---
 

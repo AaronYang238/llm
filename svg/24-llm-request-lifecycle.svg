@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#455a64"/>
+    </marker>
+    <marker id="arr-loop" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#e53935"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="#212121">一次对话在大模型里发生了什么（小白版全景）</text>
+
+  <!-- 1. 用户输入 -->
+  <rect x="30" y="70" width="150" height="70" rx="8" fill="#eceff1" stroke="#90a4ae"/>
+  <text x="105" y="98" text-anchor="middle" font-size="12" font-weight="600" fill="#37474f">① 你输入文字</text>
+  <text x="105" y="120" text-anchor="middle" font-size="12" fill="#546e7a">"今天天气怎样？"</text>
+
+  <line x1="180" y1="105" x2="218" y2="105" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 2. Tokenizer -->
+  <rect x="220" y="70" width="170" height="70" rx="8" fill="#fff3e0" stroke="#f57f17"/>
+  <text x="305" y="94" text-anchor="middle" font-size="12" font-weight="600" fill="#e65100">② Tokenizer 切词</text>
+  <text x="305" y="113" text-anchor="middle" font-size="11" fill="#37474f">文字 → 一串数字（token）</text>
+  <text x="305" y="130" text-anchor="middle" font-size="10" fill="#546e7a">[今天][天气][怎样][？]</text>
+
+  <line x1="390" y1="105" x2="428" y2="105" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 3. 模型 -->
+  <rect x="430" y="70" width="200" height="70" rx="8" fill="#e3f2fd" stroke="#1565c0"/>
+  <text x="530" y="94" text-anchor="middle" font-size="12" font-weight="600" fill="#0d47a1">③ 模型（N 层 Transformer）</text>
+  <text x="530" y="113" text-anchor="middle" font-size="11" fill="#37474f">读懂上文，算出</text>
+  <text x="530" y="130" text-anchor="middle" font-size="11" fill="#37474f">"下一个词最可能是什么"</text>
+
+  <line x1="630" y1="105" x2="668" y2="105" stroke="#455a64" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 4. 采样 -->
+  <rect x="670" y="70" width="170" height="70" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+  <text x="755" y="94" text-anchor="middle" font-size="12" font-weight="600" fill="#1b5e20">④ 选一个词</text>
+  <text x="755" y="113" text-anchor="middle" font-size="11" fill="#37474f">从概率里挑一个 token</text>
+  <text x="755" y="130" text-anchor="middle" font-size="10" fill="#546e7a">→ "今"</text>
+
+  <!-- 自回归循环箭头：从④回到③ -->
+  <path d="M 755,140 Q 755,200 530,200 Q 430,200 430,140" stroke="#e53935" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#arr-loop)"/>
+  <rect x="560" y="186" width="170" height="28" rx="6" fill="#ffebee" stroke="#e53935"/>
+  <text x="645" y="204" text-anchor="middle" font-size="11" fill="#c62828" font-weight="600">把新词接到末尾，再算下一个</text>
+
+  <text x="645" y="234" text-anchor="middle" font-size="11" fill="#c62828">这就是"自回归"：一个词一个词地吐，循环到结束</text>
+
+  <!-- 分隔 -->
+  <line x1="30" y1="258" x2="930" y2="258" stroke="#cfd8dc" stroke-width="1"/>
+
+  <!-- 两个阶段：prefill / decode -->
+  <text x="30" y="286" font-size="13" font-weight="600" fill="#1565c0">推理的两个阶段（贯穿全书的核心概念）</text>
+
+  <!-- prefill -->
+  <rect x="30" y="300" width="430" height="120" rx="8" fill="#e3f2fd" stroke="#1565c0"/>
+  <text x="50" y="324" font-size="13" font-weight="600" fill="#0d47a1">Prefill（读题）</text>
+  <text x="50" y="346" font-size="11" fill="#37474f">一次性把你的整段 prompt 读完、</text>
+  <text x="50" y="364" font-size="11" fill="#37474f">算好每个词的"记忆"（KV cache）。</text>
+  <text x="50" y="386" font-size="11" fill="#37474f">特点：算得多、并行度高 → 吃 <tspan font-weight="600">算力</tspan>。</text>
+  <text x="50" y="408" font-size="10" fill="#546e7a">决定"第一个字多久蹦出来"（TTFT）。</text>
+
+  <!-- decode -->
+  <rect x="500" y="300" width="430" height="120" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+  <text x="520" y="324" font-size="13" font-weight="600" fill="#1b5e20">Decode（答题）</text>
+  <text x="520" y="346" font-size="11" fill="#37474f">基于已有记忆，一个一个往外吐词，</text>
+  <text x="520" y="364" font-size="11" fill="#37474f">每吐一个就把它接上去再吐下一个。</text>
+  <text x="520" y="386" font-size="11" fill="#37474f">特点：每步算得少、要反复读记忆 → 吃 <tspan font-weight="600">显存带宽</tspan>。</text>
+  <text x="520" y="408" font-size="10" fill="#546e7a">决定"后面每个字多快"（TPOT）。</text>
+
+  <!-- 5. 输出 -->
+  <rect x="340" y="448" width="280" height="56" rx="8" fill="#eceff1" stroke="#90a4ae"/>
+  <text x="480" y="472" text-anchor="middle" font-size="12" font-weight="600" fill="#37474f">⑤ Detokenizer 拼回文字 → 回复你</text>
+  <text x="480" y="492" text-anchor="middle" font-size="11" fill="#546e7a">"今天多云，气温 20°C…"</text>
+
+  <!-- 提示 -->
+  <text x="30" y="528" font-size="11" fill="#546e7a">看懂这张图，你就听得懂阶段 0 起每一章在说什么。全书的优化，几乎都在让 ③④ 这个循环更快、更省、更便宜。</text>
+</svg>
