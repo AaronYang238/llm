@@ -104,7 +104,13 @@ H100 SXM 稠密峰值算力，**精度每降一位算力翻一倍**：
 
 $$\text{性能上限} = \min(\text{峰值算力},\;\text{算术强度} \times \text{HBM 带宽})$$
 
-算术强度 = **FLOPs / 从 HBM 搬运的字节数**。在 H100 BF16 上，ridge point ≈ 989 TFLOPS / 3.35 TB/s ≈ **295 FLOP/Byte**——算子算术强度低于这个值就是 memory-bound，再优化算法没用，得提复用率（融合算子、共用 input、加大 batch）。
+> **先分清 FLOPs 和 FLOPS（差一个字母，含义完全不同）**——这是 Roofline 公式里最容易读错的地方：
+> - **FLOPs**（小写 s，FLoating-point OPeration**s**）：浮点运算**次数**，一个**计数**。如"一次 `M×K×N` 的矩阵乘约 `2MKN` FLOPs"。一次乘加（`a*b+c`）算 2 FLOPs。
+> - **FLOPS**（大写 S，FLoating-point Operations **Per Second**）：每秒浮点运算**次数**，一个**速率**，衡量算力。如"H100 BF16 约 989 **T**FLOPS"（T=10¹²、P=10¹⁵）。这就是上面 §0.2.1 表里的"算力"列。
+>
+> 一句话：**FLOPs 是"活有多少"，FLOPS 是"干得多快"**。算完一个算子要多久 ≈ FLOPs ÷ FLOPS。下面的"算术强度"用的是 FLOP**s**（次数），峰值算力用的是 FLOP**S**（速率）——同一个 Roofline 公式里两者都有，别看混。
+
+算术强度 = **FLOPs（运算次数）/ 从 HBM 搬运的字节数**。在 H100 BF16 上，ridge point ≈ 989 TFLOPS / 3.35 TB/s ≈ **295 FLOP/Byte**——算子算术强度低于这个值就是 memory-bound，再优化算法没用，得提复用率（融合算子、共用 input、加大 batch）。
 
 实战分类：
 

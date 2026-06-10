@@ -41,7 +41,8 @@
 | **HBM** | High Bandwidth Memory | GPU 主存（H100 80 GB / 3.35 TB/s），decode 的带宽瓶颈在它 | 阶段 0 §0.2.2 |
 | **TMA** | Tensor Memory Accelerator | Hopper 起的异步 DMA 引擎（SMEM↔HBM），FA3 关键 | 阶段 0 §0.2.1 |
 | **Roofline** | — | 判定算子 compute-bound 还是 memory-bound 的图形模型；拐点 ≈ 峰值算力/带宽 | 阶段 0 §0.2.2 |
-| **算术强度** | Arithmetic Intensity | FLOPs / 从 HBM 搬的字节数；决定算子在 Roofline 哪一侧 | 阶段 0 §0.2.2 |
+| **FLOPs / FLOPS** | 运算次数 / 每秒运算次数 | FLOP**s**=活有多少（计数）；FLOP**S**=干得多快（算力速率，如 989 TFLOPS）。耗时 ≈ FLOPs ÷ FLOPS | 阶段 0 §0.2.2 |
+| **算术强度** | Arithmetic Intensity | FLOPs（次数）/ 从 HBM 搬的字节数；决定算子在 Roofline 哪一侧 | 阶段 0 §0.2.2 |
 | **NVLink / NVSwitch** | — | GPU 间高速点对点链路 / 其 crossbar；节点内 TP/EP 的物理底座 | 阶段 0 §0.2.3 |
 | **IB** | InfiniBand | 主流 RDMA 网络（NDR 400 Gb/s）；跨节点通信主力 | 阶段 0 §0.2.3 |
 | **NUMA** | Non-Uniform Memory Access | CPU socket 间访存非对称，跨 socket 走 QPI 会掉速 | 阶段 0 §0.5 |
