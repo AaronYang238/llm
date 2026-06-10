@@ -24,10 +24,13 @@
 ├── chapters/   # 14 章正文（前置篇 + 阶段 0–12），命名 NN-kebab-slug.md
 ├── svg/        # 24 张矢量插图，编号与章节对应
 ├── examples/   # 书里代码的"可跑版"——clone 即跑，不用从 markdown 手抄
+├── glossary.md # 术语表 · 符号表 · 缩写速查（被术语劝退时查这里）
 └── README.md   # 本文件：总目录 + 完成状态 + 各章导航
 ```
 
 > **想动手？** 看 [`examples/`](examples/)——前置篇的第一个推理、阶段 1 的手写 LLaMA、阶段 2 的 rank 拓扑模拟器、阶段 4 的 Triton kernel 等都在那里，其中 `02_rank_sim.py` 和 `P_first_run.py` **不挑硬件、立刻能跑**。
+>
+> **被某个词卡住？** 查 [`glossary.md`](glossary.md)——全书 ~90 个核心术语 + 符号表，每条给一句话解释 + 去哪一章看透。
 
 ## 进度总览
 
