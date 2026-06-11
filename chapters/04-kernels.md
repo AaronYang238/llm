@@ -1,4 +1,4 @@
-# 阶段 4｜核心算子与高性能 Kernel ✓
+# 阶段 4｜核心算子与高性能 Kernel ★★★★★ ✓
 
 > 一句话定位：把 LLM 推理 / 训练里最热的几个 kernel——FlashAttention 系列、PagedAttention、FlashInfer、FlashMLA、Triton 自写、CUTLASS GEMM、async-TP——按"原理 → 实现 → 调优 → 坑"逐个讲透，让你看到一段 attention / GEMM kernel 的实现，能立刻判断它解决了什么瓶颈、放在哪个引擎里合适、能不能替换升级。
 

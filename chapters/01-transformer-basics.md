@@ -1,4 +1,4 @@
-# 阶段 1｜Transformer 与单卡推理基础 ✓
+# 阶段 1｜Transformer 与单卡推理基础 ★★★★★ ✓
 
 > 一句话定位：把现代 decoder-only LLM 拆到模块级——Embedding、RMSNorm、GQA Attention、SwiGLU FFN、RoPE、采样——并用 ~150 行 PyTorch 完整复刻一遍 LLaMA forward，作为 Capstone P1（mini-vLLM）的起点。
 

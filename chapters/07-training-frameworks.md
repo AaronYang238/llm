@@ -1,4 +1,4 @@
-# 阶段 7｜训练框架深读 ✓
+# 阶段 7｜训练框架深读 ★★★ ✓
 
 > 一句话定位：把主流大模型训练框架放在一张图上对比——先打通 PyTorch 原生分布式底座(DTensor / DeviceMesh),再深读 Megatron-Core 和 DeepSpeed 的源码架构,对照 TorchTitan / Colossal-AI / JAX 系,让你面对一个训练框架选型或多维并行配置任务时,知道每家把阶段 2 的并行策略落成了什么、该配哪个旋钮、checkpoint 怎么存。
 

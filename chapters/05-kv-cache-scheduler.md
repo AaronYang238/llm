@@ -1,4 +1,4 @@
-# 阶段 5｜KV Cache、调度器与显存管理 ✓
+# 阶段 5｜KV Cache、调度器与显存管理 ★★★★★ ✓
 
 > 一句话定位：把推理引擎"显存怎么排、请求怎么调、KV 怎么省"这条主线打通——从 KV cache 物理布局，到 continuous batching / chunked prefill 调度，到 prefix cache / PD 分离 / KV 量化 / offload，让你看到一个 TTFT 或吞吐不达标的线上服务时，能立刻定位是布局、调度还是 KV 容量的问题。
 
