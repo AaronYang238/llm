@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" font-family="Inter, system-ui, sans-serif" font-size="13">
+  <text x="480" y="26" text-anchor="middle" font-size="16" font-weight="600">统一心智模型：每种并行在“切”模型的哪个维度</text>
+  <text x="480" y="46" text-anchor="middle" font-size="12" fill="#546e7a">切的轴不同 → 通信原语不同 → 跨节点容忍度不同。这是后面所有细节的总纲</text>
+
+  <!-- ===== DP ===== -->
+  <rect x="20" y="58" width="296" height="226" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="168" y="80" text-anchor="middle" font-weight="600" fill="#1e88e5">DP — 切 batch（数据）</text>
+  <rect x="50"  y="100" width="60" height="64" rx="3" fill="#1e88e5"/><text x="80"  y="136" text-anchor="middle" fill="white" font-size="11">完整模型</text>
+  <rect x="138" y="100" width="60" height="64" rx="3" fill="#1e88e5"/><text x="168" y="136" text-anchor="middle" fill="white" font-size="11">完整模型</text>
+  <rect x="226" y="100" width="60" height="64" rx="3" fill="#1e88e5"/><text x="256" y="136" text-anchor="middle" fill="white" font-size="11">完整模型</text>
+  <text x="80"  y="92" text-anchor="middle" font-size="10" fill="#43a047">B/3</text>
+  <text x="168" y="92" text-anchor="middle" font-size="10" fill="#43a047">B/3</text>
+  <text x="256" y="92" text-anchor="middle" font-size="10" fill="#43a047">B/3</text>
+  <text x="168" y="196" text-anchor="middle" font-size="11.5">每卡一份完整模型，各吃一段 batch</text>
+  <text x="168" y="222" text-anchor="middle" font-size="11" fill="#546e7a">主原语：AllReduce(梯度)</text>
+  <text x="168" y="242" text-anchor="middle" font-size="11" fill="#546e7a">放最外层，最容忍跨节点</text>
+  <text x="168" y="266" text-anchor="middle" font-size="11" fill="#bf360c">推理里退化成“多副本”，组间不通信</text>
+
+  <!-- ===== TP ===== -->
+  <rect x="332" y="58" width="296" height="226" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="480" y="80" text-anchor="middle" font-weight="600" fill="#1e88e5">TP — 切算子内部（hidden/head）</text>
+  <rect x="392" y="100" width="58" height="64" fill="#42a5f5" stroke="#1976d2"/><text x="421" y="136" text-anchor="middle" fill="white" font-size="11">GPU0</text>
+  <rect x="451" y="100" width="58" height="64" fill="#1e88e5" stroke="#0d47a1"/><text x="480" y="136" text-anchor="middle" fill="white" font-size="11">GPU1</text>
+  <rect x="510" y="100" width="58" height="64" fill="#1565c0" stroke="#0d47a1"/><text x="539" y="136" text-anchor="middle" fill="white" font-size="11">GPU2</text>
+  <text x="480" y="92" text-anchor="middle" font-size="10" fill="#546e7a">一个权重矩阵按列切</text>
+  <text x="480" y="196" text-anchor="middle" font-size="11.5">单层的 W 切到多卡，各算一片</text>
+  <text x="480" y="222" text-anchor="middle" font-size="11" fill="#546e7a">主原语：AllReduce(激活)，每层 2 次</text>
+  <text x="480" y="242" text-anchor="middle" font-size="11" fill="#bf360c">通信最重 → 必须放节点内 NVLink</text>
+  <text x="480" y="266" text-anchor="middle" font-size="11" fill="#546e7a">硬约束：TP ≤ num_kv_heads</text>
+
+  <!-- ===== PP ===== -->
+  <rect x="644" y="58" width="296" height="226" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="792" y="80" text-anchor="middle" font-weight="600" fill="#1e88e5">PP — 切层（深度）</text>
+  <rect x="712" y="98"  width="160" height="20" fill="#42a5f5" stroke="#1976d2"/><text x="792" y="113" text-anchor="middle" fill="white" font-size="10">layer 0</text>
+  <rect x="712" y="120" width="160" height="20" fill="#42a5f5" stroke="#1976d2"/><text x="792" y="135" text-anchor="middle" fill="white" font-size="10">layer 1</text>
+  <rect x="712" y="146" width="160" height="20" fill="#1565c0" stroke="#0d47a1"/><text x="792" y="161" text-anchor="middle" fill="white" font-size="10">layer 2</text>
+  <rect x="712" y="168" width="160" height="20" fill="#1565c0" stroke="#0d47a1"/><text x="792" y="183" text-anchor="middle" fill="white" font-size="10">layer 3</text>
+  <text x="884" y="113" font-size="9" fill="#546e7a">GPU0</text>
+  <text x="884" y="178" font-size="9" fill="#546e7a">GPU1</text>
+  <text x="792" y="208" text-anchor="middle" font-size="11.5">层分成 stage，stage 间传隐状态</text>
+  <text x="792" y="230" text-anchor="middle" font-size="11" fill="#546e7a">主原语：SendRecv (P2P)</text>
+  <text x="792" y="250" text-anchor="middle" font-size="11" fill="#bf360c">通信小、可重叠 → 容忍跨节点 IB</text>
+  <text x="792" y="270" text-anchor="middle" font-size="11" fill="#546e7a">是“装得下”工具，非“跑得快”</text>
+
+  <!-- ===== EP ===== -->
+  <rect x="20" y="300" width="296" height="234" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="168" y="322" text-anchor="middle" font-weight="600" fill="#1e88e5">EP — 切专家（MoE 宽度）</text>
+  <g>
+    <rect x="48"  y="342" width="32" height="32" rx="3" fill="#fbc02d"/><rect x="84" y="342" width="32" height="32" rx="3" fill="#fbc02d"/>
+    <rect x="152" y="342" width="32" height="32" rx="3" fill="#fbc02d"/><rect x="188" y="342" width="32" height="32" rx="3" fill="#fbc02d"/>
+    <rect x="256" y="342" width="32" height="32" rx="3" fill="#fbc02d"/><rect x="292" y="342" width="0"  height="32"/>
+    <rect x="256" y="342" width="32" height="32" rx="3" fill="#fbc02d"/>
+  </g>
+  <text x="82"  y="388" text-anchor="middle" font-size="9" fill="#546e7a">GPU0</text>
+  <text x="186" y="388" text-anchor="middle" font-size="9" fill="#546e7a">GPU1</text>
+  <text x="272" y="388" text-anchor="middle" font-size="9" fill="#546e7a">GPU2</text>
+  <text x="168" y="416" text-anchor="middle" font-size="11.5">专家分散到各卡，token 路由过去</text>
+  <text x="168" y="438" text-anchor="middle" font-size="11" fill="#546e7a">主原语：All-to-All(dispatch/combine)</text>
+  <text x="168" y="458" text-anchor="middle" font-size="11" fill="#bf360c">N² 小消息、延迟敏感 → DeepEP</text>
+  <text x="168" y="478" text-anchor="middle" font-size="11" fill="#546e7a">放 NVLink + 高速 RDMA</text>
+
+  <!-- ===== CP ===== -->
+  <rect x="332" y="300" width="296" height="234" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="480" y="322" text-anchor="middle" font-weight="600" fill="#1e88e5">CP — 切序列（长度）</text>
+  <rect x="370" y="346" width="76" height="30" fill="#42a5f5" stroke="#1976d2"/><text x="408" y="366" text-anchor="middle" fill="white" font-size="10">S/3</text>
+  <rect x="446" y="346" width="76" height="30" fill="#1e88e5" stroke="#0d47a1"/><text x="484" y="366" text-anchor="middle" fill="white" font-size="10">S/3</text>
+  <rect x="522" y="346" width="76" height="30" fill="#1565c0" stroke="#0d47a1"/><text x="560" y="366" text-anchor="middle" fill="white" font-size="10">S/3</text>
+  <text x="480" y="394" text-anchor="middle" font-size="10" fill="#546e7a">一条长序列切成段，K/V 在环上转</text>
+  <text x="480" y="418" text-anchor="middle" font-size="11.5">长到一张卡装不下序列时才用</text>
+  <text x="480" y="440" text-anchor="middle" font-size="11" fill="#546e7a">主原语：SendRecv (ring，Ring Attention)</text>
+  <text x="480" y="460" text-anchor="middle" font-size="11" fill="#bf360c">decode 不用（seq=1）</text>
+  <text x="480" y="480" text-anchor="middle" font-size="11" fill="#546e7a">放节点内 / 同 RDMA 域</text>
+
+  <!-- ===== ZeRO/FSDP ===== -->
+  <rect x="644" y="300" width="296" height="234" rx="6" fill="none" stroke="#cfd8dc"/>
+  <text x="792" y="322" text-anchor="middle" font-weight="600" fill="#1e88e5">ZeRO/FSDP — 切状态</text>
+  <rect x="700" y="346" width="60" height="30" fill="#fb8c00" stroke="#e65100"/><text x="730" y="366" text-anchor="middle" fill="white" font-size="9">参数</text>
+  <rect x="760" y="346" width="40" height="30" fill="#fbc02d" stroke="#f57f17"/><text x="780" y="366" text-anchor="middle" font-size="9">梯度</text>
+  <rect x="800" y="346" width="84" height="30" fill="#ffe082" stroke="#f57f17"/><text x="842" y="366" text-anchor="middle" font-size="9">优化器状态</text>
+  <line x1="761" y1="340" x2="761" y2="382" stroke="#e53935" stroke-dasharray="3 2"/>
+  <line x1="822" y1="340" x2="822" y2="382" stroke="#e53935" stroke-dasharray="3 2"/>
+  <text x="792" y="396" text-anchor="middle" font-size="10" fill="#546e7a">16 字节/参数 按 DP 度切到各卡</text>
+  <text x="792" y="418" text-anchor="middle" font-size="11.5">DP 的“省显存”升级版（ZeRO-1/2/3）</text>
+  <text x="792" y="440" text-anchor="middle" font-size="11" fill="#546e7a">主原语：AllGather(W)+ReduceScatter(grad)</text>
+  <text x="792" y="460" text-anchor="middle" font-size="11" fill="#bf360c">仅训练用；推理走 TP/PP</text>
+  <text x="792" y="480" text-anchor="middle" font-size="11" fill="#546e7a">ZeRO-3/FSDP 通信 ∝ 层数</text>
+
+  <!-- takeaway -->
+  <rect x="20" y="548" width="0" height="0"/>
+  <text x="480" y="552" text-anchor="middle" font-size="11.5" fill="#0d47a1" font-weight="600">读法：拿到一个并行配置，先问“它在切哪个轴” → 立刻知道走什么原语、能不能跨节点</text>
+</svg>
