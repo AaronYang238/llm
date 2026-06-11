@@ -155,7 +155,7 @@ for Q_tile in split(Q, B_r):
 | **$P=\text{softmax}(S)$** | **写 $S^2$ + 读 $S^2$** | **0（online softmax 在 SMEM）** |
 | 输出 O | $O(S\cdot d)$ | $O(S\cdot d)$ |
 
-当 $S \gg d$ 时（典型 $S$=4K、$d$=128），那两个 $S^2$ 项是绝对大头。FlashAttn 用 SMEM 内的 online softmax 把它们彻底消掉、代价是 K/V 多 load 几次（$B_r\approx d$ 时这部分和原来同量级）——所以净流量从 $O(S^2)$ 降到约 $O(S\cdot d)$。**一句话：它优化的是"算/访存比"，不是"总 load 量"。**
+当 $S \gg d$ 时（典型 $S=4\text{K}$、$d=128$），那两个 $S^2$ 项是绝对大头。FlashAttn 用 SMEM 内的 online softmax 把它们彻底消掉、代价是 K/V 多 load 几次（$B_r\approx d$ 时这部分和原来同量级）——所以净流量从 $O(S^2)$ 降到约 $O(S\cdot d)$。**一句话：它优化的是"算/访存比"，不是"总 load 量"。**
 
 综合收益：
 
