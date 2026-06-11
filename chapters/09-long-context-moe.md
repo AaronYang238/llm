@@ -343,7 +343,7 @@ DeepSeek-V3 在 256 个 routed 专家之外，加了 **1 个 shared 专家（alw
 
 MoE 的老大难问题：**负载不均**。router 可能把大量 token 都路由到少数几个热门专家，导致这些专家过载、其它专家闲置——EP 并行下（阶段 2 §2.2.5），过载专家所在的卡成瓶颈，整体吞吐被拖死。
 
-传统解法（GShard/Switch）：加一个**辅助 loss（auxiliary loss）**惩罚不均衡，逼 router 均匀分配。问题：辅助 loss 和主任务 loss **打架**——为了均衡牺牲了模型质量。
+传统解法（GShard/Switch）：加一个**辅助 loss**（auxiliary loss）惩罚不均衡，逼 router 均匀分配。问题：辅助 loss 和主任务 loss **打架**——为了均衡牺牲了模型质量。
 
 DeepSeek-V3 的 **Loss-Free Balance**（回阶段 1 §1.2.4）：**不加辅助 loss，而是给每个专家加一个可学习的偏置（bias）**。router 打分时加上这个 bias：
 

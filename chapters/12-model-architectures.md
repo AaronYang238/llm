@@ -446,7 +446,7 @@ DeepSeek 的取向是**激进重构 + 工程极致**：
 
 ### 12.6.1 GLM（智谱）
 
-**取向**：清华/智谱的系列，早期（GLM-130B、ChatGLM）用过独特的**自回归填空（autoregressive blank infilling）**预训练目标和 2D 位置编码，架构和 GPT 系不同。但**新版（GLM-4 系）已收敛到主流 decoder-only**——RMSNorm + RoPE + GQA，和 LLaMA 模板趋同。
+**取向**：清华/智谱的系列，早期（GLM-130B、ChatGLM）用过独特的**自回归填空**（autoregressive blank infilling）预训练目标和 2D 位置编码，架构和 GPT 系不同。但**新版（GLM-4 系）已收敛到主流 decoder-only**——RMSNorm + RoPE + GQA，和 LLaMA 模板趋同。
 
 值得记的差异：
 
