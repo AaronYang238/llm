@@ -257,7 +257,7 @@ $$\text{KV bytes} = \underbrace{2}_{K+V} \times L \times \underbrace{2}_{\text{F
 
 第一个 `2` 是 K 和 V 各存一份，第二个 `2` 是 FP16 每个数 2 字节。**注意 $H_{kv}$ 在式子里是一次项**——这就是为什么把它从 64 缩到 8 能直接把 KV 砍到 1/8。
 
-**例**：LLaMA-3-70B（$L=80$，$D=8192$，$H=64$，$H_{kv}=8$，$d=128$），$B=1$，$S=8192$：
+**例**：LLaMA-3-70B（$L=80,\ D=8192,\ H=64,\ H_{kv}=8,\ d=128$），$B=1,\ S=8192$：
 
 ```
 KV = 2 × 80 × 2 × 1 × 8192 × 8 × 128  ≈  2.68 GB   （GQA，H_kv=8）
@@ -671,7 +671,7 @@ $$P_{\text{layer}} = \underbrace{D \cdot (H + 2H_{kv}) \cdot d}_{QKV} + \underbr
 - **$W_O$**：把 $H{\cdot}d$ 维拼接结果投回 $D$ 维，即 $[H{\cdot}d,\,D]$；
 - **SwiGLU**：三个矩阵 $W_{\text{gate}}/W_{\text{up}}$（各 $[D,\,d_{ff}]$）+ $W_{\text{down}}$（$[d_{ff},\,D]$），共 $3Dd_{ff}$（§1.2.1.5）。
 
-**LLaMA-2-7B 实算校验**（MHA：$D=4096$，$H=H_{kv}=32$，$d=128$，$d_{ff}=11008$，$L=32$，$V=32000$）。注意 MHA 下 $H{\cdot}d = 32{\times}128 = 4096 = D$，所以三个 attention 矩阵都是 $4096{\times}4096 \approx 16.8$M：
+**LLaMA-2-7B 实算校验**（MHA：$D=4096,\ H=H_{kv}=32,\ d=128,\ d_{ff}=11008,\ L=32,\ V=32000$）。注意 MHA 下 $H{\cdot}d = 32{\times}128 = 4096 = D$，所以三个 attention 矩阵都是 $4096{\times}4096 \approx 16.8$M：
 
 | 部件 | 计算 | 参数量 |
 |---|---|---|
