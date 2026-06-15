@@ -167,6 +167,8 @@ KV slot 总数 = 48.5 GB / 40 KB ≈ 1.27 M token
 
 §5.2 把 KV cache 拆成了一个全局 token slot 池。本节回答下一个问题：**这些 slot 怎么分给一波又一波动态到达、长度各异的请求，让 GPU 一刻不闲？** 答案是 continuous batching——现代推理引擎吞吐的第一杠杆。
 
+![Static batching（上半）vs Continuous batching（下半）：短请求空转 vs slot 即时补位](../svg/15-continuous-batching.svg)
+
 ### 5.3.1 Static batching 的浪费
 
 最朴素的批处理（早期 serving 框架）：**攒够一批请求一起送进 GPU，整批跑完再收下一批**。问题出在 LLM 生成长度**高度不齐**——同一批里有的生成 4 个 token，有的生成 500 个。
