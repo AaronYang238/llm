@@ -1,6 +1,6 @@
 # 阶段 1｜Transformer 与单卡推理基础 ★★★★★ ✓
 
-> 一句话定位：把现代 decoder-only LLM 拆到模块级——Embedding、RMSNorm、GQA Attention、SwiGLU FFN、RoPE、采样——并用 ~150 行 PyTorch 完整复刻一遍 LLaMA forward，作为 Capstone P1（mini-vLLM）的起点。
+> 一句话定位：把现代 decoder-only LLM 拆到模块级——Embedding、RMSNorm、GQA Attention、SwiGLU FFN、RoPE、采样——并用 ~110 行 PyTorch 完整复刻一遍 LLaMA forward，作为 Capstone P1（mini-vLLM）的起点。
 
 ## 目录
 
@@ -8,7 +8,7 @@
 - [1.1 核心概念与术语](#11-核心概念与术语)
 - [1.2 原理详解](#12-原理详解)
 - [1.3 关键实现剖析：vLLM LlamaModel](#13-关键实现剖析vllm-llamamodel)
-- [1.4 最小可运行示例：~150 行 LLaMA forward](#14-最小可运行示例150-行-llama-forward)
+- [1.4 最小可运行示例：~110 行 LLaMA forward](#14-最小可运行示例110-行-llama-forward)
 - [1.5 性能与显存估算](#15-性能与显存估算)
 - [1.6 常见坑与 FAQ](#16-常见坑与-faq)
 - [自测](#自测)
@@ -22,7 +22,7 @@
 
 **这一章是后面所有章节的地基。** 往上每一层都建在它之上：阶段 2 的并行（TP 怎么切、为什么 TP ≤ $H_{kv}$）、阶段 4 的 kernel（FlashAttention 优化的就是 §1.2.1 的 attention）、阶段 5 的 KV cache（管理的就是 §1.2.2 的那块显存）、阶段 8 的量化（压的就是这些权重）、阶段 12 的架构选读（全是在这个骨架上拧旋钮）。**Transformer 的结构本身高度收敛**——读懂这一个 LLaMA block，就读懂了 95% 的现代 LLM；后面的章节不是学新结构，而是学"这个结构怎么跑得快、装得下、训得动"。
 
-本章的脉络：**§1.2 把原理讲透（attention/KV/RoPE/MoE/采样）→ §1.4 用 ~150 行手撕一遍 → §1.5 学会口算显存与算力**。理解 + 手写 + 估算，三件事齐了，才算真正"拿下"了 Transformer。
+本章的脉络：**§1.2 把原理讲透（attention/KV/RoPE/MoE/采样）→ §1.4 用 ~110 行手撕一遍 → §1.5 学会口算显存与算力**。理解 + 手写 + 估算，三件事齐了，才算真正"拿下"了 Transformer。
 
 读完这一章你应当能：
 
@@ -66,10 +66,10 @@
 | $d$ (head_dim) | 128 | 128 | **几乎恒为 128**——Tensor Core 和 FlashAttention 对 128 最友好，所以放大模型靠加 head 数而非加 $d$ |
 | $H$ (Q head) | 32 | 64 | $H = D/d$；放大模型主要加这个 |
 | $H_{kv}$ (KV head) | 32 (MHA) | 8 (GQA) | 大模型用 GQA 压到 8，省 KV（§1.2.2） |
-| $d_{ff}$ | 11008 | 28672 | ≈ $\frac{2}{3}\times 4D$，让 SwiGLU 三矩阵总量与经典 FFN 持平（§1.2.1.5） |
+| $d_{ff}$ | 11008 | 28672 | LLaMA-2 取 ≈ $\frac{2}{3}\times 4D\approx 2.67D$（让 SwiGLU 三矩阵总量与经典 FFN 持平，§1.2.1.5）；LLaMA-3 起约 3.5×D |
 | $V$ (vocab) | 32K | 128K+ | 新模型词表越来越大（多语言/压缩率，阶段 12） |
 
-记住三条**比例直觉**就能对任何 config 做心算：**① $d$ 恒等于 128；② $H = D/d$；③ $d_{ff} \approx 2.67D$。** 看到一个偏离这些的值（如 $d$≠128、$H_{kv}$≠$H$），那里往往就是这个模型的设计取向所在（阶段 12 §12.1）。
+记住三条**比例直觉**就能对任何 config 做心算：**① $d$ 恒等于 128；② $H = D/d$；③ $d_{ff} \approx 2.67D$（LLaMA-2 系）。** 注意第 ③ 条不普适——LLaMA-3/3.1 起把比例提到约 **3.5×D**（8B 是 $D=4096,\ d_{ff}=14336$，见 §12.2），Qwen 等也各有取值；上表 7B/70B 列给的是 LLaMA-2 的值。看到一个偏离这些的值（如 $d\neq128$、$H_{kv}\neq H$），那里往往就是这个模型的设计取向所在（阶段 12 §12.1）。
 
 ---
 
@@ -512,9 +512,9 @@ class LlamaAttention(nn.Module):
 
 ---
 
-## 1.4 最小可运行示例：~150 行 LLaMA forward
+## 1.4 最小可运行示例：~110 行 LLaMA forward
 
-下面这段代码是一个**单卡、纯 PyTorch、无外部依赖**的 LLaMA forward。形状全部标注，可直接 `python llama_mini.py` 跑通（可跑版：[`examples/01_llama_mini.py`](../examples/01_llama_mini.py)）。
+下面这段代码是一个**单卡、纯 PyTorch、除 torch 外无外部依赖**的 LLaMA forward。形状全部标注，可直接 `python llama_mini.py` 跑通（可跑版：[`examples/01_llama_mini.py`](../examples/01_llama_mini.py)）。代码默认走 GPU（`.cuda().bfloat16()`）；无 GPU 时把 `.cuda()` 改成 `.cpu()`、去掉 `.bfloat16()` 即可在 CPU 上跑。
 
 ```python
 # llama_mini.py — 单卡 prefill 演示（不含 KV cache 管理，专注架构）
@@ -636,10 +636,10 @@ H100 SXM 上预期输出（< 1 秒）：
 
 ```
 logits.shape = (2, 64, 32000)
-param count  = 116.5 M
+param count  = 109.8 M
 ```
 
-把 config 改成 `n_layers=32, hidden_size=4096, n_heads=32, n_kv_heads=8, d_ff=11008`，就是 LLaMA-2-7B 的骨架；外接 `safetensors` 加载真权重就能跑出真实输出。Capstone P1 的 mini-vLLM 在此基础上加 **KV cache 管理 + 分页 + continuous batching scheduler** 即成。
+把 config 改成 `n_layers=32, hidden_size=4096, n_heads=32, n_kv_heads=8, d_ff=11008`，就是 LLaMA-2-7B 的骨架。注意**这里的 `apply_rope` 用的是"两两交错（even/odd）"约定，和 HuggingFace LLaMA 的"前后半拼接（rotate_half）"不兼容**——想直接加载 `safetensors` 真权重跑出正确输出，得先把 RoPE 改成 rotate_half 约定、并相应重排 Q/K 权重（原因见 §1.6 第 1 条）。Capstone P1 的 mini-vLLM 在此基础上加 **KV cache 管理 + 分页 + continuous batching scheduler** 即成。
 
 ---
 
@@ -728,7 +728,7 @@ $$T_{\text{token}} \gtrsim \frac{\text{权重字节} + \text{KV 字节}}{\text{H
 2. **GQA repeat 写错**：必须 `repeat_interleave(g, dim=2)`，不能用 `repeat(1,1,g,1)`——后者会把 head 顺序打乱，等价于让 attention 学了错误的 head 映射。
 3. **`scaled_dot_product_attention` 默认 backend**：PyTorch ≥ 2.0 会在 FlashAttn / mem-efficient / math 之间自动选。生产代码要 `with sdpa_kernel(SDPBackend.FLASH_ATTENTION):` 显式锁定，避免长序列回退到 math 后端跑爆显存。
 4. **`bfloat16` 下 RMSNorm 数值**：rms 计算在 FP32 做完再 cast 回 BF16，否则长序列尾部精度漂移、推理质量肉眼可见地下降。
-5. **`lm_head` 是否与 embedding tie**：LLaMA 不 tie，Qwen2 tie，Gemma tie。加载权重时认错会导致输出乱码或 vocab size 对不上。
+5. **`lm_head` 是否与 embedding tie**：LLaMA 不 tie；Qwen 只有小模型（0.5B/1.5B）tie、7B 及以上不 tie；Gemma tie。以 config 的 `tie_word_embeddings` 为准，认错会导致输出乱码或 vocab size 对不上。
 6. **decode 时整段 KV 重算**：典型新手错误是没维护 KV cache，每步重新 forward 完整前缀，复杂度从 O(S) 升到 O(S²)。
 7. **`temperature=0`**：不要除 0；T=0 时直接走 argmax。
 8. **TP 切分 + GQA**：TP 度必须 ≤ `num_kv_heads`，否则 KV head 无法均分。LLaMA-3-8B 的 `num_kv_heads=8`，TP=8 是上限。

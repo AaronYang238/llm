@@ -92,7 +92,7 @@
 - [x] **FFN 家族**：标准 FFN、SwiGLU、GeGLU；MoE 的 Expert FFN
 - [x] **MoE 路由**：Top-K、Switch、Expert Choice、Loss-Free Balance（DeepSeek-V3）（仅列名，工程细节留阶段 9）
 - [x] **采样与解码**：greedy / top-k / top-p / temperature / min-p / typical / DRY
-- [x] **手撕一遍**：用 PyTorch 实现一个 ~150 行的 LLaMA forward（含 RoPE + GQA + SwiGLU）
+- [x] **手撕一遍**：用 PyTorch 实现一个 ~110 行的 LLaMA forward（含 RoPE + GQA + SwiGLU）
 
 ---
 
