@@ -620,7 +620,9 @@ GPUDirect Storage(GDS)能让 NVMe 直接 DMA 到 HBM、bypass CPU(回阶段 0 §
 
 ### 5.8.3 LMCache:offload 的工程化
 
-LMCache(回阶段 3 §3.5.3 通信侧提过)是目前最完整的 KV offload / 缓存层。它把上面的层级做成一个**透明的多级 KV 缓存**:
+**LMCache** 是一个开源的 LLM KV 缓存中间层(项目 github.com/LMCache/LMCache),以插件 / connector 形式挂到 vLLM、SGLang 等推理引擎上,把 KV cache 跨 GPU、CPU、本地磁盘、远端节点多级存储统一管理,并支持跨请求、跨实例复用;它也是 vLLM Production Stack(§10.6)的默认 KV 存储后端。换句话说,前面 §5.8.1–§5.8.2 讲的 offload 机制,LMCache 把它做成了一个开箱即用的生产组件。
+
+它(回阶段 3 §3.5.3 通信侧也提过)是目前最完整的 KV offload / 缓存层,把上面的存储层级做成一个**透明的多级 KV 缓存**:
 
 ```
    ┌─────────── LMCache 多级 KV 存储 ───────────┐
