@@ -85,7 +85,7 @@
 
 回阶段 1 §1.2.2 的公式，KV cache 总字节数：
 
-$$\text{KV bytes} = 2 \times L \times B \times S \times H_{kv} \times d \times \text{dtype\_bytes}$$
+$$\text{KV bytes} = 2 \times L \times B \times S \times H_{kv} \times d \times \text{dtype bytes}$$
 
 前 `2` 是 K + V。代入 LLaMA-3-70B（L=80，H\_kv=8，d=128，BF16）、B=32、S=8192：
 
