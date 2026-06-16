@@ -1,0 +1,120 @@
+<svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="a32" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#546e7a"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="26" text-anchor="middle" font-size="17" font-weight="700" fill="#263238">大规模训练的可靠性回路：故障频发 → checkpoint → 检测 → 弹性重启 → 续跑</text>
+
+  <!-- ===== Band A: failure sources ===== -->
+  <text x="24" y="56" font-size="13" font-weight="700" fill="#455a64">故障面（千卡作业每天都可能发生）：</text>
+  <rect x="24" y="64" width="216" height="46" rx="7" fill="#fdecea" stroke="#e53935" stroke-width="1.5"/>
+  <text x="132" y="84" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c62828">硬件故障</text>
+  <text x="132" y="101" text-anchor="middle" font-size="11" fill="#37474f">ECC / 掉卡 / 网络断</text>
+  <rect x="252" y="64" width="216" height="46" rx="7" fill="#fdf6e3" stroke="#fbc02d" stroke-width="1.5"/>
+  <text x="360" y="84" text-anchor="middle" font-size="12.5" font-weight="700" fill="#f9a825">卡死 / 拖后腿</text>
+  <text x="360" y="101" text-anchor="middle" font-size="11" fill="#37474f">NCCL timeout / straggler</text>
+  <rect x="480" y="64" width="216" height="46" rx="7" fill="#fdf6e3" stroke="#fbc02d" stroke-width="1.5"/>
+  <text x="588" y="84" text-anchor="middle" font-size="12.5" font-weight="700" fill="#f9a825">数值异常</text>
+  <text x="588" y="101" text-anchor="middle" font-size="11" fill="#37474f">loss NaN / 静默损坏 SDC</text>
+  <rect x="708" y="64" width="228" height="46" rx="7" fill="#e3f0fc" stroke="#1e88e5" stroke-width="1.5"/>
+  <text x="822" y="84" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1565c0">抢占 / 回收</text>
+  <text x="822" y="101" text-anchor="middle" font-size="11" fill="#37474f">高优先级抢占 / spot 回收</text>
+
+  <line x1="480" y1="112" x2="480" y2="140" stroke="#546e7a" stroke-width="1.5" marker-end="url(#a32)"/>
+  <text x="492" y="132" font-size="11" fill="#78909c">随时砸向正在跑的作业 ↓</text>
+
+  <!-- ===== Band B: training timeline ===== -->
+  <text x="24" y="160" font-size="13" font-weight="700" fill="#455a64">训练作业时间线（N 卡，每步一个 step）：</text>
+  <line x1="40" y1="200" x2="920" y2="200" stroke="#90a4ae" stroke-width="2"/>
+  <text x="928" y="204" font-size="11" fill="#90a4ae">t</text>
+
+  <!-- running segments -->
+  <rect x="40"  y="188" width="170" height="24" rx="3" fill="#e3f0fc" stroke="#1e88e5"/>
+  <rect x="250" y="188" width="170" height="24" rx="3" fill="#e3f0fc" stroke="#1e88e5"/>
+  <rect x="460" y="188" width="120" height="24" rx="3" fill="#e3f0fc" stroke="#1e88e5"/>
+  <text x="125" y="205" text-anchor="middle" font-size="11" fill="#1565c0">正常跑 step</text>
+  <text x="335" y="205" text-anchor="middle" font-size="11" fill="#1565c0">正常跑 step</text>
+
+  <!-- checkpoint markers -->
+  <g fill="#43a047">
+    <path d="M210,176 l8,-12 l8,12 z"/>
+    <path d="M420,176 l8,-12 l8,12 z"/>
+  </g>
+  <text x="218" y="160" text-anchor="middle" font-size="10.5" fill="#2e7d32">ckpt</text>
+  <text x="428" y="160" text-anchor="middle" font-size="10.5" fill="#2e7d32">ckpt</text>
+  <text x="120" y="240" text-anchor="middle" font-size="10.5" fill="#2e7d32">每隔 K 步存一次 checkpoint（异步，藏在计算后）</text>
+
+  <!-- failure -->
+  <text x="580" y="184" text-anchor="middle" font-size="20" font-weight="700" fill="#e53935">✗</text>
+  <text x="580" y="240" text-anchor="middle" font-size="11" fill="#c62828">故障发生</text>
+
+  <!-- lost-work brace -->
+  <line x1="428" y1="224" x2="580" y2="224" stroke="#e53935" stroke-width="1.5"/>
+  <line x1="428" y1="220" x2="428" y2="228" stroke="#e53935" stroke-width="1.5"/>
+  <line x1="580" y1="220" x2="580" y2="228" stroke="#e53935" stroke-width="1.5"/>
+  <text x="504" y="262" text-anchor="middle" font-size="11" font-weight="700" fill="#c62828">丢失的进度 = 距上次 ckpt 的时间</text>
+
+  <!-- downtime gap -->
+  <rect x="580" y="188" width="150" height="24" rx="3" fill="#eceff1" stroke="#90a4ae" stroke-dasharray="4 3"/>
+  <text x="655" y="205" text-anchor="middle" font-size="10.5" fill="#607d8b">停摆：检测+重启</text>
+
+  <!-- resume -->
+  <rect x="770" y="188" width="150" height="24" rx="3" fill="#e6f4ea" stroke="#43a047"/>
+  <text x="845" y="205" text-anchor="middle" font-size="11" fill="#2e7d32">从 ckpt 续跑</text>
+  <path d="M730,200 C745,200 755,200 768,200" stroke="#43a047" stroke-width="1.5" fill="none" marker-end="url(#a32)"/>
+
+  <!-- ===== Band C: recovery loop ===== -->
+  <text x="24" y="300" font-size="13" font-weight="700" fill="#455a64">恢复回路（“停摆”窗口里发生的事）：</text>
+  <g font-size="11.5">
+    <rect x="24"  y="312" width="160" height="48" rx="7" fill="#f5f7f8" stroke="#90a4ae"/>
+    <text x="104" y="332" text-anchor="middle" font-weight="700" fill="#37474f">① 检测</text>
+    <text x="104" y="349" text-anchor="middle" fill="#546e7a">watchdog / 健康检查</text>
+    <rect x="208" y="312" width="160" height="48" rx="7" fill="#f5f7f8" stroke="#90a4ae"/>
+    <text x="288" y="332" text-anchor="middle" font-weight="700" fill="#37474f">② 决策</text>
+    <text x="288" y="349" text-anchor="middle" fill="#546e7a">替换 / 收缩节点</text>
+    <rect x="392" y="312" width="160" height="48" rx="7" fill="#f5f7f8" stroke="#90a4ae"/>
+    <text x="472" y="332" text-anchor="middle" font-weight="700" fill="#37474f">③ rendezvous</text>
+    <text x="472" y="349" text-anchor="middle" fill="#546e7a">torchrun 弹性重组</text>
+    <rect x="576" y="312" width="160" height="48" rx="7" fill="#fdecea" stroke="#e53935" stroke-width="1.6"/>
+    <text x="656" y="332" text-anchor="middle" font-weight="700" fill="#c62828">④ 加载最近 ckpt</text>
+    <text x="656" y="349" text-anchor="middle" fill="#546e7a">回到存盘那一步</text>
+    <rect x="760" y="312" width="176" height="48" rx="7" fill="#e6f4ea" stroke="#43a047" stroke-width="1.6"/>
+    <text x="848" y="332" text-anchor="middle" font-weight="700" fill="#2e7d32">⑤ 续跑</text>
+    <text x="848" y="349" text-anchor="middle" fill="#546e7a">回到 step 循环</text>
+  </g>
+  <line x1="184" y1="336" x2="206" y2="336" stroke="#546e7a" stroke-width="1.5" marker-end="url(#a32)"/>
+  <line x1="368" y1="336" x2="390" y2="336" stroke="#546e7a" stroke-width="1.5" marker-end="url(#a32)"/>
+  <line x1="552" y1="336" x2="574" y2="336" stroke="#546e7a" stroke-width="1.5" marker-end="url(#a32)"/>
+  <line x1="736" y1="336" x2="758" y2="336" stroke="#546e7a" stroke-width="1.5" marker-end="url(#a32)"/>
+
+  <!-- ===== Band D: storage tiers ===== -->
+  <text x="24" y="404" font-size="13" font-weight="700" fill="#455a64">存储层级（checkpoint 落点 · 训练数据来源 · 权重加载，共用一套层级）：</text>
+  <g font-size="11.5">
+    <rect x="24"  y="416" width="200" height="44" rx="7" fill="#e3f0fc" stroke="#1e88e5"/>
+    <text x="124" y="436" text-anchor="middle" font-weight="700" fill="#1565c0">HBM（计算）</text>
+    <text x="124" y="452" text-anchor="middle" fill="#546e7a">活跃参数 / 激活</text>
+    <rect x="256" y="416" width="200" height="44" rx="7" fill="#f5f7f8" stroke="#90a4ae"/>
+    <text x="356" y="436" text-anchor="middle" font-weight="700" fill="#455a64">CPU 内存</text>
+    <text x="356" y="452" text-anchor="middle" fill="#546e7a">异步 ckpt 暂存 / 预取</text>
+    <rect x="488" y="416" width="200" height="44" rx="7" fill="#f5f7f8" stroke="#90a4ae"/>
+    <text x="588" y="436" text-anchor="middle" font-weight="700" fill="#455a64">本地 NVMe</text>
+    <text x="588" y="452" text-anchor="middle" fill="#546e7a">数据分片 / 本地 ckpt</text>
+    <rect x="720" y="416" width="216" height="44" rx="7" fill="#f5f7f8" stroke="#90a4ae"/>
+    <text x="828" y="436" text-anchor="middle" font-weight="700" fill="#455a64">对象存储 S3/GCS</text>
+    <text x="828" y="452" text-anchor="middle" fill="#546e7a">权威 ckpt / 数据集</text>
+  </g>
+  <line x1="224" y1="438" x2="254" y2="438" stroke="#90a4ae" stroke-width="1.3" marker-end="url(#a32)"/>
+  <line x1="456" y1="438" x2="486" y2="438" stroke="#90a4ae" stroke-width="1.3" marker-end="url(#a32)"/>
+  <line x1="688" y1="438" x2="718" y2="438" stroke="#90a4ae" stroke-width="1.3" marker-end="url(#a32)"/>
+  <text x="480" y="478" text-anchor="middle" font-size="10.5" font-style="italic" fill="#78909c">越往右容量越大、越慢；checkpoint 往右刷（异步），数据/权重往左加载（流式 / 预取）</text>
+
+  <!-- ===== Legend ===== -->
+  <rect x="24" y="498" width="912" height="30" rx="6" fill="#fafafa" stroke="#cfd8dc"/>
+  <path d="M40,513 l8,-10 l8,10 z" fill="#43a047"/><text x="58" y="517" font-size="11" fill="#455a64">checkpoint 存盘点</text>
+  <text x="190" y="517" font-size="13" font-weight="700" fill="#e53935">✗</text><text x="204" y="517" font-size="11" fill="#455a64">故障</text>
+  <rect x="250" y="507" width="14" height="11" rx="2" fill="#e3f0fc" stroke="#1e88e5"/><text x="270" y="517" font-size="11" fill="#455a64">正常 step</text>
+  <rect x="356" y="507" width="14" height="11" rx="2" fill="#eceff1" stroke="#90a4ae" stroke-dasharray="3 2"/><text x="376" y="517" font-size="11" fill="#455a64">停摆窗口</text>
+  <text x="470" y="517" font-size="11" fill="#c62828">红框/红线 = 丢失的进度，由 checkpoint 间隔决定 → 越密丢得越少、但存盘越频繁</text>
+</svg>
