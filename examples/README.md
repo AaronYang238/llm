@@ -56,4 +56,4 @@ python 04_fused_rmsnorm_triton.py
 
 - **先跑 `02_rank_sim.py` 和 `P_first_run.py`**——它们不挑硬件，跑通就建立了信心。
 - 没有 GPU 也能学完前置篇 + 阶段 0/1 的核心，GPU 相关的脚本等你上云（前置篇 P.3.1）再跑。
-- 某个脚本报错先看 [前置篇 P.6 常见坑](../chapters/0-onboarding.md#p6-常见坑与-faq)（下载慢、CUDA 不可用、显存不够等）。
+- 某个脚本报错先看 [前置篇 P.6 常见坑](../chapters/0-上车准备.md#p6-常见坑与-faq)（下载慢、CUDA 不可用、显存不够等）。

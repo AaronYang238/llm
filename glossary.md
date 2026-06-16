@@ -6,7 +6,7 @@
 
 ## 一、符号约定（贯穿全书）
 
-公式与代码里反复出现的记号，统一约定如下（首次定义见 [阶段 0 §0.1](chapters/00-prereq-hardware.md)）：
+公式与代码里反复出现的记号，统一约定如下（首次定义见 [阶段 0 §0.1](chapters/00-先修与硬件基础.md)）：
 
 | 符号 | 含义 | 对应 `config.json` 字段 |
 |---|---|---|
@@ -24,8 +24,8 @@
 
 **两个最常用的口算公式**：
 
-- KV cache 字节 ≈ `2 × L × 2 × B × S × H_kv × d × dtype_bytes`（前 2=K/V，后 2=BF16 字节数）。详见 [阶段 1 §1.2.2](chapters/01-transformer-basics.md)。
-- 参数显存 ≈ `参数量 × dtype_bytes`（BF16=2 字节，故 7B → 14 GB）。详见 [前置篇 P.1.1](chapters/0-onboarding.md)。
+- KV cache 字节 ≈ `2 × L × 2 × B × S × H_kv × d × dtype_bytes`（前 2=K/V，后 2=BF16 字节数）。详见 [阶段 1 §1.2.2](chapters/01-Transformer与单卡推理.md)。
+- 参数显存 ≈ `参数量 × dtype_bytes`（BF16=2 字节，故 7B → 14 GB）。详见 [前置篇 P.1.1](chapters/0-上车准备.md)。
 
 ---
 

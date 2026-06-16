@@ -21,7 +21,7 @@
 
 ```
 .
-├── chapters/   # 14 章正文（前置篇 + 阶段 0–12），命名 NN-kebab-slug.md
+├── chapters/   # 14 章正文（前置篇 + 阶段 0–12），命名 NN-中文标题.md
 ├── svg/        # 24 张矢量插图，编号与章节对应
 ├── examples/   # 书里代码的"可跑版"——clone 即跑，不用从 markdown 手抄
 ├── glossary.md # 术语表 · 符号表 · 缩写速查（被术语劝退时查这里）
@@ -36,21 +36,21 @@
 
 | 阶段 | 主题 | 章节 | 状态 |
 |---|---|---|---|
-| **前置** | **上车准备：基础概念 + 环境搭建**（写给小白，老手可跳过） | `0-onboarding` | ✓ |
-| 0 | 先修与硬件基础 | `00-prereq-hardware` | ✓ |
-| 1 | Transformer 与单卡推理 | `01-transformer-basics` | ✓ |
-| 2 | 并行策略系统化 | `02-parallelism` | ✓ |
-| 3 | 集合通信与通信库 | `03-collective-comm` | ✓ |
-| 4 | 核心算子与高性能 Kernel | `04-kernels` | ✓ |
-| 5 | KV Cache、调度器与显存 | `05-kv-cache-scheduler` | ✓ |
-| 6 | 推理引擎深读 | `06-inference-engines` | ✓ |
-| 7 | 训练框架深读 | `07-training-frameworks` | ✓ |
-| 8 | 量化、蒸馏与加速 | `08-quantization` | ✓ |
-| 9 | 长上下文与 MoE 专题 | `09-long-context-moe` | ✓ |
-| 10 | 生产化服务与多模态 | `10-serving-multimodal` | ✓ |
-| 11 | 性能分析与调优工具 | `11-profiling` | ✓ |
-| 12 | 代表模型架构选读 | `12-model-architectures` | ✓ |
-| 13 | 集群编排、调度与 GPU 共享 | `13-orchestration-scheduling` | 草案 |
+| **前置** | **上车准备：基础概念 + 环境搭建**（写给小白，老手可跳过） | `0-上车准备` | ✓ |
+| 0 | 先修与硬件基础 | `00-先修与硬件基础` | ✓ |
+| 1 | Transformer 与单卡推理 | `01-Transformer与单卡推理` | ✓ |
+| 2 | 并行策略系统化 | `02-并行策略` | ✓ |
+| 3 | 集合通信与通信库 | `03-集合通信` | ✓ |
+| 4 | 核心算子与高性能 Kernel | `04-核心算子与Kernel` | ✓ |
+| 5 | KV Cache、调度器与显存 | `05-KV-Cache与调度器` | ✓ |
+| 6 | 推理引擎深读 | `06-推理引擎` | ✓ |
+| 7 | 训练框架深读 | `07-训练框架` | ✓ |
+| 8 | 量化、蒸馏与加速 | `08-量化蒸馏与加速` | ✓ |
+| 9 | 长上下文与 MoE 专题 | `09-长上下文与MoE` | ✓ |
+| 10 | 生产化服务与多模态 | `10-生产服务与多模态` | ✓ |
+| 11 | 性能分析与调优工具 | `11-性能分析与调优` | ✓ |
+| 12 | 代表模型架构选读 | `12-模型架构选读` | ✓ |
+| 13 | 集群编排、调度与 GPU 共享 | `13-集群编排与调度` | 草案 |
 | 14 | 大规模训练的容错、弹性与数据/权重管线 | `14-fault-tolerance-data` | 草案 |
 | 15 | Post-training 基础设施（RLHF/DPO） | `15-post-training-infra` | 草案 |
 
@@ -64,7 +64,7 @@
 
 ## 前置篇｜上车准备：基础概念 + 环境搭建 ✓
 
-> 写给真·小白（已会 vLLM/HuggingFace 的可跳过）：[chapters/0-onboarding.md](chapters/0-onboarding.md)，主图 [svg/24-llm-request-lifecycle.svg](svg/24-llm-request-lifecycle.svg)（一次对话的生命周期）。
+> 写给真·小白（已会 vLLM/HuggingFace 的可跳过）：[chapters/0-上车准备.md](chapters/0-上车准备.md)，主图 [svg/24-llm-request-lifecycle.svg](svg/24-llm-request-lifecycle.svg)（一次对话的生命周期）。
 
 - [x] **30 分钟深度学习地基**：模型/参数、token/embedding、训练 vs 推理、**prefill/decode**、KV cache、一张"大图"（P.1）
 - [x] **Python / 数学最小集**：会看张量形状 + 知道"主要计算是矩阵乘" + "模型按概率选词"就够（P.2）
@@ -76,7 +76,7 @@
 
 ## 阶段 0｜先修与硬件基础 ✓
 
-> 已就位：[chapters/00-prereq-hardware.md](chapters/00-prereq-hardware.md)，主图 [svg/08-gpu-memory-topology.svg](svg/08-gpu-memory-topology.svg)。
+> 已就位：[chapters/00-先修与硬件基础.md](chapters/00-先修与硬件基础.md)，主图 [svg/08-gpu-memory-topology.svg](svg/08-gpu-memory-topology.svg)。
 
 - [x] **GPU 体系结构**：SM / Warp / Tensor Core / SMEM / HBM；H100 / H200 / B200 / MI300X 关键参数对比
 - [x] **GPU 内存层级与带宽**：寄存器 → SMEM → L2 → HBM 带宽与延迟、Roofline 模型
@@ -89,7 +89,7 @@
 
 ## 阶段 1｜Transformer 与单卡推理基础 ✓
 
-> 已就位：[chapters/01-transformer-basics.md](chapters/01-transformer-basics.md)，主图 [svg/09-transformer-block.svg](svg/09-transformer-block.svg)。
+> 已就位：[chapters/01-Transformer与单卡推理.md](chapters/01-Transformer与单卡推理.md)，主图 [svg/09-transformer-block.svg](svg/09-transformer-block.svg)。
 
 - [x] **核心模块**：Embedding、RMSNorm/LayerNorm、Linear、Residual
 - [x] **Attention 家族**：MHA → MQA → GQA → MLA（DeepSeek）→ Differential / NSA
@@ -103,7 +103,7 @@
 
 ## 阶段 2｜并行策略系统化
 
-> 已就位 ✓：[chapters/02-parallelism.md](chapters/02-parallelism.md) 2.0–2.4 节覆盖 DP/TP/SP/PP/EP/CP 六种并行与多维编排；2.2.8 节深入 ZeRO 1/2/3、FSDP1/FSDP2、`HYBRID_SHARD`；2.4.4 节 3D 实战含可跑 rank 拓扑模拟器 + Megatron 启动配置（真机指标待硬件校准）。
+> 已就位 ✓：[chapters/02-并行策略.md](chapters/02-并行策略.md) 2.0–2.4 节覆盖 DP/TP/SP/PP/EP/CP 六种并行与多维编排；2.2.8 节深入 ZeRO 1/2/3、FSDP1/FSDP2、`HYBRID_SHARD`；2.4.4 节 3D 实战含可跑 rank 拓扑模拟器 + Megatron 启动配置（真机指标待硬件校准）。
 
 - [x] **DP（数据并行）**：`DDP` 梯度桶、`gradient_as_bucket_view`；与 ZeRO 的关系（02 §2.2.1）
 - [x] **ZeRO 1/2/3 与 FSDP**：参数/梯度/优化器状态分片；`FULL_SHARD` vs `HYBRID_SHARD`；`torch.distributed.fsdp` 与 FSDP2 (`fully_shard`) 的差异（02 §2.2.8）
@@ -119,7 +119,7 @@
 
 ## 阶段 3｜集合通信与高性能通信库 ✓
 
-> 已就位：[chapters/03-collective-comm.md](chapters/03-collective-comm.md)，主图 [svg/10-nccl-algos.svg](svg/10-nccl-algos.svg)（四种 AllReduce 算法对比）+ [svg/11-nccl-busbw-curve.svg](svg/11-nccl-busbw-curve.svg)（busbw 随消息大小的典型曲线）。原语层基础参见 [chapters/02-parallelism.md](chapters/02-parallelism.md) §2.1。
+> 已就位：[chapters/03-集合通信.md](chapters/03-集合通信.md)，主图 [svg/10-nccl-algos.svg](svg/10-nccl-algos.svg)（四种 AllReduce 算法对比）+ [svg/11-nccl-busbw-curve.svg](svg/11-nccl-busbw-curve.svg)（busbw 随消息大小的典型曲线）。原语层基础参见 [chapters/02-并行策略.md](chapters/02-并行策略.md) §2.1。
 
 - [x] **七大原语**：Broadcast / Reduce / AllReduce / AllGather / ReduceScatter / All-to-All / Send-Recv（02 §2.1.2，参见 `svg/01-collective-primitives.svg`）
 - [x] **NCCL 算法**：Ring / Tree / NVLS / Double Binary Tree；`NCCL_ALGO`、`NCCL_PROTO`（02 §2.1.3 + 03 §3.2 busbw 推导与自动选择规则）
@@ -133,7 +133,7 @@
 
 ## 阶段 4｜核心算子与高性能 Kernel ✓
 
-> 已就位：[chapters/04-kernels.md](chapters/04-kernels.md)，主图 [svg/12-flashattn-tiling.svg](svg/12-flashattn-tiling.svg)（FlashAttention tiling + online softmax）+ [svg/13-paged-attention.svg](svg/13-paged-attention.svg)（PagedAttention block table 与 prefix sharing）。
+> 已就位：[chapters/04-核心算子与Kernel.md](chapters/04-核心算子与Kernel.md)，主图 [svg/12-flashattn-tiling.svg](svg/12-flashattn-tiling.svg)（FlashAttention tiling + online softmax）+ [svg/13-paged-attention.svg](svg/13-paged-attention.svg)（PagedAttention block table 与 prefix sharing）。
 
 - [x] **Attention kernel 演进**：FlashAttention v1 → v2 → v3 → FlashAttention-3 FP8 / Hopper TMA（04 §4.2，主图 `svg/12-flashattn-tiling.svg`）
 - [x] **PagedAttention**：block table、KV 分页布局（04 §4.3，主图 `svg/13-paged-attention.svg`）
@@ -147,7 +147,7 @@
 
 ## 阶段 5｜KV Cache、调度器与显存管理 ✓
 
-> 已就位：[chapters/05-kv-cache-scheduler.md](chapters/05-kv-cache-scheduler.md)，主图 [svg/14-kv-layout.svg](svg/14-kv-layout.svg)（连续 vs 分页布局）+ [svg/15-continuous-batching.svg](svg/15-continuous-batching.svg)（static vs continuous batching）+ [svg/16-radix-tree-prefix.svg](svg/16-radix-tree-prefix.svg)（RadixAttention 前缀树）。
+> 已就位：[chapters/05-KV-Cache与调度器.md](chapters/05-KV-Cache与调度器.md)，主图 [svg/14-kv-layout.svg](svg/14-kv-layout.svg)（连续 vs 分页布局）+ [svg/15-continuous-batching.svg](svg/15-continuous-batching.svg)（static vs continuous batching）+ [svg/16-radix-tree-prefix.svg](svg/16-radix-tree-prefix.svg)（RadixAttention 前缀树）。
 
 - [x] **KV Cache 布局**：layer-major vs token-major、`[B, H, S, D]` vs paged block（05 §5.2，主图 `svg/14-kv-layout.svg`）
 - [x] **Continuous Batching**：Orca 论文 → vLLM 的 scheduler（05 §5.3，主图 `svg/15-continuous-batching.svg`）
@@ -161,7 +161,7 @@
 
 ## 阶段 6｜推理引擎深读 ✓
 
-> 已就位：[chapters/06-inference-engines.md](chapters/06-inference-engines.md)，主图 [svg/17-inference-engine-arch.svg](svg/17-inference-engine-arch.svg)（推理引擎通用骨架 loop + 六条差异轴）。选 vLLM/SGLang 深读源码，其它对照阅读。
+> 已就位：[chapters/06-推理引擎.md](chapters/06-推理引擎.md)，主图 [svg/17-inference-engine-arch.svg](svg/17-inference-engine-arch.svg)（推理引擎通用骨架 loop + 六条差异轴）。选 vLLM/SGLang 深读源码，其它对照阅读。
 
 - [x] **vLLM**：（06 §6.3）
   - [x] 架构：`LLMEngine` / `Scheduler` / `BlockManager` / `ModelRunner` / `Worker`（06 §6.3.1）
@@ -181,7 +181,7 @@
 
 ## 阶段 7｜训练框架深读 ✓
 
-> 已就位：[chapters/07-training-frameworks.md](chapters/07-training-frameworks.md)，主图 [svg/18-training-framework-arch.svg](svg/18-training-framework-arch.svg)（training step loop + DeviceMesh 多维并行 + 八条差异轴）。深读 Megatron-Core/DeepSpeed，PyTorch 原生底座先讲，其它对照阅读。
+> 已就位：[chapters/07-训练框架.md](chapters/07-训练框架.md)，主图 [svg/18-training-framework-arch.svg](svg/18-training-framework-arch.svg)（training step loop + DeviceMesh 多维并行 + 八条差异轴）。深读 Megatron-Core/DeepSpeed，PyTorch 原生底座先讲，其它对照阅读。
 
 - [x] **PyTorch 分布式**：`torch.distributed`、`DTensor`、`DeviceMesh`、`pipeline_parallel`（07 §7.3，主图 `svg/18-training-framework-arch.svg`）
 - [x] **FSDP2 (`fully_shard`)**：与 FSDP1 的 API/性能差异（已由 02 §2.2.8.2 完整覆盖；本阶段聚焦 PyTorch distributed 整体、DTensor、与 TP/PP/CP 的组合而不再单独讲 FSDP2 自身）
@@ -195,7 +195,7 @@
 
 ## 阶段 8｜量化、蒸馏与加速 ✓
 
-> 已就位：[chapters/08-quantization.md](chapters/08-quantization.md)，主图 [svg/19-quantization-landscape.svg](svg/19-quantization-landscape.svg)（三类加速手段 + scale 粒度谱 + outlier）+ [svg/20-speculative-decoding.svg](svg/20-speculative-decoding.svg)（投机解码时序）。三类正交手段：量化(§8.3–8.6) / 投机解码(§8.7) / 稀疏化(§8.8)。
+> 已就位：[chapters/08-量化蒸馏与加速.md](chapters/08-量化蒸馏与加速.md)，主图 [svg/19-quantization-landscape.svg](svg/19-quantization-landscape.svg)（三类加速手段 + scale 粒度谱 + outlier）+ [svg/20-speculative-decoding.svg](svg/20-speculative-decoding.svg)（投机解码时序）。三类正交手段：量化(§8.3–8.6) / 投机解码(§8.7) / 稀疏化(§8.8)。
 
 - [x] **PTQ**：GPTQ、AWQ、SmoothQuant、HQQ（08 §8.3）
 - [x] **FP8 训练 / 推理**：per-tensor / per-token / per-block / Hopper FP8 recipe（08 §8.4；硬件见 0 §0.2.4，GEMM kernel 见 4 §4.7.4）
@@ -208,7 +208,7 @@
 
 ## 阶段 9｜长上下文与 MoE 专题 ✓
 
-> 已就位（类型 C 案例章）：[chapters/09-long-context-moe.md](chapters/09-long-context-moe.md)，主图 [svg/21-deepseek-v3-fullstack.svg](svg/21-deepseek-v3-fullstack.svg)（DeepSeek-V3 全栈技术地图）+ 复用 [svg/05](svg/05-cp-ring-attention.svg)/[svg/06](svg/06-deepseek-v3-topology.svg)。以 DeepSeek-V3 为核心案例串起长上下文 + 大 MoE 两条线。
+> 已就位（类型 C 案例章）：[chapters/09-长上下文与MoE.md](chapters/09-长上下文与MoE.md)，主图 [svg/21-deepseek-v3-fullstack.svg](svg/21-deepseek-v3-fullstack.svg)（DeepSeek-V3 全栈技术地图）+ 复用 [svg/05](svg/05-cp-ring-attention.svg)/[svg/06](svg/06-deepseek-v3-topology.svg)。以 DeepSeek-V3 为核心案例串起长上下文 + 大 MoE 两条线。
 
 - [x] **位置外推**：YaRN、LongRoPE、Position Interpolation（09 §9.3；RoPE 基础见 1 §1.2.3）
 - [x] **长上下文 attention**：Ring / Striped / Ulysses / DistFlashAttn（09 §9.4，复用 `svg/05`；CP 基础见 2 §2.2.6）
@@ -220,7 +220,7 @@
 
 ## 阶段 10｜生产化服务与多模态 ✓
 
-> 已就位（A + D 混合类型）：[chapters/10-serving-multimodal.md](chapters/10-serving-multimodal.md)，主图 [svg/22-multimodal-token-path.svg](svg/22-multimodal-token-path.svg)（图像→token 路径）。前半 A 类（API/结构化输出/多 LoRA/多模态 §10.2–10.5），后半 D 类 cookbook（网关/可观测性 §10.6–10.7）。
+> 已就位（A + D 混合类型）：[chapters/10-生产服务与多模态.md](chapters/10-生产服务与多模态.md)，主图 [svg/22-multimodal-token-path.svg](svg/22-multimodal-token-path.svg)（图像→token 路径）。前半 A 类（API/结构化输出/多 LoRA/多模态 §10.2–10.5），后半 D 类 cookbook（网关/可观测性 §10.6–10.7）。
 
 - [x] **OpenAI 兼容 API**：`/v1/chat/completions`、`/v1/responses`、tool use、JSON schema（10 §10.2）
 - [x] **结构化输出**：xgrammar、outlines、lm-format-enforcer（10 §10.3；logits mask 原理见 1 §1.2.5，引擎位置见 6 §6.3.4）
@@ -233,7 +233,7 @@
 
 ## 阶段 11｜性能分析与调优工具（持续）✓
 
-> 已就位（纯 D 类 cookbook）：[chapters/11-profiling.md](chapters/11-profiling.md)，全章"任务→命令→输出→判读→下一步"。把前面各阶段的调优散点收拢成系统方法论：nvidia-smi → Roofline → profiler/nsys → ncu/NCCL trace → 阶段旋钮的五步下钻。
+> 已就位（纯 D 类 cookbook）：[chapters/11-性能分析与调优.md](chapters/11-性能分析与调优.md)，全章"任务→命令→输出→判读→下一步"。把前面各阶段的调优散点收拢成系统方法论：nvidia-smi → Roofline → profiler/nsys → ncu/NCCL trace → 阶段旋钮的五步下钻。
 
 - [x] **Profiler**：`torch.profiler`、Nsight Systems (`nsys`)、Nsight Compute (`ncu`)（11 §11.3/11.4/11.5）
 - [x] **通信 trace**：`NCCL_DEBUG=TRACE`、`TORCH_NCCL_TRACE_BUFFER_SIZE`（11 §11.6；NCCL 调优旋钮见 3 §3.3）
@@ -245,7 +245,7 @@
 
 ## 阶段 12｜代表模型架构（选读，对照源码）✓
 
-> 已就位（类型 B 横向对比章）：[chapters/12-model-architectures.md](chapters/12-model-architectures.md)，主图 [svg/23-llm-architecture-knobs.svg](svg/23-llm-architecture-knobs.svg)（标准骨架 + 六个旋钮）。§12.1 立"六旋钮 + config 速读"框架，§12.2–12.7 每个模型按这个框架填取值，§12.8 横向对比矩阵 + §12.9 排错心法收尾。**全书最后一个内容章节，至此 12 个阶段全部就位。**
+> 已就位（类型 B 横向对比章）：[chapters/12-模型架构选读.md](chapters/12-模型架构选读.md)，主图 [svg/23-llm-architecture-knobs.svg](svg/23-llm-architecture-knobs.svg)（标准骨架 + 六个旋钮）。§12.1 立"六旋钮 + config 速读"框架，§12.2–12.7 每个模型按这个框架填取值，§12.8 横向对比矩阵 + §12.9 排错心法收尾。**全书最后一个内容章节，至此 12 个阶段全部就位。**
 
 - [x] **LLaMA 1/2/3/4**：GQA、Tokenizer、MoE（L4 Scout/Maverick）（12 §12.2，主图 `svg/23-llm-architecture-knobs.svg`）
 - [x] **Qwen 2 / 2.5 / 3**：tied embedding、长上下文、MoE（Qwen3-MoE）（12 §12.3）
