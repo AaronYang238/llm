@@ -1,0 +1,158 @@
+<svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#546e7a"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#263238">GPU 集群编排：把作业需求映射到物理卡池的统一调度</text>
+
+  <!-- ===== Layer A: Jobs ===== -->
+  <rect x="16" y="48" width="84" height="104" rx="6" fill="#eceff1" stroke="#90a4ae"/>
+  <text x="58" y="96" text-anchor="middle" font-size="13" font-weight="700" fill="#455a64">作业层</text>
+  <text x="58" y="114" text-anchor="middle" font-size="11" fill="#78909c">谁要卡</text>
+
+  <rect x="116" y="60" width="252" height="80" rx="8" fill="#e3f0fc" stroke="#1e88e5" stroke-width="1.5"/>
+  <text x="242" y="86" text-anchor="middle" font-size="13" font-weight="700" fill="#1565c0">训练作业</text>
+  <text x="242" y="106" text-anchor="middle" font-size="11" fill="#37474f">多卡 gang：16 卡要么全给</text>
+  <text x="242" y="122" text-anchor="middle" font-size="11" fill="#37474f">要么不调度（部分没用）</text>
+
+  <rect x="384" y="60" width="252" height="80" rx="8" fill="#e6f4ea" stroke="#43a047" stroke-width="1.5"/>
+  <text x="510" y="86" text-anchor="middle" font-size="13" font-weight="700" fill="#2e7d32">推理服务</text>
+  <text x="510" y="106" text-anchor="middle" font-size="11" fill="#37474f">弹性 N 副本：按 QPS 扩缩</text>
+  <text x="510" y="122" text-anchor="middle" font-size="11" fill="#37474f">可被高优先级作业抢占</text>
+
+  <rect x="652" y="60" width="252" height="80" rx="8" fill="#fdf6e3" stroke="#fbc02d" stroke-width="1.5"/>
+  <text x="778" y="86" text-anchor="middle" font-size="13" font-weight="700" fill="#f9a825">批处理 / 调参</text>
+  <text x="778" y="106" text-anchor="middle" font-size="11" fill="#37474f">海量小作业：填碎片</text>
+  <text x="778" y="122" text-anchor="middle" font-size="11" fill="#37474f">低优先级、可被打断</text>
+
+  <!-- submit arrows -->
+  <line x1="242" y1="140" x2="242" y2="184" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="510" y1="140" x2="510" y2="184" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="778" y1="140" x2="778" y2="184" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="566" y="176" font-size="11" fill="#78909c">提交（声明：要几卡、什么拓扑、多久）</text>
+
+  <!-- ===== Layer B: Orchestrator ===== -->
+  <rect x="16" y="190" width="84" height="170" rx="6" fill="#eceff1" stroke="#90a4ae"/>
+  <text x="58" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="#455a64">编排</text>
+  <text x="58" y="284" text-anchor="middle" font-size="13" font-weight="700" fill="#455a64">调度层</text>
+  <text x="58" y="304" text-anchor="middle" font-size="11" fill="#78909c">怎么分</text>
+
+  <rect x="116" y="190" width="788" height="170" rx="8" fill="#fafafa" stroke="#b0bec5" stroke-dasharray="4 3"/>
+  <text x="510" y="212" text-anchor="middle" font-size="12" font-style="italic" fill="#607d8b">调度器 = 把"作业需求"翻译成"物理卡"的循环；三条核心职责：</text>
+
+  <rect x="132" y="224" width="240" height="62" rx="8" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+  <text x="252" y="248" text-anchor="middle" font-size="12.5" font-weight="700" fill="#37474f">① 排队 &amp; 配额</text>
+  <text x="252" y="266" text-anchor="middle" font-size="11" fill="#546e7a">优先级、多租户 quota</text>
+  <text x="252" y="280" text-anchor="middle" font-size="11" fill="#546e7a">防大作业饿死小作业</text>
+
+  <rect x="392" y="224" width="240" height="62" rx="8" fill="#fdecea" stroke="#e53935" stroke-width="1.8"/>
+  <text x="512" y="248" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c62828">② 放置：gang + 拓扑</text>
+  <text x="512" y="266" text-anchor="middle" font-size="11" fill="#546e7a">成组调度（全或无）</text>
+  <text x="512" y="280" text-anchor="middle" font-size="11" fill="#546e7a">排进同一 NVLink 域 / rail</text>
+
+  <rect x="652" y="224" width="240" height="62" rx="8" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+  <text x="772" y="248" text-anchor="middle" font-size="12.5" font-weight="700" fill="#37474f">③ 隔离 &amp; 共享</text>
+  <text x="772" y="266" text-anchor="middle" font-size="11" fill="#546e7a">MIG / MPS / time-slicing</text>
+  <text x="772" y="280" text-anchor="middle" font-size="11" fill="#546e7a">一张卡跑多个小任务</text>
+
+  <line x1="372" y1="255" x2="390" y2="255" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="632" y1="255" x2="650" y2="255" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <text x="132" y="312" font-size="11" fill="#455a64"><tspan font-weight="700">K8s</tspan>：声明式 + Operator，云原生主流</text>
+  <text x="408" y="312" font-size="11" fill="#455a64"><tspan font-weight="700">Slurm</tspan>：HPC 批队列，超算 / 大训练</text>
+  <text x="672" y="312" font-size="11" fill="#455a64"><tspan font-weight="700">Ray</tspan>：Python 原生，RLHF / 数据并行</text>
+  <text x="510" y="340" text-anchor="middle" font-size="11" font-style="italic" fill="#78909c">三家做的是同一件事，差异只在"声明方式 / 调度模型 / 谁来管 GPU 共享"——见 §13.8 对比矩阵</text>
+
+  <!-- place arrow -->
+  <line x1="510" y1="360" x2="510" y2="392" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="520" y="380" font-size="11" fill="#78909c">放置到具体节点 / 卡</text>
+
+  <!-- ===== Layer C: Physical pool ===== -->
+  <rect x="16" y="398" width="84" height="150" rx="6" fill="#eceff1" stroke="#90a4ae"/>
+  <text x="58" y="466" text-anchor="middle" font-size="13" font-weight="700" fill="#455a64">物理</text>
+  <text x="58" y="484" text-anchor="middle" font-size="13" font-weight="700" fill="#455a64">资源池</text>
+  <text x="58" y="504" text-anchor="middle" font-size="11" fill="#78909c">卡在哪</text>
+
+  <!-- nodes -->
+  <g>
+    <!-- node template repeated 4x -->
+    <g transform="translate(116,402)">
+      <rect width="180" height="120" rx="8" fill="#f5f7f8" stroke="#90a4ae"/>
+      <text x="90" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#455a64">Node 0</text>
+      <rect x="16" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="50" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="104" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="138" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="16" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="50" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="104" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="138" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <line x1="42" y1="43" x2="104" y2="43" stroke="#43a047" stroke-width="2"/>
+      <line x1="42" y1="75" x2="104" y2="75" stroke="#43a047" stroke-width="2"/>
+      <text x="90" y="108" text-anchor="middle" font-size="10.5" fill="#2e7d32">NVLink 域：8 卡</text>
+    </g>
+    <g transform="translate(312,402)">
+      <rect width="180" height="120" rx="8" fill="#f5f7f8" stroke="#90a4ae"/>
+      <text x="90" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#455a64">Node 1</text>
+      <rect x="16" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="50" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="104" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="138" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="16" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="50" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="104" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="138" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <line x1="42" y1="43" x2="104" y2="43" stroke="#43a047" stroke-width="2"/>
+      <line x1="42" y1="75" x2="104" y2="75" stroke="#43a047" stroke-width="2"/>
+      <text x="90" y="108" text-anchor="middle" font-size="10.5" fill="#2e7d32">NVLink 域：8 卡</text>
+    </g>
+    <g transform="translate(508,402)">
+      <rect width="180" height="120" rx="8" fill="#f5f7f8" stroke="#90a4ae"/>
+      <text x="90" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#455a64">Node 2</text>
+      <rect x="16" y="30" width="26" height="26" rx="3" fill="#cfd8dc" stroke="#90a4ae"/>
+      <rect x="50" y="30" width="26" height="26" rx="3" fill="#cfd8dc" stroke="#90a4ae"/>
+      <rect x="104" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="138" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="16" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="50" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="104" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="138" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <line x1="42" y1="43" x2="104" y2="43" stroke="#43a047" stroke-width="2"/>
+      <line x1="42" y1="75" x2="104" y2="75" stroke="#43a047" stroke-width="2"/>
+      <text x="90" y="108" text-anchor="middle" font-size="10.5" fill="#90a4ae">2 卡空闲（碎片）</text>
+    </g>
+    <g transform="translate(704,402)">
+      <rect width="180" height="120" rx="8" fill="#f5f7f8" stroke="#90a4ae"/>
+      <text x="90" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#455a64">Node 3</text>
+      <rect x="16" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="50" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="104" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="138" y="30" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="16" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="50" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="104" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <rect x="138" y="62" width="26" height="26" rx="3" fill="#bbdefb" stroke="#1e88e5"/>
+      <line x1="42" y1="43" x2="104" y2="43" stroke="#43a047" stroke-width="2"/>
+      <line x1="42" y1="75" x2="104" y2="75" stroke="#43a047" stroke-width="2"/>
+      <text x="90" y="108" text-anchor="middle" font-size="10.5" fill="#2e7d32">NVLink 域：8 卡</text>
+    </g>
+  </g>
+  <!-- inter-node fabric -->
+  <line x1="296" y1="462" x2="312" y2="462" stroke="#e53935" stroke-width="2" stroke-dasharray="5 3"/>
+  <line x1="492" y1="462" x2="508" y2="462" stroke="#e53935" stroke-width="2" stroke-dasharray="5 3"/>
+  <line x1="688" y1="462" x2="704" y2="462" stroke="#e53935" stroke-width="2" stroke-dasharray="5 3"/>
+  <text x="900" y="466" font-size="10.5" fill="#c62828">IB / RoCE</text>
+  <text x="900" y="480" font-size="10.5" fill="#c62828">rail（跨节点）</text>
+
+  <!-- ===== Legend ===== -->
+  <rect x="16" y="558" width="928" height="30" rx="6" fill="#fafafa" stroke="#cfd8dc"/>
+  <rect x="28" y="567" width="13" height="13" rx="2" fill="#e3f0fc" stroke="#1e88e5"/><text x="46" y="578" font-size="11" fill="#455a64">训练作业</text>
+  <rect x="120" y="567" width="13" height="13" rx="2" fill="#e6f4ea" stroke="#43a047"/><text x="138" y="578" font-size="11" fill="#455a64">推理服务</text>
+  <rect x="212" y="567" width="13" height="13" rx="2" fill="#fdf6e3" stroke="#fbc02d"/><text x="230" y="578" font-size="11" fill="#455a64">批 / 调参</text>
+  <rect x="300" y="567" width="13" height="13" rx="2" fill="#bbdefb" stroke="#1e88e5"/><text x="318" y="578" font-size="11" fill="#455a64">已占用 GPU</text>
+  <rect x="408" y="567" width="13" height="13" rx="2" fill="#cfd8dc" stroke="#90a4ae"/><text x="426" y="578" font-size="11" fill="#455a64">空闲 GPU</text>
+  <line x1="500" y1="574" x2="524" y2="574" stroke="#43a047" stroke-width="2"/><text x="530" y="578" font-size="11" fill="#455a64">NVLink（节点内）</text>
+  <line x1="660" y1="574" x2="684" y2="574" stroke="#e53935" stroke-width="2" stroke-dasharray="5 3"/><text x="690" y="578" font-size="11" fill="#455a64">IB / RoCE（跨节点）</text>
+</svg>
