@@ -142,6 +142,7 @@
 | **投机解码** | Speculative Decoding | draft 猜 k 个、target 并行验证；无损，加速比≈接受率 | 阶段 8 §8.7 |
 | **EAGLE / Medusa / MTP** | — | 投机解码的 draft 来源：特征级 / 多头 / DeepSeek 原生多 token | 阶段 8 §8.7、阶段 9 §9.7 |
 | **稀疏化** | Sparsity | MoE 路由 / 激活稀疏 / 稀疏 attention（NSA、MoBA） | 阶段 8 §8.8 |
+| **蒸馏 / KD** | Knowledge Distillation | 训练小 student 模仿大 teacher 的软分布（暗知识）；换更小模型、可再量化（R1-Distill） | 阶段 8 §8.9 |
 
 ### 长上下文与 DeepSeek 体系（阶段 9）
 

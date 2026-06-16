@@ -195,7 +195,7 @@
 
 ## 阶段 8｜量化、蒸馏与加速 ✓
 
-> 已就位：[chapters/08-量化蒸馏与加速.md](chapters/08-量化蒸馏与加速.md)，主图 [svg/19-quantization-landscape.svg](svg/19-quantization-landscape.svg)（三类加速手段 + scale 粒度谱 + outlier）+ [svg/20-speculative-decoding.svg](svg/20-speculative-decoding.svg)（投机解码时序）。三类正交手段：量化(§8.3–8.6) / 投机解码(§8.7) / 稀疏化(§8.8)。
+> 已就位：[chapters/08-量化蒸馏与加速.md](chapters/08-量化蒸馏与加速.md)，主图 [svg/19-quantization-landscape.svg](svg/19-quantization-landscape.svg)（三类加速手段 + scale 粒度谱 + outlier）+ [svg/20-speculative-decoding.svg](svg/20-speculative-decoding.svg)（投机解码时序）。四类手段（前三类压给定模型、蒸馏换更小模型）：量化(§8.3–8.6) / 蒸馏(§8.9) / 投机解码(§8.7) / 稀疏化(§8.8)。
 
 - [x] **PTQ**：GPTQ、AWQ、SmoothQuant、HQQ（08 §8.3）
 - [x] **FP8 训练 / 推理**：per-tensor / per-token / per-block / Hopper FP8 recipe（08 §8.4；硬件见 0 §0.2.4，GEMM kernel 见 4 §4.7.4）
@@ -203,6 +203,7 @@
 - [x] **KV 量化**：KIVI、FlashInfer KV INT8（08 §8.6 算法侧；显存视角见 5 §5.7）
 - [x] **Speculative Decoding**：draft model、Medusa、EAGLE、Lookahead、Self-Speculative（08 §8.7，主图 `svg/20-speculative-decoding.svg`；引擎位置见 6 §6.3.4）
 - [x] **稀疏化**：MoE 路由稀疏、Activation Sparsity、稀疏 Attention（NSA、MoBA）（08 §8.8；MoE 工程见 2 §2.2.5/3 §3.4，稀疏 attn 长序列见阶段 9）
+- [x] **蒸馏**：序列级 / logit 级 / 特征级 KD、软标签与"暗知识"、on-policy 蒸馏（GKD）（08 §8.9；DeepSeek-R1-Distill 为例，蒸完可再量化）
 
 ---
 
