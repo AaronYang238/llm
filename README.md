@@ -50,8 +50,13 @@
 | 10 | 生产化服务与多模态 | `10-serving-multimodal` | ✓ |
 | 11 | 性能分析与调优工具 | `11-profiling` | ✓ |
 | 12 | 代表模型架构选读 | `12-model-architectures` | ✓ |
+| 13 | 集群编排、调度与 GPU 共享 | `13-orchestration-scheduling` | 草案 |
+| 14 | 大规模训练的容错、弹性与数据/权重管线 | `14-fault-tolerance-data` | 草案 |
+| 15 | Post-training 基础设施（RLHF/DPO） | `15-post-training-infra` | 草案 |
 
 **正文 12 个阶段（13 章 + 23 图）全部定稿。** Capstone 动手项目（P1–P7）与推荐阅读清单持续推进。
+
+> **阶段 13–15 是"AI Infra 平台层"扩展草案**——把教材从"会跑单作业的计算系统"延伸到"会运营集群的平台基础设施"。目前只落了 checklist（见文末"规划中"一节），章节正文与类型待确认后再写；状态标"草案"，不计入"12 个阶段定稿"。
 
 下面按阶段列出每章的**对应文件、主图、覆盖的知识点**（带小节定位，可当详细目录查）。
 
@@ -248,6 +253,47 @@
 - [x] **DeepSeek V2 / V3 / R1**：MLA、DeepSeekMoE、MTP、推理优化（12 §12.5；架构原理详见阶段 9）
 - [x] **GLM / Yi / Gemma / Phi**：架构差异点（12 §12.6）
 - [x] **多模态**：Qwen-VL、InternVL、LLaVA-NeXT、视频模型的 token 化（12 §12.7；token 路径机制见 10 §10.5）
+
+---
+
+## 规划中｜AI Infra 平台层扩展（阶段 13–15 · 草案）
+
+> 这三章把教材从**单作业计算系统**（阶段 0–12，"会跑、会改、会调"）延伸到**集群平台基础设施**（"会运营、会容错、会上量"）。下面只是 checklist 草案——**章节正文尚未动笔，类型/主图待确认**。每条都带"读它解决什么真实问题"的动机，定稿后再按 CLAUDE.md §6 流程逐小节写。
+>
+> 类型预判（CLAUDE.md §3.5）：13 偏 **B 类**（多种编排/调度方案横向对比 + 选型矩阵）、14 偏 **A+D 混合**（容错原理用 A、排障/恢复用 D cookbook）、15 偏 **C 类**（以一个真实 RLHF 系统为主案例串技术点）。
+
+### 阶段 13｜集群编排、调度与 GPU 共享（草案）
+
+> 真实问题：8 张卡的机器有了，但 50 个人 200 个作业怎么排队、怎么不互相抢卡、怎么让一张卡跑多个小任务？阶段 0–12 都假设"卡已经分给你了"，本章补上"谁来分、怎么分"。
+
+- [ ] **编排平台横向对比**：Kubernetes（device plugin、GPU Operator）vs Slurm vs Ray / Ray Serve——各自的作业模型、适用规模、训练 vs 推理侧重
+- [ ] **Gang scheduling 与队列**：Volcano / Kueue 的成组调度（多卡作业要么全调度要么不调度）、优先级抢占、多租户配额（避免大作业饿死小作业）
+- [ ] **GPU 共享与切分**：MIG（硬件分区）vs MPS（进程并发）vs time-slicing 的隔离性/性能差异；fractional GPU 何时划算
+- [ ] **弹性伸缩**：推理服务 HPA/KEDA 按 QPS/队列长度扩缩、scale-to-zero；spot/抢占式实例的成本与中断处理
+- [ ] **拓扑感知调度**：把同一作业的卡排进同一 NVLink 域/同一 rail（呼应阶段 0 §0.2.3、阶段 3 通信）
+- [ ] **对比矩阵**：编排方案 × 维度（多租户 / 弹性 / 训练支持 / 推理支持 / 学习曲线 / 生态）+ 选型决策清单
+
+### 阶段 14｜大规模训练的容错、弹性与数据/权重管线（草案）
+
+> 真实问题：千卡作业跑 3 天，第 2 天有张卡 ECC 报错、或某 rank 静默卡死、或 loss 突然 NaN——怎么发现、怎么不从头再来？阶段 7 §7.8 只讲了 checkpoint 格式，没讲"作业怎么在故障里活下来"。
+
+- [ ] **故障检测**：hang / straggler 检测、NCCL timeout 与 watchdog、静默数据损坏（SDC）、loss spike / NaN 的自动捕获与定位
+- [ ] **弹性与恢复**：torch elastic / torchrun 的 rendezvous、节点掉了的弹性收缩、抢占恢复；快速 resume 的工程难点
+- [ ] **Checkpoint 工程**（深化阶段 7 §7.8）：异步 checkpoint、in-memory / 分层 checkpoint、写对象存储（S3/GCS）的吞吐与一致性、ckpt 分片与并行加载
+- [ ] **训练数据管线**：大规模数据集分片与流式读取（WebDataset / MosaicML StreamingDataset）、dataloader 瓶颈、大规模 tokenization 的离线/在线权衡
+- [ ] **权重加载与分发**：fast model load、weight streaming（tensorizer、Run:ai model streamer）——把推理冷启动从分钟级压到秒级
+- [ ] **端到端实战**：一个"模拟注入故障 → 自动恢复"的最小复现（标硬件），把上面的检测/恢复串起来
+
+### 阶段 15｜Post-training 基础设施：RLHF / DPO（草案）
+
+> 真实问题：预训练只是开始，对齐阶段（RLHF/RLAIF）的作业拓扑和预训练完全不同——一个 step 里要同时跑推理（rollout）和训练（update），还要摆下 4 个模型。这是当前最热也最容易踩坑的 infra 题，阶段 7 完全没碰。
+
+- [ ] **算法形态速览**：PPO / GRPO / DPO 的差异，以及各自对 infra 的不同要求（DPO 无需 reward/critic，PPO 要四模型）
+- [ ] **作业拓扑**：actor / critic / reward / reference 四个模型怎么放——colocate（共卡分时）vs disaggregate（分卡常驻）的显存与吞吐权衡
+- [ ] **rollout↔train 两相位**：生成相位（推理引擎，memory-bound）与训练相位（compute-bound）的资源复用与切换开销；为什么这是 RLHF 吞吐的命门
+- [ ] **框架横向对比**：veRL / OpenRLHF / NeMo-Aligner / TRL 的架构取向（复用 vLLM 做 rollout、用 Ray 编排、权重同步策略）
+- [ ] **权重同步**：训练侧更新后怎么把新权重灌回 rollout 引擎（NCCL broadcast / 共享存储），同步延迟怎么藏
+- [ ] **端到端复现路径**：一个小模型的 GRPO/DPO 最小可跑配置 + 预期指标（标硬件）
 
 ---
 
