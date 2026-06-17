@@ -51,12 +51,12 @@
 | 11 | 性能分析与调优工具 | `11-性能分析与调优` | ✓ |
 | 12 | 代表模型架构选读 | `12-模型架构选读` | ✓ |
 | 13 | 集群编排、调度与 GPU 共享 | `13-集群编排与调度` | ✓ |
-| 14 | 大规模训练的容错、弹性与数据/权重管线 | `14-fault-tolerance-data` | 草案 |
+| 14 | 大规模训练的容错、弹性与数据/权重管线 | `14-容错弹性与数据管线` | ✓ |
 | 15 | Post-training 基础设施（RLHF/DPO） | `15-post-training-infra` | 草案 |
 
 **正文 12 个阶段（13 章 + 23 图）全部定稿。** Capstone 动手项目（P1–P7）与推荐阅读清单持续推进。
 
-> **阶段 13–15 是"AI Infra 平台层"扩展**——把教材从"会跑单作业的计算系统"延伸到"会运营集群的平台基础设施"。其中**阶段 13 已定稿**（集群编排，见下文），阶段 14–15 仍为 checklist 草案（见文末"规划中"一节），待确认后再写；草案不计入"12 个阶段定稿"。
+> **阶段 13–15 是"AI Infra 平台层"扩展**——把教材从"会跑单作业的计算系统"延伸到"会运营集群的平台基础设施"。其中**阶段 13、14 已定稿**（集群编排 / 训练容错，见下文），阶段 15 仍为 checklist 草案（见文末"规划中"一节），待确认后再写；草案不计入"12 个阶段定稿"。
 
 下面按阶段列出每章的**对应文件、主图、覆盖的知识点**（带小节定位，可当详细目录查）。
 
@@ -271,22 +271,25 @@
 
 ---
 
-## 规划中｜AI Infra 平台层扩展（阶段 14–15 · 草案）
+## 阶段 14｜大规模训练的容错、弹性与数据/权重管线 ✓
 
-> 阶段 13（上）已落地，是 AI Infra 平台层扩展的第一章。下面两章继续这条线：从**单作业计算系统**（阶段 0–12）延伸到**集群平台基础设施**。仍是 checklist 草案——**正文尚未动笔，类型/主图待确认**，每条带"读它解决什么真实问题"的动机，定稿后按 CLAUDE.md §6 流程逐小节写。
+> 已就位（类型 A+D 混合，AI Infra 平台层扩展第二章）：[chapters/14-容错弹性与数据管线.md](chapters/14-容错弹性与数据管线.md)，主图 [svg/32-training-reliability-loop.svg](svg/32-training-reliability-loop.svg)（故障面 → checkpoint → 检测 → 弹性重启 → 续跑）。§14.2–§14.7 原理（A），§14.8 排障 cookbook（D）。深化阶段 7 §7.8 只讲过的 checkpoint。
+
+- [x] **可靠性回路**：用 MTBF 算"千卡几小时挂一次"；goodput = 丢失进度 + 停摆，两块一起压（14 §14.2，主图 `svg/32-training-reliability-loop.svg`）
+- [x] **故障检测**：hang（collective mismatch + NCCL watchdog/flight recorder）、straggler（统计离群）、NaN/loss spike、SDC（主动校验）（14 §14.3）
+- [x] **弹性与恢复**：torch elastic / `torchrun` 的 rendezvous、整组重启、3D 并行的"替换 + 热备保形"（14 §14.4）
+- [x] **Checkpoint 工程**：存全五样、异步 checkpoint、分布式 DCP + 分层、并行加载（14 §14.5，深化阶段 7 §7.8）
+- [x] **训练数据管线**：流式分片读（WebDataset / StreamingDataset）、两级 shuffle、可恢复 dataloader（14 §14.6）
+- [x] **权重加载与分发**：weight streaming（tensorizer）、并行加载、warm 副本，压掉冷启动（14 §14.7；勾连 13 §13.7.1）
+- [x] **端到端排障实战**：collective mismatch / straggler / NaN / 恢复走样四个 cookbook 格（14 §14.8）
+
+---
+
+## 规划中｜AI Infra 平台层扩展（阶段 15 · 草案）
+
+> 阶段 13、14（上）已落地，是 AI Infra 平台层扩展的前两章。最后一章 RLHF 基础设施仍为 checklist 草案——**正文尚未动笔，类型/主图待确认**，每条带"读它解决什么真实问题"的动机，定稿后按 CLAUDE.md §6 流程逐小节写。
 >
-> 类型预判（CLAUDE.md §3.5）：14 偏 **A+D 混合**（容错原理用 A、排障/恢复用 D cookbook）、15 偏 **C 类**（以一个真实 RLHF 系统为主案例串技术点）。
-
-### 阶段 14｜大规模训练的容错、弹性与数据/权重管线（草案）
-
-> 真实问题：千卡作业跑 3 天，第 2 天有张卡 ECC 报错、或某 rank 静默卡死、或 loss 突然 NaN——怎么发现、怎么不从头再来？阶段 7 §7.8 只讲了 checkpoint 格式，没讲"作业怎么在故障里活下来"。
-
-- [ ] **故障检测**：hang / straggler 检测、NCCL timeout 与 watchdog、静默数据损坏（SDC）、loss spike / NaN 的自动捕获与定位
-- [ ] **弹性与恢复**：torch elastic / torchrun 的 rendezvous、节点掉了的弹性收缩、抢占恢复；快速 resume 的工程难点
-- [ ] **Checkpoint 工程**（深化阶段 7 §7.8）：异步 checkpoint、in-memory / 分层 checkpoint、写对象存储（S3/GCS）的吞吐与一致性、ckpt 分片与并行加载
-- [ ] **训练数据管线**：大规模数据集分片与流式读取（WebDataset / MosaicML StreamingDataset）、dataloader 瓶颈、大规模 tokenization 的离线/在线权衡
-- [ ] **权重加载与分发**：fast model load、weight streaming（tensorizer、Run:ai model streamer）——把推理冷启动从分钟级压到秒级
-- [ ] **端到端实战**：一个"模拟注入故障 → 自动恢复"的最小复现（标硬件），把上面的检测/恢复串起来
+> 类型预判（CLAUDE.md §3.5）：15 偏 **C 类**（以一个真实 RLHF 系统为主案例串技术点）。
 
 ### 阶段 15｜Post-training 基础设施：RLHF / DPO（草案）
 
