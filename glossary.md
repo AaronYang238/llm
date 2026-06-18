@@ -206,6 +206,21 @@
 | **流式数据集** | WebDataset / StreamingDataset | 分片存对象存储、边下边训、可断点续读，不全量落盘 | 阶段 14 §14.6 |
 | **weight streaming** | — | 逐张量从存储直灌 GPU、下载与拷贝重叠，把冷启动压到秒级 | 阶段 14 §14.7 |
 
+### Post-training / RLHF（阶段 15）
+
+| 术语 | 全称 / 中文 | 一句话 | 出处 |
+|---|---|---|---|
+| **RLHF** | 基于人类反馈的强化学习 | 用奖励信号把模型往人类偏好推；PPO 要四模型 + rollout 回路 | 阶段 15 §15.2 |
+| **PPO / GRPO / DPO** | — | 对齐算法三档：PPO 四模型最重、GRPO 省 critic、DPO 去 rollout 最简 | 阶段 15 §15.3.1 |
+| **rollout** | 生成相位 | actor 对 prompt 批量生成回答（一次推理，memory-bound） | 阶段 15 §15.3.3 |
+| **actor / critic / reward / reference** | — | RLHF 四模型：策略 / 价值 / 奖励 / KL 锚 | 阶段 15 §15.2 |
+| **colocate / disaggregate** | 共置 / 分离 | 多模型共卡分时（省卡）vs 分卡常驻（高吞吐） | 阶段 15 §15.3.2 |
+| **两相位** | rollout↔train | 生成（memory-bound）↔ 反向（compute-bound）交替，复用是吞吐命门 | 阶段 15 §15.3.3 |
+| **权重同步** | weight sync | 训练新 actor 权重灌回 rollout 引擎；colocate 时几乎免费 | 阶段 15 §15.3.4 |
+| **KL penalty** | KL 惩罚 | 限制策略别偏离 reference，RLHF 的安全带，防 reward hacking | 阶段 15 §15.4.3 |
+| **reward hacking** | 奖励钻空 | 钻奖励模型漏洞而非真变好；信号是 reward 升而 KL 爆 | 阶段 15 §15.6 |
+| **veRL / OpenRLHF** | — | 主流 RLHF 框架，建在 Ray + vLLM rollout + 训练后端之上 | 阶段 15 §15.3.5 |
+
 ---
 
 > 没找到某个词？它大概率在对应阶段的 "N.1 核心概念与术语" 里有更细的中英对照。本表只收录跨章高频、需要集中查阅的核心术语。

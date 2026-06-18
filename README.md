@@ -52,11 +52,11 @@
 | 12 | 代表模型架构选读 | `12-模型架构选读` | ✓ |
 | 13 | 集群编排、调度与 GPU 共享 | `13-集群编排与调度` | ✓ |
 | 14 | 大规模训练的容错、弹性与数据/权重管线 | `14-容错弹性与数据管线` | ✓ |
-| 15 | Post-training 基础设施（RLHF/DPO） | `15-post-training-infra` | 草案 |
+| 15 | Post-training 基础设施（RLHF/DPO） | `15-后训练基础设施` | ✓ |
 
 **正文 12 个阶段（13 章 + 23 图）全部定稿。** Capstone 动手项目（P1–P7）与推荐阅读清单持续推进。
 
-> **阶段 13–15 是"AI Infra 平台层"扩展**——把教材从"会跑单作业的计算系统"延伸到"会运营集群的平台基础设施"。其中**阶段 13、14 已定稿**（集群编排 / 训练容错，见下文），阶段 15 仍为 checklist 草案（见文末"规划中"一节），待确认后再写；草案不计入"12 个阶段定稿"。
+> **阶段 13–15 是"AI Infra 平台层"扩展**——把教材从"会跑单作业的计算系统"延伸到"会运营集群的平台基础设施"，三章（集群编排 / 训练容错 / RLHF 基础设施）**均已定稿**（见下文）。它们建立在阶段 0–12 的计算系统之上，是面向 infra/平台工程师的进阶篇。
 
 下面按阶段列出每章的**对应文件、主图、覆盖的知识点**（带小节定位，可当详细目录查）。
 
@@ -285,22 +285,16 @@
 
 ---
 
-## 规划中｜AI Infra 平台层扩展（阶段 15 · 草案）
+## 阶段 15｜Post-training 基础设施：RLHF / DPO ✓
 
-> 阶段 13、14（上）已落地，是 AI Infra 平台层扩展的前两章。最后一章 RLHF 基础设施仍为 checklist 草案——**正文尚未动笔，类型/主图待确认**，每条带"读它解决什么真实问题"的动机，定稿后按 CLAUDE.md §6 流程逐小节写。
->
-> 类型预判（CLAUDE.md §3.5）：15 偏 **C 类**（以一个真实 RLHF 系统为主案例串技术点）。
+> 已就位（类型 C 综合案例，AI Infra 平台层扩展第三章 · 完结）：[chapters/15-后训练基础设施.md](chapters/15-后训练基础设施.md)，主图 [svg/33-rlhf-topology.svg](svg/33-rlhf-topology.svg)（rollout↔train 两相位回路 + 四模型 + 权重同步）。以 PPO/GRPO 系统为主案例、DPO 作对照。
 
-### 阶段 15｜Post-training 基础设施：RLHF / DPO（草案）
-
-> 真实问题：预训练只是开始，对齐阶段（RLHF/RLAIF）的作业拓扑和预训练完全不同——一个 step 里要同时跑推理（rollout）和训练（update），还要摆下 4 个模型。这是当前最热也最容易踩坑的 infra 题，阶段 7 完全没碰。
-
-- [ ] **算法形态速览**：PPO / GRPO / DPO 的差异，以及各自对 infra 的不同要求（DPO 无需 reward/critic，PPO 要四模型）
-- [ ] **作业拓扑**：actor / critic / reward / reference 四个模型怎么放——colocate（共卡分时）vs disaggregate（分卡常驻）的显存与吞吐权衡
-- [ ] **rollout↔train 两相位**：生成相位（推理引擎，memory-bound）与训练相位（compute-bound）的资源复用与切换开销；为什么这是 RLHF 吞吐的命门
-- [ ] **框架横向对比**：veRL / OpenRLHF / NeMo-Aligner / TRL 的架构取向（复用 vLLM 做 rollout、用 Ray 编排、权重同步策略）
-- [ ] **权重同步**：训练侧更新后怎么把新权重灌回 rollout 引擎（NCCL broadcast / 共享存储），同步延迟怎么藏
-- [ ] **端到端复现路径**：一个小模型的 GRPO/DPO 最小可跑配置 + 预期指标（标硬件）
+- [x] **算法形态**：PPO / GRPO / DPO 的差异与对 infra 的要求（DPO 无需 reward/critic/rollout、GRPO 省 critic、PPO 四模型）（15 §15.3.1）
+- [x] **作业拓扑（放置）**：actor / critic / reward / reference 四模型 colocate vs disaggregate（15 §15.3.2，主图 `svg/33-rlhf-topology.svg`）
+- [x] **rollout↔train 两相位**：memory-bound 生成 ↔ compute-bound 反向，资源复用是吞吐命门（15 §15.3.3、§15.5）
+- [x] **权重同步**：训练新权重灌回 rollout（NCCL 直传 / 共享存储 / colocate 免传）（15 §15.3.4）
+- [x] **框架横向对比**：veRL / OpenRLHF / NeMo-Aligner / TRL 的架构取向（15 §15.3.5）
+- [x] **端到端复现 + 调优**：TRL/DPO 与 veRL/GRPO 最小路径（标硬件）+ KL 安全带、由简到繁选档（15 §15.4–§15.5）
 
 ---
 

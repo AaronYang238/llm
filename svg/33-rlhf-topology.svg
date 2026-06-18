@@ -1,0 +1,92 @@
+<svg viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="a33" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#546e7a"/>
+    </marker>
+    <marker id="a33r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#e53935"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="26" text-anchor="middle" font-size="17" font-weight="700" fill="#263238">RLHF（PPO）的作业拓扑：rollout↔train 两相位回路 + 四个模型</text>
+
+  <!-- ===== pipeline ===== -->
+  <line x1="20" y1="104" x2="40" y2="104" stroke="#546e7a" stroke-width="1.5" marker-end="url(#a33)"/>
+  <text x="22" y="92" font-size="11" fill="#78909c">一批 prompt</text>
+
+  <rect x="40" y="64" width="244" height="82" rx="8" fill="#e6f4ea" stroke="#43a047" stroke-width="1.6"/>
+  <text x="162" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#2e7d32">① Rollout（生成）</text>
+  <text x="162" y="108" text-anchor="middle" font-size="11" fill="#37474f">Actor 用推理引擎（vLLM）</text>
+  <text x="162" y="124" text-anchor="middle" font-size="11" fill="#37474f">对每个 prompt 生成回答</text>
+  <text x="162" y="140" text-anchor="middle" font-size="10.5" font-style="italic" fill="#2e7d32">memory-bound · 推理</text>
+
+  <rect x="358" y="64" width="244" height="82" rx="8" fill="#fdf6e3" stroke="#fbc02d" stroke-width="1.6"/>
+  <text x="480" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#f9a825">② 打分 / 估值</text>
+  <text x="480" y="108" text-anchor="middle" font-size="11" fill="#37474f">Reward 给回答打分</text>
+  <text x="480" y="124" text-anchor="middle" font-size="11" fill="#37474f">Reference 算 KL · Critic 估 value</text>
+  <text x="480" y="140" text-anchor="middle" font-size="10.5" font-style="italic" fill="#f9a825">三次 forward</text>
+
+  <rect x="676" y="64" width="244" height="82" rx="8" fill="#e3f0fc" stroke="#1e88e5" stroke-width="1.6"/>
+  <text x="798" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#1565c0">③ 训练（更新）</text>
+  <text x="798" y="108" text-anchor="middle" font-size="11" fill="#37474f">算 advantage（GAE/GRPO）</text>
+  <text x="798" y="124" text-anchor="middle" font-size="11" fill="#37474f">反向更新 Actor（+ Critic）</text>
+  <text x="798" y="140" text-anchor="middle" font-size="10.5" font-style="italic" fill="#1565c0">compute-bound · 反向</text>
+
+  <line x1="284" y1="105" x2="356" y2="105" stroke="#546e7a" stroke-width="1.5" marker-end="url(#a33)"/>
+  <text x="320" y="98" text-anchor="middle" font-size="10" fill="#78909c">回答</text>
+  <line x1="602" y1="105" x2="674" y2="105" stroke="#546e7a" stroke-width="1.5" marker-end="url(#a33)"/>
+  <text x="638" y="98" text-anchor="middle" font-size="10" fill="#78909c">分数/优势</text>
+
+  <!-- weight sync feedback -->
+  <path d="M798,146 L798,176 L162,176 L162,148" fill="none" stroke="#e53935" stroke-width="2" stroke-dasharray="6 3" marker-end="url(#a33r)"/>
+  <rect x="300" y="166" width="360" height="22" rx="5" fill="#fdecea" stroke="#e53935"/>
+  <text x="480" y="181" text-anchor="middle" font-size="11" font-weight="700" fill="#c62828">④ 权重同步：新 Actor 权重灌回 rollout 引擎</text>
+
+  <!-- ===== phase brackets ===== -->
+  <line x1="40" y1="200" x2="284" y2="200" stroke="#43a047" stroke-width="2"/>
+  <text x="162" y="216" text-anchor="middle" font-size="11" fill="#2e7d32">Rollout 相位（生成 · memory-bound）</text>
+  <line x1="358" y1="200" x2="920" y2="200" stroke="#1e88e5" stroke-width="2"/>
+  <text x="639" y="216" text-anchor="middle" font-size="11" fill="#1565c0">Train 相位（打分 + 反向 · compute-bound）</text>
+  <text x="480" y="236" text-anchor="middle" font-size="11" font-style="italic" fill="#c62828">两相位 GPU 利用形态相反、此消彼长 → 资源怎么复用是 RLHF 吞吐的命门</text>
+
+  <!-- ===== four models ===== -->
+  <text x="24" y="266" font-size="13" font-weight="700" fill="#455a64">四个模型（PPO 要同时摆下）：</text>
+  <rect x="40" y="276" width="210" height="64" rx="8" fill="#e3f0fc" stroke="#1e88e5" stroke-width="1.6"/>
+  <text x="145" y="298" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1565c0">Actor（策略）</text>
+  <text x="145" y="316" text-anchor="middle" font-size="11" fill="#37474f">可训练 · 既生成又更新</text>
+  <text x="145" y="331" text-anchor="middle" font-size="10.5" fill="#1565c0">主角</text>
+
+  <rect x="266" y="276" width="210" height="64" rx="8" fill="#e3f0fc" stroke="#1e88e5"/>
+  <text x="371" y="298" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1565c0">Critic（价值）</text>
+  <text x="371" y="316" text-anchor="middle" font-size="11" fill="#37474f">可训练 · 估 advantage 基线</text>
+  <text x="371" y="331" text-anchor="middle" font-size="10.5" fill="#90a4ae">GRPO 可省去</text>
+
+  <rect x="492" y="276" width="210" height="64" rx="8" fill="#eceff1" stroke="#90a4ae"/>
+  <text x="597" y="298" text-anchor="middle" font-size="12.5" font-weight="700" fill="#455a64">Reward（奖励）</text>
+  <text x="597" y="316" text-anchor="middle" font-size="11" fill="#37474f">冻结 · 给回答打分</text>
+  <text x="597" y="331" text-anchor="middle" font-size="10.5" fill="#90a4ae">只前向</text>
+
+  <rect x="718" y="276" width="202" height="64" rx="8" fill="#eceff1" stroke="#90a4ae"/>
+  <text x="819" y="298" text-anchor="middle" font-size="12.5" font-weight="700" fill="#455a64">Reference（参考）</text>
+  <text x="819" y="316" text-anchor="middle" font-size="11" fill="#37474f">冻结 · KL 锚，防跑偏</text>
+  <text x="819" y="331" text-anchor="middle" font-size="10.5" fill="#90a4ae">只前向</text>
+
+  <!-- ===== placement + DPO callouts ===== -->
+  <rect x="40" y="362" width="430" height="78" rx="8" fill="#fafafa" stroke="#cfd8dc"/>
+  <text x="60" y="384" font-size="12.5" font-weight="700" fill="#455a64">放置（用 Ray placement group，§13.5）</text>
+  <text x="60" y="404" font-size="11" fill="#37474f">· colocate：四模型共卡分时 → 省卡，但相位切换有开销</text>
+  <text x="60" y="422" font-size="11" fill="#37474f">· disaggregate：分卡常驻 → 吞吐高，但占卡多</text>
+
+  <rect x="490" y="362" width="430" height="78" rx="8" fill="#fdecea" stroke="#e53935"/>
+  <text x="510" y="384" font-size="12.5" font-weight="700" fill="#c62828">DPO：把这套回路坍缩掉</text>
+  <text x="510" y="404" font-size="11" fill="#37474f">去掉 Reward / Critic / rollout，直接用人类偏好对</text>
+  <text x="510" y="422" font-size="11" fill="#37474f">（chosen / rejected）做一次有监督式更新 → 工程简单得多</text>
+
+  <!-- ===== legend ===== -->
+  <rect x="40" y="456" width="880" height="30" rx="6" fill="#fafafa" stroke="#cfd8dc"/>
+  <rect x="54" y="465" width="14" height="12" rx="2" fill="#e3f0fc" stroke="#1e88e5"/><text x="74" y="475" font-size="11" fill="#455a64">可训练模型</text>
+  <rect x="172" y="465" width="14" height="12" rx="2" fill="#eceff1" stroke="#90a4ae"/><text x="192" y="475" font-size="11" fill="#455a64">冻结模型（只前向）</text>
+  <line x1="330" y1="471" x2="356" y2="471" stroke="#43a047" stroke-width="2"/><text x="362" y="475" font-size="11" fill="#455a64">rollout 相位</text>
+  <line x1="466" y1="471" x2="492" y2="471" stroke="#1e88e5" stroke-width="2"/><text x="498" y="475" font-size="11" fill="#455a64">train 相位</text>
+  <line x1="600" y1="471" x2="626" y2="471" stroke="#e53935" stroke-width="2" stroke-dasharray="6 3"/><text x="632" y="475" font-size="11" fill="#455a64">权重同步（每轮更新后）</text>
+</svg>
